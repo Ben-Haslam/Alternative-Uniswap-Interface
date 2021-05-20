@@ -5,11 +5,6 @@ import { ethers, Contract } from 'ethers';
 const Router = require('./build/UniswapV2Router02.json');
 const ERC20 = require('./build/ERC20.json');
 
-let _TokenA_address = '0x1d29BD2ACedBff15A59e946a4DE26d5257447727';
-
-
-
-
 class App extends Component {
 
   constructor(props) {
@@ -33,17 +28,23 @@ class App extends Component {
   }
 
   async getTokenAData(address){
-    let TokenA = new Contract(
-      address,
-      ERC20.abi,
-      this.state.signer
-    );
+    try{
+      let TokenA = new Contract(
+        address,
+        ERC20.abi,
+        this.state.signer
+      );
+  
+      let TokenA_balance_0 = await TokenA.balanceOf(this.state.account);
+      let TokenA_balance_1 = ethers.utils.formatEther(TokenA_balance_0);
+  
+      this.setState({TokenA_address: TokenA.address});
+      this.setState({TokenA_balance: TokenA_balance_1});
+    } catch(err){
+      console.log('oofff');
+      document.getElementById("demo").innerHTML = 'Error: Please enter a valid token address';
+    }
 
-    let TokenA_balance_0 = await TokenA.balanceOf(this.state.account);
-    let TokenA_balance_1 = ethers.utils.formatEther(TokenA_balance_0);
-
-    this.setState({TokenA_address: TokenA.address});
-    this.setState({TokenA_balance: TokenA_balance_1});
   }
 
   async getTokenBData(address){
@@ -79,16 +80,20 @@ class App extends Component {
 
   handleSubmit = (event) => {
       event.preventDefault()
-  }
+      console.log(this.state._TokenA_address)
+      this.getTokenAData(this.state._TokenA_address)
+}
 
   handleInputChange = (event) => {
       event.preventDefault()
-      if (event.target.value.length == 42){
-        this.getTokenAData(event.target.value)
+      this.setState({
+        [event.target.name]: event.target.value
+    })
+
       } 
       
 
-  }
+  
 
   render() {
     return (
@@ -106,13 +111,11 @@ class App extends Component {
             <h4> Token A</h4>
 
             <form onSubmit={this.handleSubmit}>
-              <label>
-                address: 
-                <input type="text" name="TokenA_address" placeholder="enter token address" onChange={this.handleInputChange} />
-              </label>
+              <input type="text" name="_TokenA_address" placeholder="enter token address" onChange={this.handleInputChange} />
               <input type="submit" value="Submit" />
             </form>
             
+            <p id="demo"></p>
             <p> address: {this.state.TokenA_address}</p>
             <p> balance: {this.state.TokenA_balance}</p>
           </div>
