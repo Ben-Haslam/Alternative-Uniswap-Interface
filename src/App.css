@@ -45,6 +45,10 @@ body {
   display: inline;
 }
 
+.swap {
+  padding: 10px;
+}
+
 .swap_button {
   float: right;
 }

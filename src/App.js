@@ -1,11 +1,12 @@
 import React, { Component, useState } from "react";
 import "./App.css";
 import { ethers, Contract } from "ethers";
+import _App from "./ethereum";
 
 const ROUTER = require("./build/UniswapV2Router02.json");
 const ERC20 = require("./build/ERC20.json");
 
-class App extends Component {
+class App extends _App {
   constructor(props) {
     super(props);
     this.state = {
@@ -32,64 +33,6 @@ class App extends Component {
     this.loadBlockchainData();
   }
 
-  async loadBlockchainData() {
-    const accounts = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    let balance_0 = await provider.getBalance(accounts[0]);
-    let balance_1 = ethers.utils.formatEther(balance_0);
-
-    this.setState({ account: accounts[0] });
-    this.setState({ provider: provider });
-    this.setState({ signer: signer });
-    this.setState({ balance: balance_1 });
-
-    const Router = new Contract(
-      this.state.Router_address,
-      ROUTER.abi,
-      this.state.signer
-    );
-    this.setState({ Router: Router });
-  }
-
-  async getTokenAData(address) {
-    try {
-      let TokenA = new Contract(address, ERC20.abi, this.state.signer);
-
-      let TokenA_balance_0 = await TokenA.balanceOf(this.state.account);
-      let TokenA_balance_1 = ethers.utils.formatEther(TokenA_balance_0);
-      let TokenA_symbol = await TokenA.symbol();
-
-      this.setState({ TokenA_balance: TokenA_balance_1 });
-      this.setState({ TokenA: TokenA });
-      document.getElementById("TokenA_message").innerHTML =
-        TokenA_symbol.concat(" balance: ");
-    } catch (err) {
-      document.getElementById("TokenA_message").innerHTML =
-        "Error: Please enter a valid token address";
-    }
-  }
-
-  async getTokenBData(address) {
-    try {
-      let TokenB = new Contract(address, ERC20.abi, this.state.signer);
-
-      let TokenB_balance_0 = await TokenB.balanceOf(this.state.account);
-      let TokenB_balance_1 = ethers.utils.formatEther(TokenB_balance_0);
-      let TokenB_symbol = await TokenB.symbol();
-
-      this.setState({ TokenB_balance: TokenB_balance_1 });
-      this.setState({ TokenB: TokenB });
-      document.getElementById("TokenB_message").innerHTML =
-        TokenB_symbol.concat(" balance: ");
-    } catch (err) {
-      document.getElementById("TokenB_message").innerHTML =
-        "Error: Please enter a valid token address";
-    }
-  }
-
   async getSwap() {
     if (this.state.TokenA !== undefined && this.state.TokenA !== undefined) {
       let tokens = [
@@ -99,9 +42,7 @@ class App extends Component {
       ];
 
       let amount_in = ethers.utils.parseEther(this.state.amountIn.toString());
-      console.log(amount_in);
       let amount_out = await this.state.Router.getAmountsOut(amount_in, tokens);
-      console.log(amount_out);
       let amount_out0 = ethers.utils.formatEther(amount_out[0]);
       let amount_out1 = ethers.utils.formatEther(amount_out[1]);
       let amount_out2 = ethers.utils.formatEther(amount_out[2]);
@@ -111,26 +52,25 @@ class App extends Component {
     }
   }
 
-  handleSubmitA = (event) => {
+  handleSubmit = (event) => {
     event.preventDefault();
-    this.getTokenAData(this.state._TokenA_address);
-    this.getSwap();
-  };
-
-  handleSubmitB = (event) => {
-    event.preventDefault();
-    this.getTokenBData(this.state._TokenB_address);
-    this.getSwap();
-  };
-
-  handleSubmitSwap = (event) => {
-    event.preventDefault();
-    this.getSwap();
-  };
-
-  handleMakeSwap = (event) => {
-    event.preventDefault();
-    console.log("Swap!");
+    if (event.target.name == "SubmitA") {
+      this.getTokenAData(this.state._TokenA_address);
+      this.getSwap();
+    }
+    if (event.target.name == "SubmitB") {
+      this.getTokenBData(this.state._TokenB_address);
+      this.getSwap();
+    }
+    if (event.target.name == "SubmitSwap") {
+      this.getSwap();
+    }
+    if (event.target.name == "swapB") {
+      console.log("Swap B!");
+    }
+    if (event.target.name == "swapE") {
+      console.log("Swap E!");
+    }
   };
 
   handleInputChange = (event) => {
@@ -156,7 +96,7 @@ class App extends Component {
           <div className="container">
             <h4> Token A</h4>
 
-            <form class="myform" onSubmit={this.handleSubmitA}>
+            <form class="myform" name="SubmitA" onSubmit={this.handleSubmit}>
               <input
                 type="text"
                 name="_TokenA_address"
@@ -175,7 +115,11 @@ class App extends Component {
           <div className="container">
             <h4> Token B</h4>
 
-            <form className="myform" onSubmit={this.handleSubmitB}>
+            <form
+              className="myform"
+              name="SubmitB"
+              onSubmit={this.handleSubmit}
+            >
               <input
                 type="text"
                 name="_TokenB_address"
@@ -190,10 +134,15 @@ class App extends Component {
           </div>
         </div>
 
+        {/* Submit amount */}
         <div className="outer">
           <div className="container">
             <h4> Swap</h4>
-            <form className="myform" onSubmit={this.handleSubmitSwap}>
+            <form
+              className="myform"
+              name="SubmitSwap"
+              onSubmit={this.handleSubmit}
+            >
               <input
                 type="text"
                 name="amountIn"
@@ -203,26 +152,26 @@ class App extends Component {
               <input type="submit" value="Submit" />
             </form>
 
-            <form className="swap" onSubmit={this.handleSubmitSwap()}>
-              <p>
-                Token B out: {this.state.amount_out[1]}{" "}
-                <input
-                  className="swap_button"
-                  type="submit"
-                  value="Make swap"
-                />
-              </p>
+            {/* Swap B */}
+            <form className="swap" name="swapB" onSubmit={this.handleSubmit}>
+              <label>Token B out: {this.state.amount_out[1]}</label>
+              <input
+                className="swap_button"
+                name="swapB"
+                type="submit"
+                value="Swap"
+              />
             </form>
 
-            <form className="swap" onSubmit={this.handleSubmitSwap()}>
-              <p>
-                ETH out: {this.state.amount_out[2]}{" "}
-                <input
-                  className="swap_button"
-                  type="submit"
-                  value="Make swap"
-                />
-              </p>
+            {/* Swap ETH */}
+            <form className="swap" name="swapE" onSubmit={this.handleSubmit}>
+              <label>ETH out: {this.state.amount_out[2]}</label>
+              <input
+                className="swap_button"
+                name="swapE"
+                type="submit"
+                value="Swap"
+              />
             </form>
           </div>
         </div>
