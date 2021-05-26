@@ -1,32 +1,50 @@
-body{
-	background-color: #f4f4f4;
-	color: #555555;
-	
-	font-family: Arial, Helvetica, sans-serif;
+body {
+  background-color: #f4f4f4;
+  color: #555555;
 
-	font-size: 15px;
-	font-weight: normal;
+  font-family: Arial, Helvetica, sans-serif;
 
-	line-height: 1em;
-	margin:0;
+  font-size: 15px;
+  font-weight: normal;
+
+  line-height: 1em;
+  margin: 0;
 }
 
-.outer{
-    padding:10px;
+.outer {
+  padding: 10px;
 }
 
-.container{
-	width:80%;
-	margin: auto;
-    border: 5px #333333 solid;
-    padding:10px;
-    border-radius: 25px;
+.container {
+  width: 80%;
+  margin: auto;
+  border: 5px #333333 solid;
+  padding: 10px;
+  border-radius: 25px;
 }
 
-.input{
-    width: 1;
-    color: #777;
-    padding: 8;
-    margin: 10;
-    width: 200;
+.input {
+  width: 1;
+  color: #777;
+  padding: 8;
+  margin: 10;
+  width: 200;
+}
+
+.myform {
+  padding: 20px;
+}
+
+.myform input[type="text"],
+.myform textarea {
+  padding: 8px;
+  width: 100%;
+}
+
+.Token_message {
+  display: inline;
+}
+
+.swap_button {
+  float: right;
 }
