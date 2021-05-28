@@ -23,7 +23,14 @@ export class _App extends Component {
       ROUTER.abi,
       this.state.signer
     );
+
+    const Weth = new Contract(
+      this.state.Weth_address,
+      ERC20.abi,
+      this.state.signer
+    );
     this.setState({ Router: Router });
+    this.setState({ Weth: Weth });
   }
 
   async getTokenAData(address) {
