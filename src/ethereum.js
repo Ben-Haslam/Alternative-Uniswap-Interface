@@ -1,5 +1,5 @@
 import { ethers, Contract } from "ethers";
-import React, { Component, useState } from "react";
+import { Component } from "react";
 const ROUTER = require("./build/UniswapV2Router02.json");
 const ERC20 = require("./build/ERC20.json");
 

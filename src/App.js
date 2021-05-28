@@ -1,10 +1,7 @@
-import React, { Component, useState } from "react";
+import React from "react";
 import "./App.css";
-import { ethers, Contract } from "ethers";
+import { ethers } from "ethers";
 import _App from "./ethereum";
-
-const ROUTER = require("./build/UniswapV2Router02.json");
-const ERC20 = require("./build/ERC20.json");
 
 class App extends _App {
   constructor(props) {
@@ -33,8 +30,56 @@ class App extends _App {
     this.loadBlockchainData();
   }
 
+  async SwapTokenforToken() {
+    let amountIn = ethers.utils.parseEther(this.state.amountIn.toString());
+    let amountOut = ethers.utils.parseEther(
+      this.state.amount_out[1].toString()
+    );
+    await this.state.TokenA.approve(this.state.Router_address, amountIn);
+
+    let tokens = [this.state._TokenA_address, this.state._TokenB_address];
+    let time = Math.floor(Date.now() / 1000) + 200000;
+    let deadline = ethers.BigNumber.from(time);
+
+    await this.state.Router.swapExactTokensForTokens(
+      amountIn,
+      amountOut,
+      tokens,
+      this.state.account,
+      deadline
+    );
+
+    await this.getTokenAData(this.state._TokenA_address);
+    await this.getTokenBData(this.state._TokenB_address);
+    await this.getSwap();
+  }
+
+  async SwapTokenforEth() {
+    let amountIn = ethers.utils.parseEther(this.state.amountIn.toString());
+    let amountOut = ethers.utils.parseEther(
+      this.state.amount_out[2].toString()
+    );
+    await this.state.TokenA.approve(this.state.Router_address, amountIn);
+
+    let tokens = [this.state._TokenA_address, this.state.Weth_address];
+    let time = Math.floor(Date.now() / 1000) + 200000;
+    let deadline = ethers.BigNumber.from(time);
+
+    await this.state.Router.swapExactTokensForETH(
+      amountIn,
+      amountOut,
+      tokens,
+      this.state.account,
+      deadline
+    );
+
+    await this.loadBlockchainData();
+    await this.getTokenAData(this.state._TokenA_address);
+    await this.getSwap();
+  }
+
   async getSwap() {
-    if (this.state.TokenA !== undefined && this.state.TokenA !== undefined) {
+    if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
       let tokens = [
         this.state._TokenA_address,
         this.state._TokenB_address,
@@ -54,22 +99,24 @@ class App extends _App {
 
   handleSubmit = (event) => {
     event.preventDefault();
-    if (event.target.name == "SubmitA") {
+    if (event.target.name === "SubmitA") {
       this.getTokenAData(this.state._TokenA_address);
       this.getSwap();
     }
-    if (event.target.name == "SubmitB") {
+    if (event.target.name === "SubmitB") {
       this.getTokenBData(this.state._TokenB_address);
       this.getSwap();
     }
-    if (event.target.name == "SubmitSwap") {
+    if (event.target.name === "SubmitSwap") {
       this.getSwap();
     }
-    if (event.target.name == "swapB") {
+    if (event.target.name === "swapB") {
       console.log("Swap B!");
+      this.SwapTokenforToken();
     }
-    if (event.target.name == "swapE") {
+    if (event.target.name === "swapE") {
       console.log("Swap E!");
+      this.SwapTokenforEth();
     }
   };
 
@@ -86,7 +133,7 @@ class App extends _App {
       <div>
         <div className="outer">
           <div className="container">
-            <h4> React Blockchain App</h4>
+            <h4> Uniswap Autonity App</h4>
             <p> Your account: {this.state.account} </p>
             <p> Your balance: {this.state.balance}</p>
           </div>
