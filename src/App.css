@@ -52,3 +52,8 @@ body {
 .swap_button {
   float: right;
 }
+
+.markdown {
+  width: 80%;
+  margin: auto;
+}
