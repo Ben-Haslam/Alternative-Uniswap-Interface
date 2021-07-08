@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/uniswap-react/static/css/main.43c8fdf3.chunk.css",
-    "main.js": "/uniswap-react/static/js/main.e59486c0.chunk.js",
-    "main.js.map": "/uniswap-react/static/js/main.e59486c0.chunk.js.map",
+    "main.js": "/uniswap-react/static/js/main.c155d216.chunk.js",
+    "main.js.map": "/uniswap-react/static/js/main.c155d216.chunk.js.map",
     "runtime-main.js": "/uniswap-react/static/js/runtime-main.f3d76965.js",
     "runtime-main.js.map": "/uniswap-react/static/js/runtime-main.f3d76965.js.map",
     "static/css/2.4f8976c6.chunk.css": "/uniswap-react/static/css/2.4f8976c6.chunk.css",
@@ -21,6 +21,6 @@
     "static/css/2.4f8976c6.chunk.css",
     "static/js/2.3a5eaaaf.chunk.js",
     "static/css/main.43c8fdf3.chunk.css",
-    "static/js/main.e59486c0.chunk.js"
+    "static/js/main.c155d216.chunk.js"
   ]
 }
