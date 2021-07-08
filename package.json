@@ -1,5 +1,5 @@
 {
-  "name": "eth-todo-list-react",
+  "name": "react-uniswap",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -9,7 +9,8 @@
     "@testing-library/user-event": "^12.1.10",
     "bignumber": "^1.1.0",
     "bootstrap": "^5.0.1",
-    "ethers": "^5.1.4",
+    "ethers": "^5.4.1",
+    "gh-pages": "^3.2.3",
     "react": "^17.0.2",
     "react-bootstrap": "^1.6.0",
     "react-dom": "^17.0.2",
@@ -21,7 +22,9 @@
     "web-vitals": "^1.0.1",
     "web3": "^1.3.6"
   },
+  "homepage": "https://clearmatics.github.io/uniswap-react/",
   "scripts": {
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

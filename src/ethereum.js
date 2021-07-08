@@ -2,6 +2,8 @@ import { ethers, Contract } from "ethers";
 import { Component } from "react";
 const ROUTER = require("./build/UniswapV2Router02.json");
 const ERC20 = require("./build/ERC20.json");
+const FACTORY = require("./build/IUniswapV2Factory.json");
+const PAIR = require("./build/IUniswapV2Pair.json");
 
 export class _App extends Component {
   async loadBlockchainData() {
@@ -29,17 +31,25 @@ export class _App extends Component {
       ERC20.abi,
       this.state.signer
     );
+
+    const Factory = new Contract(
+      this.state.Factory_address,
+      FACTORY.abi,
+      this.state.provider
+    );
+
     this.setState({ Router: Router });
     this.setState({ Weth: Weth });
+    this.setState({ Factory: Factory });
   }
 
   async getTokenAData(address) {
     try {
-      let TokenA = new Contract(address, ERC20.abi, this.state.signer);
+      const TokenA = new Contract(address, ERC20.abi, this.state.signer);
 
-      let TokenA_balance_0 = await TokenA.balanceOf(this.state.account);
-      let TokenA_balance_1 = ethers.utils.formatEther(TokenA_balance_0);
-      let TokenA_symbol = await TokenA.symbol();
+      const TokenA_balance_0 = await TokenA.balanceOf(this.state.account);
+      const TokenA_balance_1 = ethers.utils.formatEther(TokenA_balance_0);
+      const TokenA_symbol = await TokenA.symbol();
 
       this.setState({ TokenA_balance: TokenA_balance_1 });
       this.setState({ TokenA: TokenA });
@@ -53,11 +63,11 @@ export class _App extends Component {
 
   async getTokenBData(address) {
     try {
-      let TokenB = new Contract(address, ERC20.abi, this.state.signer);
+      const TokenB = new Contract(address, ERC20.abi, this.state.signer);
 
-      let TokenB_balance_0 = await TokenB.balanceOf(this.state.account);
-      let TokenB_balance_1 = ethers.utils.formatEther(TokenB_balance_0);
-      let TokenB_symbol = await TokenB.symbol();
+      const TokenB_balance_0 = await TokenB.balanceOf(this.state.account);
+      const TokenB_balance_1 = ethers.utils.formatEther(TokenB_balance_0);
+      const TokenB_symbol = await TokenB.symbol();
 
       this.setState({ TokenB_balance: TokenB_balance_1 });
       this.setState({ TokenB: TokenB });
@@ -66,6 +76,56 @@ export class _App extends Component {
     } catch (err) {
       document.getElementById("TokenB_message").innerHTML =
         "Error: Please enter a valid token address";
+    }
+  }
+
+  async getPair() {
+    if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
+      const Factory = this.state.Factory;
+      const pairAddress = await Factory.getPair(
+        this.state._TokenA_address,
+        this.state._TokenB_address
+      );
+
+      const pair = new Contract(pairAddress, PAIR.abi, this.state.signer);
+      const reserves = await pair.getReserves();
+
+      console.log(
+        "reserves for token A",
+        ethers.utils.formatEther(reserves[0])
+      );
+      console.log(
+        "reserves for token B",
+        ethers.utils.formatEther(reserves[1])
+      );
+
+      this.setState({ reserves_A: ethers.utils.formatEther(reserves[0]) });
+      this.setState({ reserves_B: ethers.utils.formatEther(reserves[1]) });
+    }
+  }
+
+  async getPairETH(token) {
+    if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
+      const Factory = this.state.Factory;
+      const pairAddress = await Factory.getPair(
+        this.state._TokenA_address,
+        this.state._TokenB_address
+      );
+
+      const pair = new Contract(pairAddress, PAIR.abi, this.state.signer);
+      const reserves = await pair.getReserves();
+
+      console.log(
+        "reserves for token A",
+        ethers.utils.formatEther(reserves[0])
+      );
+      console.log(
+        "reserves for token B",
+        ethers.utils.formatEther(reserves[1])
+      );
+
+      this.setState({ reserves_A: ethers.utils.formatEther(reserves[0]) });
+      this.setState({ reserves_B: ethers.utils.formatEther(reserves[1]) });
     }
   }
 }

@@ -18,8 +18,14 @@ class Swap extends _App {
       TokenA_balance: undefined,
       TokenB_balance: undefined,
       Token: "",
+
       Router_address: "0x4489D87C8440B19f11d63FA2246f943F492F3F5F",
       Router: undefined,
+      Factory_address: "0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116",
+      Factory: undefined,
+      reserves_A: 0,
+      reserves_B: 0,
+
       Weth_address: "0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF",
       Weth: undefined,
       amountIn: 0,
@@ -33,16 +39,14 @@ class Swap extends _App {
     this.loadBlockchainData();
   }
 
-  async SwapTokenforToken() {
-    let amountIn = ethers.utils.parseEther(this.state.amountIn.toString());
-    let amountOut = ethers.utils.parseEther(
-      this.state.amount_out[1].toString()
-    );
-    await this.state.TokenA.approve(this.state.Router_address, amountIn);
+  async SwapTokenforToken(Token1, Token2, _amountIn, _amount_out) {
+    const amountIn = ethers.utils.parseEther(_amountIn.toString());
+    const amountOut = ethers.utils.parseEther(_amount_out.toString());
+    await Token1.approve(this.state.Router_address, amountIn);
 
-    let tokens = [this.state._TokenA_address, this.state._TokenB_address];
-    let time = Math.floor(Date.now() / 1000) + 200000;
-    let deadline = ethers.BigNumber.from(time);
+    const tokens = [Token1.address, Token2.address];
+    const time = Math.floor(Date.now() / 1000) + 200000;
+    const deadline = ethers.BigNumber.from(time);
 
     await this.state.Router.swapExactTokensForTokens(
       amountIn,
@@ -54,15 +58,15 @@ class Swap extends _App {
   }
 
   async SwapTokenforEth() {
-    let amountIn = ethers.utils.parseEther(this.state.amountIn.toString());
-    let amountOut = ethers.utils.parseEther(
+    const amountIn = ethers.utils.parseEther(this.state.amountIn.toString());
+    const amountOut = ethers.utils.parseEther(
       this.state.amount_out[2].toString()
     );
     await this.state.TokenA.approve(this.state.Router_address, amountIn);
 
-    let tokens = [this.state._TokenA_address, this.state.Weth_address];
-    let time = Math.floor(Date.now() / 1000) + 200000;
-    let deadline = ethers.BigNumber.from(time);
+    const tokens = [this.state._TokenA_address, this.state.Weth_address];
+    const time = Math.floor(Date.now() / 1000) + 200000;
+    const deadline = ethers.BigNumber.from(time);
 
     await this.state.Router.swapExactTokensForETH(
       amountIn,
@@ -73,7 +77,7 @@ class Swap extends _App {
     );
   }
 
-  async getSwap() {
+  async getSwap(token) {
     if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
       let tokens = [
         this.state._TokenA_address,
@@ -81,27 +85,30 @@ class Swap extends _App {
         this.state.Weth_address,
       ];
 
-      let amount_in = ethers.utils.parseEther(this.state.amountIn.toString());
-      let amount_out = await this.state.Router.getAmountsOut(amount_in, tokens);
-      let amount_out0 = ethers.utils.formatEther(amount_out[0]);
-      let amount_out1 = ethers.utils.formatEther(amount_out[1]);
-      let amount_out2 = ethers.utils.formatEther(amount_out[2]);
-      let amount_out_A = [amount_out0, amount_out1, amount_out2];
+      const amount_in = ethers.utils.parseEther(this.state.amountIn.toString());
+      const amount_out = await this.state.Router.getAmountsOut(
+        amount_in,
+        tokens
+      );
+      const amount_out0 = ethers.utils.formatEther(amount_out[0]);
+      const amount_out1 = ethers.utils.formatEther(amount_out[1]);
+      const amount_out2 = ethers.utils.formatEther(amount_out[2]);
+      const amount_out_A = [amount_out0, amount_out1, amount_out2];
       console.log(amount_out_A);
       this.setState({ amount_out: amount_out_A });
     }
   }
 
   async SwapEthforToken(K, Token_Address) {
-    let amountIn = ethers.utils.parseEther(this.state.amountInE.toString());
-    let amountOut = ethers.utils.parseEther(
+    const amountIn = ethers.utils.parseEther(this.state.amountInE.toString());
+    const amountOut = ethers.utils.parseEther(
       this.state.amount_outE[K].toString()
     );
     await this.state.Weth.approve(this.state.Router_address, amountIn);
 
-    let tokens = [this.state.Weth_address, Token_Address];
-    let time = Math.floor(Date.now() / 1000) + 200000;
-    let deadline = ethers.BigNumber.from(time);
+    const tokens = [this.state.Weth_address, Token_Address];
+    const time = Math.floor(Date.now() / 1000) + 200000;
+    const deadline = ethers.BigNumber.from(time);
 
     await this.state.Router.swapExactETHForTokens(
       amountOut,
@@ -114,18 +121,23 @@ class Swap extends _App {
 
   async getSwapE() {
     if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
-      let tokens = [
+      const tokens = [
         this.state.Weth_address,
         this.state._TokenA_address,
         this.state._TokenB_address,
       ];
 
-      let amount_in = ethers.utils.parseEther(this.state.amountInE.toString());
-      let amount_out = await this.state.Router.getAmountsOut(amount_in, tokens);
-      let amount_out0 = ethers.utils.formatEther(amount_out[0]);
-      let amount_out1 = ethers.utils.formatEther(amount_out[1]);
-      let amount_out2 = ethers.utils.formatEther(amount_out[2]);
-      let amount_out_A = [amount_out0, amount_out1, amount_out2];
+      const amount_in = ethers.utils.parseEther(
+        this.state.amountInE.toString()
+      );
+      const amount_out = await this.state.Router.getAmountsOut(
+        amount_in,
+        tokens
+      );
+      const amount_out0 = ethers.utils.formatEther(amount_out[0]);
+      const amount_out1 = ethers.utils.formatEther(amount_out[1]);
+      const amount_out2 = ethers.utils.formatEther(amount_out[2]);
+      const amount_out_A = [amount_out0, amount_out1, amount_out2];
       console.log(amount_out_A);
       this.setState({ amount_outE: amount_out_A });
     }
@@ -135,18 +147,27 @@ class Swap extends _App {
     event.preventDefault();
     if (event.target.name === "SubmitA") {
       this.getTokenAData(this.state._TokenA_address);
-      this.getSwap();
+      this.getPair();
     }
     if (event.target.name === "SubmitB") {
       this.getTokenBData(this.state._TokenB_address);
-      this.getSwap();
+      this.getPair();
     }
     if (event.target.name === "SubmitSwap") {
-      this.getSwap();
+      this.getSwap(
+        this.state._TokenA_address,
+        this.state._TokenB_address,
+        this.state.Weth_address
+      );
     }
     if (event.target.name === "swapAB") {
       console.log("Swap B!");
-      this.SwapTokenforToken();
+      this.SwapTokenforToken(
+        this.state.TokenA,
+        this.state.TokenB,
+        this.state.amountIn,
+        this.state.amount_out[1]
+      );
     }
     if (event.target.name === "swapAE") {
       console.log("Swap E!");
@@ -164,6 +185,9 @@ class Swap extends _App {
       console.log("Swap B!");
       this.SwapEthforToken(2, this.state._TokenA_address);
     }
+    if (event.target.name === "GetReserves") {
+      this.getPair();
+    }
   };
 
   handleInputChange = (event) => {
@@ -179,7 +203,7 @@ class Swap extends _App {
       <div>
         <div className="outer">
           <div className="container">
-            <h4> Uniswap Autonity App</h4>
+            <h4> Swap tokens / ETH</h4>
             <p> Your account: {this.state.account} </p>
             <p> Your balance: {this.state.balance}</p>
           </div>
@@ -230,7 +254,18 @@ class Swap extends _App {
         {/* Swap Token A */}
         <div className="outer">
           <div className="container">
-            <h4> Swap Token</h4>
+            <h4> Swap Token A</h4>
+
+            <form
+              className="myform"
+              name="GetReserves"
+              onSubmit={this.handleSubmit}
+            >
+              <p> Token A reserves: {this.state.reserves_A}</p>
+              <p> Token B reserves: {this.state.reserves_B}</p>
+              <input type="submit" value="Get Reserves" />
+            </form>
+
             <form
               className="myform"
               name="SubmitSwap"
