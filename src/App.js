@@ -11,8 +11,8 @@ function App() {
   return (
     <div className="App">
       <NarBar />
-      <Route exact path="/" component={Swap} />
-      <Route exact path="/liquidity" component={Liquidity} />
+      <Route exact path="/uniswap-react/" component={Swap} />
+      <Route exact path="/uniswap-react/liquidity" component={Liquidity} />
     </div>
   );
 }

@@ -23,8 +23,11 @@ class Swap extends _App {
       Router: undefined,
       Factory_address: "0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116",
       Factory: undefined,
-      reserves_A: 0,
-      reserves_B: 0,
+      reserves_A_B: [undefined, undefined],
+      reserves_A_AUT: [undefined, undefined],
+      reserves_B_AUT: [undefined, undefined],
+      price_out: [0, 0, 0],
+      price_out_AUT: [0, 0, 0],
 
       Weth_address: "0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF",
       Weth: undefined,
@@ -37,6 +40,8 @@ class Swap extends _App {
 
   componentWillMount() {
     this.loadBlockchainData();
+    let A = 100.01;
+    console.log(A.toFixed(1));
   }
 
   async SwapTokenforToken(Token1, Token2, _amountIn, _amount_out) {
@@ -77,15 +82,9 @@ class Swap extends _App {
     );
   }
 
-  async getSwap(token) {
+  async getSwap(_amount_in, tokens) {
     if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
-      let tokens = [
-        this.state._TokenA_address,
-        this.state._TokenB_address,
-        this.state.Weth_address,
-      ];
-
-      const amount_in = ethers.utils.parseEther(this.state.amountIn.toString());
+      const amount_in = ethers.utils.parseEther(_amount_in);
       const amount_out = await this.state.Router.getAmountsOut(
         amount_in,
         tokens
@@ -94,8 +93,7 @@ class Swap extends _App {
       const amount_out1 = ethers.utils.formatEther(amount_out[1]);
       const amount_out2 = ethers.utils.formatEther(amount_out[2]);
       const amount_out_A = [amount_out0, amount_out1, amount_out2];
-      console.log(amount_out_A);
-      this.setState({ amount_out: amount_out_A });
+      return amount_out_A;
     }
   }
 
@@ -119,46 +117,24 @@ class Swap extends _App {
     );
   }
 
-  async getSwapE() {
-    if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
-      const tokens = [
-        this.state.Weth_address,
-        this.state._TokenA_address,
-        this.state._TokenB_address,
-      ];
-
-      const amount_in = ethers.utils.parseEther(
-        this.state.amountInE.toString()
-      );
-      const amount_out = await this.state.Router.getAmountsOut(
-        amount_in,
-        tokens
-      );
-      const amount_out0 = ethers.utils.formatEther(amount_out[0]);
-      const amount_out1 = ethers.utils.formatEther(amount_out[1]);
-      const amount_out2 = ethers.utils.formatEther(amount_out[2]);
-      const amount_out_A = [amount_out0, amount_out1, amount_out2];
-      console.log(amount_out_A);
-      this.setState({ amount_outE: amount_out_A });
-    }
-  }
-
   handleSubmit = (event) => {
     event.preventDefault();
     if (event.target.name === "SubmitA") {
       this.getTokenAData(this.state._TokenA_address);
-      this.getPair();
     }
     if (event.target.name === "SubmitB") {
       this.getTokenBData(this.state._TokenB_address);
-      this.getPair();
     }
     if (event.target.name === "SubmitSwap") {
-      this.getSwap(
+      let tokens = [
         this.state._TokenA_address,
         this.state._TokenB_address,
-        this.state.Weth_address
-      );
+        this.state.Weth_address,
+      ];
+
+      this.getSwap(this.state.amountIn.toString(), tokens).then((values) => {
+        this.setState({ amount_out: values });
+      });
     }
     if (event.target.name === "swapAB") {
       console.log("Swap B!");
@@ -174,7 +150,15 @@ class Swap extends _App {
       this.SwapTokenforEth();
     }
     if (event.target.name === "SubmitSwapE") {
-      this.getSwapE();
+      let tokens = [
+        this.state.Weth_address,
+        this.state._TokenA_address,
+        this.state._TokenB_address,
+      ];
+
+      this.getSwap(this.state.amountInE.toString(), tokens).then((values) => {
+        this.setState({ amount_outE: values });
+      });
       console.log("Get swap E");
     }
     if (event.target.name === "swapEA") {
@@ -186,7 +170,57 @@ class Swap extends _App {
       this.SwapEthforToken(2, this.state._TokenA_address);
     }
     if (event.target.name === "GetReserves") {
-      this.getPair();
+      this.getPair(this.state._TokenA_address, this.state._TokenB_address).then(
+        (values) => {
+          this.setState({
+            reserves_A_B: values,
+          });
+        }
+      );
+
+      let tokens = [
+        this.state._TokenA_address,
+        this.state._TokenB_address,
+        this.state.Weth_address,
+      ];
+
+      this.getSwap("1", tokens).then((values) => {
+        values[0] = Number(values[0]).toFixed(6);
+        values[1] = Number(values[1]).toFixed(6);
+        values[2] = Number(values[2]).toFixed(6);
+        this.setState({ price_out: values });
+      });
+    }
+
+    if (event.target.name === "GetReserves_AUT") {
+      this.getPair(this.state._TokenA_address, this.state.Weth_address).then(
+        (values) => {
+          this.setState({
+            reserves_A_AUT: values,
+          });
+        }
+      );
+
+      this.getPair(this.state._TokenB_address, this.state.Weth_address).then(
+        (values) => {
+          this.setState({
+            reserves_B_AUT: values,
+          });
+        }
+      );
+
+      const tokens = [
+        this.state.Weth_address,
+        this.state._TokenA_address,
+        this.state._TokenB_address,
+      ];
+
+      this.getSwap("1", tokens).then((values) => {
+        values[0] = Number(values[0]).toFixed(6);
+        values[1] = Number(values[1]).toFixed(6);
+        values[2] = Number(values[2]).toFixed(6);
+        this.setState({ price_out_AUT: values });
+      });
     }
   };
 
@@ -203,7 +237,7 @@ class Swap extends _App {
       <div>
         <div className="outer">
           <div className="container">
-            <h4> Swap tokens / ETH</h4>
+            <h4> Swap tokens / AUT</h4>
             <p> Your account: {this.state.account} </p>
             <p> Your balance: {this.state.balance}</p>
           </div>
@@ -256,15 +290,21 @@ class Swap extends _App {
           <div className="container">
             <h4> Swap Token A</h4>
 
+            {/* Get Reserves & price */}
             <form
-              className="myform"
+              className="column"
               name="GetReserves"
               onSubmit={this.handleSubmit}
             >
-              <p> Token A reserves: {this.state.reserves_A}</p>
-              <p> Token B reserves: {this.state.reserves_B}</p>
+              <p> Token A reserves: {this.state.reserves_A_B[0]}</p>
+              <p> Token B reserves: {this.state.reserves_A_B[1]}</p>
               <input type="submit" value="Get Reserves" />
             </form>
+
+            <div className="column">
+              <p> Token A / B price: {this.state.price_out[1]}</p>
+              <p> Token A/AUT price: {this.state.price_out[2]}</p>
+            </div>
 
             <form
               className="myform"
@@ -286,18 +326,40 @@ class Swap extends _App {
               <input className="swap_button" type="submit" value="Swap" />
             </form>
 
-            {/* Swap for ETH */}
+            {/* Swap for AUT */}
             <form className="swap" name="swapAE" onSubmit={this.handleSubmit}>
-              <label>ETH out: {this.state.amount_out[2]}</label>
+              <label>AUT out: {this.state.amount_out[2]}</label>
               <input className="swap_button" type="submit" value="Swap" />
             </form>
           </div>
         </div>
 
-        {/* Swap ETH */}
+        {/* Swap AUT */}
         <div className="outer">
           <div className="container">
-            <h4> Swap ETH</h4>
+            <h4> Swap AUT</h4>
+
+            {/* Get Reserves & price */}
+            <form
+              className="column_aut"
+              name="GetReserves_AUT"
+              onSubmit={this.handleSubmit}
+            >
+              <p> Token A reserves: {this.state.reserves_A_AUT[0]}</p>
+              <p> AUT reserves: {this.state.reserves_A_AUT[1]}</p>
+              <input type="submit" value="Get Reserves AUT" />
+            </form>
+
+            <div className="column_aut">
+              <p> Token B reserves: {this.state.reserves_B_AUT[0]}</p>
+              <p> AUT reserves: {this.state.reserves_B_AUT[1]}</p>
+            </div>
+
+            <div className="column_aut">
+              <p> Token AUT/A price: {this.state.price_out_AUT[1]}</p>
+              <p> Token AUT/B price: {this.state.price_out_AUT[2]}</p>
+            </div>
+
             <form
               className="myform"
               name="SubmitSwapE"

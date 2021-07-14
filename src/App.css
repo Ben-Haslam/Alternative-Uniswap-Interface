@@ -41,6 +41,18 @@ body {
   width: 100%;
 }
 
+.column {
+  padding: 20px;
+  float: left;
+  width: 50%;
+}
+
+.column_aut {
+  padding: 20px;
+  float: left;
+  width: 33%;
+}
+
 .Token_message {
   display: inline;
 }

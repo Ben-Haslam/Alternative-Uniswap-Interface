@@ -79,53 +79,22 @@ export class _App extends Component {
     }
   }
 
-  async getPair() {
+  async getPair(address0, address1) {
     if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
       const Factory = this.state.Factory;
-      const pairAddress = await Factory.getPair(
-        this.state._TokenA_address,
-        this.state._TokenB_address
-      );
+      const pairAddress = await Factory.getPair(address0, address1);
 
       const pair = new Contract(pairAddress, PAIR.abi, this.state.signer);
-      const reserves = await pair.getReserves();
+      const reserves_BN = await pair.getReserves();
 
-      console.log(
-        "reserves for token A",
-        ethers.utils.formatEther(reserves[0])
-      );
-      console.log(
-        "reserves for token B",
-        ethers.utils.formatEther(reserves[1])
-      );
+      const reserves0 = Number(
+        ethers.utils.formatEther(reserves_BN[0])
+      ).toFixed(2);
+      const reserves1 = Number(
+        ethers.utils.formatEther(reserves_BN[1])
+      ).toFixed(2);
 
-      this.setState({ reserves_A: ethers.utils.formatEther(reserves[0]) });
-      this.setState({ reserves_B: ethers.utils.formatEther(reserves[1]) });
-    }
-  }
-
-  async getPairETH(token) {
-    if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
-      const Factory = this.state.Factory;
-      const pairAddress = await Factory.getPair(
-        this.state._TokenA_address,
-        this.state._TokenB_address
-      );
-
-      const pair = new Contract(pairAddress, PAIR.abi, this.state.signer);
-      const reserves = await pair.getReserves();
-
-      console.log(
-        "reserves for token A",
-        ethers.utils.formatEther(reserves[0])
-      );
-      console.log(
-        "reserves for token B",
-        ethers.utils.formatEther(reserves[1])
-      );
-
-      this.setState({ reserves_A: ethers.utils.formatEther(reserves[0]) });
-      this.setState({ reserves_B: ethers.utils.formatEther(reserves[1]) });
+      return [reserves0, reserves1];
     }
   }
 }

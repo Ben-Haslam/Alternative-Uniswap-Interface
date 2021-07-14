@@ -1,12 +1,12 @@
 export const MenuItems = [
   {
     title: "Swap",
-    url: "/",
+    url: "/uniswap-react/",
     cName: "nav-links",
   },
   {
     title: "Deploy Liquidity",
-    url: "/liquidity",
+    url: "/uniswap-react/liquidity",
     cName: "nav-links",
   },
 ];
