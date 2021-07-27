@@ -104,21 +104,27 @@ class Liquidity extends _App {
     );
   }
 
-  handleSubmit = (event) => {
-    event.preventDefault();
-    if (event.target.name === "SubmitA") {
+  handleSubmit = {
+    submitA: (e) => {
+      e.preventDefault();
       this.getTokenAData(this.state._TokenA_address);
-    }
-    if (event.target.name === "SubmitB") {
+    },
+
+    submitB: (e) => {
+      e.preventDefault();
       this.getTokenBData(this.state._TokenB_address);
-    }
-    if (event.target.name === "Deploy Liquidity") {
+    },
+
+    deployLiquidity: (e) => {
+      e.preventDefault();
       this.addLiquidity();
-    }
-    if (event.target.name === "GetReserves") {
+    },
+
+    getReserves: (e) => {
+      e.preventDefault();
       this.getPair();
     }
-  };
+  }
 
   handleInputChange = (event) => {
     event.preventDefault();
@@ -144,7 +150,11 @@ class Liquidity extends _App {
           <div className="container">
             <h4> Token A</h4>
 
-            <form class="myform" name="SubmitA" onSubmit={this.handleSubmit}>
+            <form
+              class="myform"
+              name="SubmitA"
+              onSubmit={this.handleSubmit.submitA}
+            >
               <input
                 type="text"
                 name="_TokenA_address"
@@ -167,7 +177,7 @@ class Liquidity extends _App {
             <form
               className="myform"
               name="SubmitB"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.submitB}
             >
               <input
                 type="text"
@@ -191,7 +201,7 @@ class Liquidity extends _App {
             <form
               className="myform"
               name="GetReserves"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.getReserves}
             >
               <p> Token A reserves: {this.state.reserves_A}</p>
               <p> Token B reserves: {this.state.reserves_B}</p>
@@ -201,7 +211,7 @@ class Liquidity extends _App {
             <form
               className="myform"
               name="Deploy Liquidity"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.deployLiquidity}
             >
               <input
                 type="text"
