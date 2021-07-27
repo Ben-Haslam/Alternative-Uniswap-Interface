@@ -1,5 +1,6 @@
-import { ethers, Contract } from "ethers";
-import { Component } from "react";
+import {Contract, ethers} from "ethers";
+import {Component} from "react";
+
 const ROUTER = require("./build/UniswapV2Router02.json");
 const ERC20 = require("./build/ERC20.json");
 const FACTORY = require("./build/IUniswapV2Factory.json");
@@ -41,6 +42,15 @@ export class _App extends Component {
     this.setState({ Router: Router });
     this.setState({ Weth: Weth });
     this.setState({ Factory: Factory });
+  }
+
+  doesTokenExist(address) {
+    try {
+      return new Contract(address, ERC20.abi, this.state.signer)
+    }
+    catch (err) {
+      return false
+    }
   }
 
   async getTokenAData(address) {
