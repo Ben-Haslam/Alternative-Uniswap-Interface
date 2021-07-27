@@ -240,9 +240,10 @@ class Swap extends _App {
           values[0] = Number(values[0]).toFixed(6);
           values[1] = Number(values[1]).toFixed(6);
           values[2] = Number(values[2]).toFixed(6);
-          this.setState({ price_out_AUT: values });
+          this.setState({price_out_AUT: values});
         });
       }
+    }
   };
 
   handleInputChange = (event) => {
@@ -268,7 +269,7 @@ class Swap extends _App {
           <div className="container">
             <h4> Token A</h4>
 
-            <form class="myform" name="SubmitA" onSubmit={this.handleSubmit}>
+            <form class="myform" name="SubmitA" onSubmit={this.handleSubmit.submitA}>
               <input
                 type="text"
                 name="_TokenA_address"
@@ -290,7 +291,7 @@ class Swap extends _App {
             <form
               className="myform"
               name="SubmitB"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.submitB}
             >
               <input
                 type="text"
@@ -315,7 +316,7 @@ class Swap extends _App {
             <form
               className="column"
               name="GetReserves"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.getReserves}
             >
               <p> Token A reserves: {this.state.reserves_A_B[0]}</p>
               <p> Token B reserves: {this.state.reserves_A_B[1]}</p>
@@ -330,7 +331,7 @@ class Swap extends _App {
             <form
               className="myform"
               name="SubmitSwap"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.submitSwap}
             >
               <input
                 type="text"
@@ -342,13 +343,13 @@ class Swap extends _App {
             </form>
 
             {/* Swap for B */}
-            <form className="swap" name="swapAB" onSubmit={this.handleSubmit}>
+            <form className="swap" name="swapAB" onSubmit={this.handleSubmit.swapAB}>
               <label>Token B out: {this.state.amount_out[1]}</label>
               <input className="swap_button" type="submit" value="Swap" />
             </form>
 
             {/* Swap for AUT */}
-            <form className="swap" name="swapAE" onSubmit={this.handleSubmit}>
+            <form className="swap" name="swapAE" onSubmit={this.handleSubmit.swapAE}>
               <label>AUT out: {this.state.amount_out[2]}</label>
               <input className="swap_button" type="submit" value="Swap" />
             </form>
@@ -364,7 +365,7 @@ class Swap extends _App {
             <form
               className="column_aut"
               name="GetReserves_AUT"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.getReserves_AUT}
             >
               <p> Token A reserves: {this.state.reserves_A_AUT[0]}</p>
               <p> AUT reserves: {this.state.reserves_A_AUT[1]}</p>
@@ -384,7 +385,7 @@ class Swap extends _App {
             <form
               className="myform"
               name="SubmitSwapE"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.submitSwapE}
             >
               <input
                 type="text"
@@ -396,13 +397,13 @@ class Swap extends _App {
             </form>
 
             {/* Swap for A */}
-            <form className="swap" name="swapEA" onSubmit={this.handleSubmit}>
+            <form className="swap" name="swapEA" onSubmit={this.handleSubmit.swapEA}>
               <label>Token A out: {this.state.amount_outE[1]}</label>
               <input className="swap_button" type="submit" value="Swap" />
             </form>
 
             {/* Swap for B */}
-            <form className="swap" name="swapEB" onSubmit={this.handleSubmit}>
+            <form className="swap" name="swapEB" onSubmit={this.handleSubmit.swapEB}>
               <label>Token B out: {this.state.amount_outE[2]}</label>
               <input className="swap_button" type="submit" value="Swap" />
             </form>
