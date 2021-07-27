@@ -2,11 +2,16 @@ import React from "react";
 import "./App.css";
 import { ethers } from "ethers";
 import _App from "./ethereum";
+import {Button} from "@material-ui/core";
+import CurrencyDialog from "./CurrencySwapper/CurrencyDialog";
 
 class Swap extends _App {
   constructor(props) {
     super(props);
     this.state = {
+      dialogOpen: false,
+      dialogOnClose: (address) => console.log(address),
+
       account: "",
       provider: undefined,
       signer: undefined,
@@ -254,9 +259,24 @@ class Swap extends _App {
     });
   };
 
+  selectTokenEvent = (f) => {
+    return () => this.setState({
+      dialogOpen: true,
+      dialogOnClose: (address) => {
+        f(address);
+        this.setState({
+          dialogOpen: false,
+          dialogOnClose: (address) => console.warn(address)
+        });
+      }
+    })
+  }
+
   render() {
     return (
       <div>
+        <CurrencyDialog open={this.state.dialogOpen} onClose={this.state.dialogOnClose}/>
+
         <div className="outer">
           <div className="container">
             <h4> Swap tokens / AUT</h4>
@@ -270,12 +290,14 @@ class Swap extends _App {
             <h4> Token A</h4>
 
             <form class="myform" name="SubmitA" onSubmit={this.handleSubmit.submitA}>
-              <input
-                type="text"
-                name="_TokenA_address"
-                placeholder="enter token address"
-                onChange={this.handleInputChange}
-              />
+              <Button
+                  color="primary"
+                  onClick={this.selectTokenEvent((address) => this.setState({_TokenA_address: address}))}
+              >
+                Select Token
+              </Button>
+
+
               <input type="submit" value="Submit" />
             </form>
 
