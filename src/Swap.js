@@ -117,15 +117,19 @@ class Swap extends _App {
     );
   }
 
-  handleSubmit = (event) => {
-    event.preventDefault();
-    if (event.target.name === "SubmitA") {
+  handleSubmit = {
+    submitA: (e) => {
+      e.preventDefault();
       this.getTokenAData(this.state._TokenA_address);
-    }
-    if (event.target.name === "SubmitB") {
+    },
+
+    submitB: (e) => {
+      e.preventDefault();
       this.getTokenBData(this.state._TokenB_address);
-    }
-    if (event.target.name === "SubmitSwap") {
+    },
+
+    submitSwap: (e) => {
+      e.preventDefault();
       let tokens = [
         this.state._TokenA_address,
         this.state._TokenB_address,
@@ -135,8 +139,10 @@ class Swap extends _App {
       this.getSwap(this.state.amountIn.toString(), tokens).then((values) => {
         this.setState({ amount_out: values });
       });
-    }
-    if (event.target.name === "swapAB") {
+    },
+
+    swapAB: (e) => {
+      e.preventDefault();
       console.log("Swap B!");
       this.SwapTokenforToken(
         this.state.TokenA,
@@ -144,12 +150,16 @@ class Swap extends _App {
         this.state.amountIn,
         this.state.amount_out[1]
       );
-    }
-    if (event.target.name === "swapAE") {
+    },
+
+    swapAE: (e) => {
+      e.preventDefault();
       console.log("Swap E!");
       this.SwapTokenforEth();
-    }
-    if (event.target.name === "SubmitSwapE") {
+    },
+
+    submitSwapE: (e) => {
+      e.preventDefault();
       let tokens = [
         this.state.Weth_address,
         this.state._TokenA_address,
@@ -160,20 +170,26 @@ class Swap extends _App {
         this.setState({ amount_outE: values });
       });
       console.log("Get swap E");
-    }
-    if (event.target.name === "swapEA") {
+    },
+
+    swapEA: (e) => {
+      e.preventDefault();
       console.log("Swap A!");
       this.SwapEthforToken(1, this.state._TokenA_address);
-    }
-    if (event.target.name === "swapEB") {
+    },
+
+    swapEB: (e) => {
+      e.preventDefault();
       console.log("Swap B!");
       this.SwapEthforToken(2, this.state._TokenA_address);
-    }
-    if (event.target.name === "GetReserves") {
+    },
+
+    getReserves: (e) => {
+      e.preventDefault();
       if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
         this.getPair(
-          this.state._TokenA_address,
-          this.state._TokenB_address
+            this.state._TokenA_address,
+            this.state._TokenB_address
         ).then((values) => {
           this.setState({
             reserves_A_B: values,
@@ -193,24 +209,25 @@ class Swap extends _App {
           this.setState({ price_out: values });
         });
       }
-    }
+    },
 
-    if (event.target.name === "GetReserves_AUT") {
+    getReserves_AUT: (e) => {
+      e.preventDefault();
       if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
         this.getPair(this.state._TokenA_address, this.state.Weth_address).then(
-          (values) => {
-            this.setState({
-              reserves_A_AUT: values,
-            });
-          }
+            (values) => {
+              this.setState({
+                reserves_A_AUT: values,
+              });
+            }
         );
 
         this.getPair(this.state._TokenB_address, this.state.Weth_address).then(
-          (values) => {
-            this.setState({
-              reserves_B_AUT: values,
-            });
-          }
+            (values) => {
+              this.setState({
+                reserves_B_AUT: values,
+              });
+            }
         );
 
         const tokens = [
@@ -223,7 +240,7 @@ class Swap extends _App {
           values[0] = Number(values[0]).toFixed(6);
           values[1] = Number(values[1]).toFixed(6);
           values[2] = Number(values[2]).toFixed(6);
-          this.setState({ price_out_AUT: values });
+          this.setState({price_out_AUT: values});
         });
       }
     }
@@ -252,7 +269,7 @@ class Swap extends _App {
           <div className="container">
             <h4> Token A</h4>
 
-            <form class="myform" name="SubmitA" onSubmit={this.handleSubmit}>
+            <form class="myform" name="SubmitA" onSubmit={this.handleSubmit.submitA}>
               <input
                 type="text"
                 name="_TokenA_address"
@@ -274,7 +291,7 @@ class Swap extends _App {
             <form
               className="myform"
               name="SubmitB"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.submitB}
             >
               <input
                 type="text"
@@ -299,7 +316,7 @@ class Swap extends _App {
             <form
               className="column"
               name="GetReserves"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.getReserves}
             >
               <p> Token A reserves: {this.state.reserves_A_B[0]}</p>
               <p> Token B reserves: {this.state.reserves_A_B[1]}</p>
@@ -314,7 +331,7 @@ class Swap extends _App {
             <form
               className="myform"
               name="SubmitSwap"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.submitSwap}
             >
               <input
                 type="text"
@@ -326,13 +343,13 @@ class Swap extends _App {
             </form>
 
             {/* Swap for B */}
-            <form className="swap" name="swapAB" onSubmit={this.handleSubmit}>
+            <form className="swap" name="swapAB" onSubmit={this.handleSubmit.swapAB}>
               <label>Token B out: {this.state.amount_out[1]}</label>
               <input className="swap_button" type="submit" value="Swap" />
             </form>
 
             {/* Swap for AUT */}
-            <form className="swap" name="swapAE" onSubmit={this.handleSubmit}>
+            <form className="swap" name="swapAE" onSubmit={this.handleSubmit.swapAE}>
               <label>AUT out: {this.state.amount_out[2]}</label>
               <input className="swap_button" type="submit" value="Swap" />
             </form>
@@ -348,7 +365,7 @@ class Swap extends _App {
             <form
               className="column_aut"
               name="GetReserves_AUT"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.getReserves_AUT}
             >
               <p> Token A reserves: {this.state.reserves_A_AUT[0]}</p>
               <p> AUT reserves: {this.state.reserves_A_AUT[1]}</p>
@@ -368,7 +385,7 @@ class Swap extends _App {
             <form
               className="myform"
               name="SubmitSwapE"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.submitSwapE}
             >
               <input
                 type="text"
@@ -380,13 +397,13 @@ class Swap extends _App {
             </form>
 
             {/* Swap for A */}
-            <form className="swap" name="swapEA" onSubmit={this.handleSubmit}>
+            <form className="swap" name="swapEA" onSubmit={this.handleSubmit.swapEA}>
               <label>Token A out: {this.state.amount_outE[1]}</label>
               <input className="swap_button" type="submit" value="Swap" />
             </form>
 
             {/* Swap for B */}
-            <form className="swap" name="swapEB" onSubmit={this.handleSubmit}>
+            <form className="swap" name="swapEB" onSubmit={this.handleSubmit.swapEB}>
               <label>Token B out: {this.state.amount_outE[2]}</label>
               <input className="swap_button" type="submit" value="Swap" />
             </form>

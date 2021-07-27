@@ -112,25 +112,33 @@ class Liquidity extends _App {
     this.setState({ Liquidity_transfer: [liquidity0, liquidity1, liquidity2] });
   }
 
-  handleSubmit = (event) => {
-    event.preventDefault();
-    if (event.target.name === "SubmitA") {
+  handleSubmit = {
+    submitA: (e) => {
+      e.preventDefault();
       this.getTokenAData(this.state._TokenA_address);
-    }
-    if (event.target.name === "SubmitB") {
+    },
+
+    submitB: (e) => {
+      e.preventDefault();
       this.getTokenBData(this.state._TokenB_address);
-    }
-    if (event.target.name === "Deploy Liquidity Test") {
+    },
+
+    deployLiquidityTest: (e) => {
+      e.preventDefault();
       this.addLiquidityTest();
-    }
-    if (event.target.name === "Deploy Liquidity") {
+    },
+
+    deployLiquidity: (e) => {
+      e.preventDefault();
       this.addLiquidity();
-    }
-    if (event.target.name === "GetReserves") {
+    },
+
+    getReserves: (e) => {
+      e.preventDefault();
       if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
         this.getPair(
-          this.state._TokenA_address,
-          this.state._TokenB_address
+            this.state._TokenA_address,
+            this.state._TokenB_address
         ).then((values) => {
           this.setState({
             reserves_A_B: values,
@@ -138,7 +146,7 @@ class Liquidity extends _App {
         });
       }
     }
-  };
+  }
 
   handleInputChange = (event) => {
     event.preventDefault();
@@ -164,7 +172,11 @@ class Liquidity extends _App {
           <div className="container">
             <h4> Token A</h4>
 
-            <form class="myform" name="SubmitA" onSubmit={this.handleSubmit}>
+            <form
+              class="myform"
+              name="SubmitA"
+              onSubmit={this.handleSubmit.submitA}
+            >
               <input
                 type="text"
                 name="_TokenA_address"
@@ -187,7 +199,7 @@ class Liquidity extends _App {
             <form
               className="myform"
               name="SubmitB"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.submitB}
             >
               <input
                 type="text"
@@ -211,7 +223,7 @@ class Liquidity extends _App {
             <form
               className="myform"
               name="GetReserves"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.getReserves}
             >
               <p> Token A reserves: {this.state.reserves_A_B[0]}</p>
               <p> Token B reserves: {this.state.reserves_A_B[1]}</p>
@@ -221,7 +233,7 @@ class Liquidity extends _App {
             <form
               className="myform"
               name="Deploy Liquidity Test"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.deployLiquidityTest}
             >
               <input
                 type="text"
@@ -242,7 +254,7 @@ class Liquidity extends _App {
             <form
               className="myform"
               name="Deploy Liquidity"
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmit.deployLiquidity}
             >
               <p> TokenA in: {this.state.Liquidity_transfer[0]}</p>
               <p> TokenB in: {this.state.Liquidity_transfer[1]}</p>
