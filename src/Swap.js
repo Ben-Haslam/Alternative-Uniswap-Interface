@@ -23,9 +23,9 @@ class Swap extends _App {
       Router: undefined,
       Factory_address: "0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116",
       Factory: undefined,
-      reserves_A_B: [undefined, undefined],
-      reserves_A_AUT: [undefined, undefined],
-      reserves_B_AUT: [undefined, undefined],
+      reserves_A_B: [0, 0],
+      reserves_A_AUT: [0, 0],
+      reserves_B_AUT: [0, 0],
       price_out: [0, 0, 0],
       price_out_AUT: [0, 0, 0],
 
@@ -170,57 +170,62 @@ class Swap extends _App {
       this.SwapEthforToken(2, this.state._TokenA_address);
     }
     if (event.target.name === "GetReserves") {
-      this.getPair(this.state._TokenA_address, this.state._TokenB_address).then(
-        (values) => {
+      if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
+        this.getPair(
+          this.state._TokenA_address,
+          this.state._TokenB_address
+        ).then((values) => {
           this.setState({
             reserves_A_B: values,
           });
-        }
-      );
+        });
 
-      let tokens = [
-        this.state._TokenA_address,
-        this.state._TokenB_address,
-        this.state.Weth_address,
-      ];
+        let tokens = [
+          this.state._TokenA_address,
+          this.state._TokenB_address,
+          this.state.Weth_address,
+        ];
 
-      this.getSwap("1", tokens).then((values) => {
-        values[0] = Number(values[0]).toFixed(6);
-        values[1] = Number(values[1]).toFixed(6);
-        values[2] = Number(values[2]).toFixed(6);
-        this.setState({ price_out: values });
-      });
+        this.getSwap("1", tokens).then((values) => {
+          values[0] = Number(values[0]).toFixed(6);
+          values[1] = Number(values[1]).toFixed(6);
+          values[2] = Number(values[2]).toFixed(6);
+          this.setState({ price_out: values });
+        });
+      }
     }
 
     if (event.target.name === "GetReserves_AUT") {
-      this.getPair(this.state._TokenA_address, this.state.Weth_address).then(
-        (values) => {
-          this.setState({
-            reserves_A_AUT: values,
-          });
-        }
-      );
+      if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
+        this.getPair(this.state._TokenA_address, this.state.Weth_address).then(
+          (values) => {
+            this.setState({
+              reserves_A_AUT: values,
+            });
+          }
+        );
 
-      this.getPair(this.state._TokenB_address, this.state.Weth_address).then(
-        (values) => {
-          this.setState({
-            reserves_B_AUT: values,
-          });
-        }
-      );
+        this.getPair(this.state._TokenB_address, this.state.Weth_address).then(
+          (values) => {
+            this.setState({
+              reserves_B_AUT: values,
+            });
+          }
+        );
 
-      const tokens = [
-        this.state.Weth_address,
-        this.state._TokenA_address,
-        this.state._TokenB_address,
-      ];
+        const tokens = [
+          this.state.Weth_address,
+          this.state._TokenA_address,
+          this.state._TokenB_address,
+        ];
 
-      this.getSwap("1", tokens).then((values) => {
-        values[0] = Number(values[0]).toFixed(6);
-        values[1] = Number(values[1]).toFixed(6);
-        values[2] = Number(values[2]).toFixed(6);
-        this.setState({ price_out_AUT: values });
-      });
+        this.getSwap("1", tokens).then((values) => {
+          values[0] = Number(values[0]).toFixed(6);
+          values[1] = Number(values[1]).toFixed(6);
+          values[2] = Number(values[2]).toFixed(6);
+          this.setState({ price_out_AUT: values });
+        });
+      }
     }
   };
 

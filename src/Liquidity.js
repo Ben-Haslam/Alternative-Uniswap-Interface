@@ -17,8 +17,8 @@ class Liquidity extends _App {
       TokenB: undefined,
       TokenA_balance: undefined,
       TokenB_balance: undefined,
-      amountInA: 0,
-      amountInB: 0,
+      reserves_A_B: [undefined, undefined],
+      Liquidity_transfer: [0, 0, 0],
       amountInETH: 0,
       amountAMin: 0,
       amountBMin: 0,
@@ -83,7 +83,9 @@ class Liquidity extends _App {
     const time = Math.floor(Date.now() / 1000) + 200000;
     const deadline = ethers.BigNumber.from(time);
 
-    const transfer = await this.state.Router.estimateGas.addLiquidity(
+    console.log("Balls");
+
+    const transfer = await this.state.Router.callStatic.addLiquidity(
       this.state._TokenA_address,
       this.state._TokenB_address,
       amountInA,
@@ -96,12 +98,18 @@ class Liquidity extends _App {
 
     console.log(transfer);
 
+    const liquidity0 = ethers.utils.formatEther(transfer[0]);
+    const liquidity1 = ethers.utils.formatEther(transfer[1]);
+    const liquidity2 = ethers.utils.formatEther(transfer[2]);
+
     console.log("tokenA in: ", ethers.utils.formatEther(transfer[0]));
     console.log("tokenB in: ", ethers.utils.formatEther(transfer[1]));
     console.log(
       "liquidity tokens out: ",
       ethers.utils.formatEther(transfer[2])
     );
+
+    this.setState({ Liquidity_transfer: [liquidity0, liquidity1, liquidity2] });
   }
 
   handleSubmit = (event) => {
@@ -112,11 +120,23 @@ class Liquidity extends _App {
     if (event.target.name === "SubmitB") {
       this.getTokenBData(this.state._TokenB_address);
     }
+    if (event.target.name === "Deploy Liquidity Test") {
+      this.addLiquidityTest();
+    }
     if (event.target.name === "Deploy Liquidity") {
       this.addLiquidity();
     }
     if (event.target.name === "GetReserves") {
-      this.getPair();
+      if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
+        this.getPair(
+          this.state._TokenA_address,
+          this.state._TokenB_address
+        ).then((values) => {
+          this.setState({
+            reserves_A_B: values,
+          });
+        });
+      }
     }
   };
 
@@ -193,14 +213,14 @@ class Liquidity extends _App {
               name="GetReserves"
               onSubmit={this.handleSubmit}
             >
-              <p> Token A reserves: {this.state.reserves_A}</p>
-              <p> Token B reserves: {this.state.reserves_B}</p>
+              <p> Token A reserves: {this.state.reserves_A_B[0]}</p>
+              <p> Token B reserves: {this.state.reserves_A_B[1]}</p>
               <input type="submit" value="Get Reserves" />
             </form>
 
             <form
               className="myform"
-              name="Deploy Liquidity"
+              name="Deploy Liquidity Test"
               onSubmit={this.handleSubmit}
             >
               <input
@@ -216,7 +236,18 @@ class Liquidity extends _App {
                 placeholder="Amount in Token B"
                 onChange={this.handleInputChange}
               />
-              <input type="submit" value="Add liquidity" />
+              <input type="submit" value="Submit" />
+            </form>
+
+            <form
+              className="myform"
+              name="Deploy Liquidity"
+              onSubmit={this.handleSubmit}
+            >
+              <p> TokenA in: {this.state.Liquidity_transfer[0]}</p>
+              <p> TokenB in: {this.state.Liquidity_transfer[1]}</p>
+              <p> Liquidity tokens out: {this.state.Liquidity_transfer[1]}</p>
+              <input type="submit" value="Deploy Liquidity" />
             </form>
           </div>
         </div>
