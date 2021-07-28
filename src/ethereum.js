@@ -6,6 +6,81 @@ const ERC20 = require("./build/ERC20.json");
 const FACTORY = require("./build/IUniswapV2Factory.json");
 const PAIR = require("./build/IUniswapV2Pair.json");
 
+export function getProvider() {
+  return new ethers.providers.Web3Provider(window.ethereum);
+}
+
+export function getSigner(provider) {
+  return provider.getSigner();
+}
+
+export function getRouter(address, signer) {
+  return new Contract(
+      address,
+      ROUTER.abi,
+      signer
+  );
+}
+
+export function getWeth(address, signer) {
+  return new Contract(
+      address,
+      ERC20.abi,
+      signer
+  );
+}
+
+export function getFactory(address, signer) {
+  return new Contract(
+      address,
+      FACTORY.abi,
+      signer
+  );
+}
+
+export async function getConversionRate(router, token1_address, token2_address) {
+  try {
+    const amount_out = await router.getAmountsOut(ethers.utils.parseEther("1"), [token1_address, token2_address]);
+    const rate = ethers.utils.formatEther(amount_out[1]);
+    return Number(rate);
+  }
+  catch {
+    return false;
+  }
+}
+
+export async function getTokenDate(address, signer) {
+  try {
+    const token = new Contract(address, ERC20.abi, signer);
+
+    const accounts = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+
+    const balance0 = await token.balanceOf(accounts[0]);
+    const balance1 = ethers.utils.formatEther(balance0);
+    const symbol = await token.symbol();
+
+    return {
+      token: token,
+      balance: balance1,
+      symbol: symbol
+    }
+  }
+  catch (err) {
+    return false
+  }
+}
+
+export function doesTokenExist(address) {
+  try {
+    return new Contract(address, ERC20.abi, this.state.signer)
+  }
+  catch (err) {
+    return false
+  }
+}
+
 export class _App extends Component {
   async loadBlockchainData() {
     const accounts = await window.ethereum.request({
@@ -42,15 +117,6 @@ export class _App extends Component {
     this.setState({ Router: Router });
     this.setState({ Weth: Weth });
     this.setState({ Factory: Factory });
-  }
-
-  doesTokenExist(address) {
-    try {
-      return new Contract(address, ERC20.abi, this.state.signer)
-    }
-    catch (err) {
-      return false
-    }
   }
 
   async getTokenAData(address) {
