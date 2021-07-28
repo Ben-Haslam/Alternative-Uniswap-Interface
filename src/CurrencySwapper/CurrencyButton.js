@@ -1,9 +1,11 @@
 import React from "react";
 import {ButtonBase, Grid, makeStyles, Typography} from "@material-ui/core";
+import PropTypes from "prop-types";
 import * as COLORS from "@material-ui/core/colors";
 
 const useStyles = makeStyles((theme) => ({
     button: {
+        width: "100%",
         paddingTop: theme.spacing(0.5),
         paddingBottom: theme.spacing(0.5),
         '&:hover, &$focusVisible': {
@@ -15,6 +17,11 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+CurrencyButton.propTypes = {
+    coinName: PropTypes.string.isRequired,
+    coinAbbr: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired
+}
 
 export default function CurrencyButton(props) {
     const {coinName, coinAbbr, onClick, ...other} = props;

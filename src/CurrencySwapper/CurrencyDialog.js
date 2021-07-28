@@ -2,7 +2,8 @@ import React from "react";
 import {
     Button,
     Dialog,
-    Grid, IconButton,
+    Grid,
+    IconButton, makeStyles,
     TextField,
     Typography,
     withStyles
@@ -11,25 +12,25 @@ import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import CloseIcon from '@material-ui/icons/Close';
 import CurrencyButton from "./CurrencyButton";
-import _App from "../ethereum";
+import {doesTokenExist} from "../ethereum";
+import PropTypes from "prop-types";
 import * as COLORS from "@material-ui/core/colors"
 import * as COINS from '../constants/coins';
 
-
 const styles = (theme) => ({
-    dialogPaperContainer: {
+    dialogContainer: {
         borderRadius: theme.spacing(2),
     },
-    dialogTitle: {
+    titleSection: {
         padding: theme.spacing(2)
     },
-    dialogTitleTypography: {
+    titleText: {
         alignSelf: "center"
     },
     hr: {
         margin: 0
     },
-    searchField: {
+    address: {
         paddingLeft: theme.spacing(2.5),
         paddingRight: theme.spacing(2.5),
         paddingBottom: theme.spacing(2)
@@ -47,14 +48,17 @@ const styles = (theme) => ({
     }
 })
 
+const useStyles = makeStyles(styles);
+
+// This is a modified version of MaterialUI's DialogTitle component, I've added a close button in the top right corner
 const DialogTitle = withStyles(styles)((props) => {
     const { children, classes, onClose, ...other } = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.dialogTitle} {...other}>
+        <MuiDialogTitle disableTypography className={classes.titleSection} {...other}>
             <Grid container direction="row" justifyContent="space-between" alignContent="center">
-                <Typography variant="h6" className={classes.dialogTitleTypography}>{children}</Typography>
+                <Typography variant="h6" className={classes.titleText}>{children}</Typography>
                 {onClose ? (
-                    <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+                    <IconButton aria-label="close" onClick={onClose}>
                         <CloseIcon />
                     </IconButton>
                 ) : null}
@@ -63,6 +67,7 @@ const DialogTitle = withStyles(styles)((props) => {
     );
 });
 
+// This is a modified version of MaterialUI's DialogActions component, the color has been changed by modifying the CSS
 const DialogActions = withStyles((theme) => ({
     root: {
         margin: 0,
@@ -71,90 +76,95 @@ const DialogActions = withStyles((theme) => ({
     },
 }))(MuiDialogActions);
 
-class CurrencyDialog extends _App {
-    constructor(props) {
-        super(props);
+CurrencyDialog.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired
+}
 
-        this.state = {
-            searchField: "",
-            error: "",
-        };
-    }
+export default function CurrencyDialog(props) {
+    // The CurrencyDialog component will display a dialog window on top of the page, allowing a user to select a currency
+    // from a list (list can be found in 'src/constants/coins.js') or enter an address into a search field. Any entered
+    // addresses will first be validated to make sure they exist.
+    // When the dialog closes, it will call the `onClose` prop with 1 argument which will either be undefined (if the
+    // user closes the dialog without selecting anything), or will be a string containing the address of a currency.
 
-    submit() {
-        let address = this.state.searchField;
-        if (super.doesTokenExist(address)) {
-            this.setState({
-                error: "",
-                searchField: ""
-            })
-            this.props.onClose(address);
+    const classes = useStyles();
+    const {onClose, open, ...others} = props;
+
+    const [address, setAddress] = React.useState("");
+    const [error, setError] = React.useState("");
+
+    // Called when the user tries to input a custom address, this function will validate the address and will either
+    // then close the dialog and return the validated address, or will display an error.
+    const submit = () => {
+        if (doesTokenExist(address)) {
+            exit(address)
         }
         else {
-            this.setState({
-                error: "This address is not valid"
-            })
+            setError("This address is not valid")
         }
     }
 
-    handleChange = {
-        searchField: (e) => {
-            this.setState({
-                searchField: e.target.value
-            })
-        }
+    // Resets any fields in the dialog (in case it's opened in the future) and calls the `onClose` prop
+    const exit = (value) => {
+        setError("");
+        setAddress("");
+        onClose(value);
     }
 
-    render() {
-        const classes = this.props.classes;
+    return (
+        <Dialog
+            open={open}
+            onClose={() => exit(undefined)}
+            fullWidth
+            maxWidth="sm"
+            classes={{paper: classes.dialogContainer}}
+        >
+            <DialogTitle onClose={() => exit(undefined)}>
+                Select Currency
+            </DialogTitle>
 
-        const exit = () => {
-            this.setState({
-                error: "",
-                searchField: ""
-            })
-            this.props.onClose("");
-        }
+            <hr className={classes.hr}/>
 
-        return (
-            <Dialog open={this.props.open} onClose={exit} fullWidth maxWidth="sm" classes={{paper: classes.dialogPaperContainer}}>
-                <DialogTitle onClose={exit}>Select Currency</DialogTitle>
-                <hr className={classes.hr}/>
-                <div className={classes.currencyContainer}>
-                    <Grid container direction="column" spacing={1} alignContent="center">
-                        <TextField
-                            value={this.state.searchField}
-                            onChange={this.handleChange.searchField.bind(this)}
-                            variant="outlined"
-                            placeholder="Paste Address"
-                            error={this.state.error}
-                            helperText={this.state.error}
-                            fullWidth
-                            className={classes.searchField}
-                        />
-                        <hr className={classes.hr}/>
-                        <Grid item className={classes.currencyList}>
-                            <Grid container direction="column">
-                                {COINS.ALL.map(coin => (
+            <div className={classes.currencyContainer}>
+                <Grid container direction="column" spacing={1} alignContent="center">
+                    <TextField
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        variant="outlined"
+                        placeholder="Paste Address"
+                        error={error !== ""}
+                        helperText={error}
+                        fullWidth
+                        className={classes.address}
+                    />
+
+                    <hr className={classes.hr}/>
+
+                    <Grid item className={classes.currencyList}>
+                        <Grid container direction="column">
+                            {/* Maps all of the currencies in the constants file to buttons */}
+                            {COINS.ALL.map((coin, index) => (
+                                <Grid item key={index} xs={12}>
                                     <CurrencyButton
                                         coinName={coin.name}
                                         coinAbbr={coin.abbr}
-                                        onClick={() => this.props.onClose(coin.address)}
+                                        onClick={() => exit(coin.address)}
                                     />
-                                ))}
-                            </Grid>
+                                </Grid>
+                            ))}
                         </Grid>
                     </Grid>
-                </div>
-                <hr className={classes.hr}/>
-                <DialogActions>
-                    <Button autoFocus onClick={this.submit.bind(this)} color="primary">
-                        Enter
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        )
-    }
-}
+                </Grid>
+            </div>
 
-export default withStyles(styles)(CurrencyDialog);
+            <hr className={classes.hr}/>
+
+            <DialogActions>
+                <Button autoFocus onClick={submit} color="primary">
+                    Enter
+                </Button>
+            </DialogActions>
+        </Dialog>
+    )
+}
