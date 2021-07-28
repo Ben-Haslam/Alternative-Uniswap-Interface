@@ -85,7 +85,7 @@ class Liquidity extends _App {
 
     console.log("Balls");
 
-    const transfer = await this.state.Router.callStatic.addLiquidity(
+    await this.state.Router.callStatic.addLiquidity(
       this.state._TokenA_address,
       this.state._TokenB_address,
       amountInA,
@@ -94,22 +94,25 @@ class Liquidity extends _App {
       amountBMin,
       this.state.account,
       deadline
-    );
+    ).then((values) => {
+      console.log(values);
 
-    console.log(transfer);
+      const liquidity0 = ethers.utils.formatEther(values[0]);
+      const liquidity1 = ethers.utils.formatEther(values[1]);
+      const liquidity2 = ethers.utils.formatEther(values[2]);
 
-    const liquidity0 = ethers.utils.formatEther(transfer[0]);
-    const liquidity1 = ethers.utils.formatEther(transfer[1]);
-    const liquidity2 = ethers.utils.formatEther(transfer[2]);
+      console.log("tokenA in: ", ethers.utils.formatEther(values[0]));
+      console.log("tokenB in: ", ethers.utils.formatEther(values[1]));
+      console.log(
+        "liquidity tokens out: ",
+        ethers.utils.formatEther(values[2])
+      );
 
-    console.log("tokenA in: ", ethers.utils.formatEther(transfer[0]));
-    console.log("tokenB in: ", ethers.utils.formatEther(transfer[1]));
-    console.log(
-      "liquidity tokens out: ",
-      ethers.utils.formatEther(transfer[2])
-    );
+      this.setState({ Liquidity_transfer: [liquidity0, liquidity1, liquidity2] });
 
-    this.setState({ Liquidity_transfer: [liquidity0, liquidity1, liquidity2] });
+    });
+
+
   }
 
   handleSubmit = {

@@ -62,16 +62,35 @@ class Swap extends _App {
     );
   }
 
-  async SwapTokenforEth() {
-    const amountIn = ethers.utils.parseEther(this.state.amountIn.toString());
-    const amountOut = ethers.utils.parseEther(
-      this.state.amount_out[2].toString()
-    );
-    await this.state.TokenA.approve(this.state.Router_address, amountIn);
+  async SwapTokenforTokenTest(Token1, Token2, _amountIn, _amount_out) {
+    const amountIn = ethers.utils.parseEther(_amountIn.toString());
+    const amountOut = ethers.utils.parseEther(_amount_out.toString());
+    await Token1.approve(this.state.Router_address, amountIn);
 
-    const tokens = [this.state._TokenA_address, this.state.Weth_address];
+    const tokens = [Token1.address, Token2.address];
     const time = Math.floor(Date.now() / 1000) + 200000;
     const deadline = ethers.BigNumber.from(time);
+
+    await this.state.Router.callStatic.swapExactTokensForTokens(
+      amountIn,
+      amountOut,
+      tokens,
+      this.state.account,
+      deadline
+    ).then((values) => {
+      console.log(values);
+
+    });
+  }
+
+  async SwapTokenforEth(Token1, Token2, _amountIn, _amount_out) {
+      const amountIn = ethers.utils.parseEther(_amountIn.toString());
+      const amountOut = ethers.utils.parseEther(_amount_out.toString());
+      await Token1.approve(this.state.Router_address, amountIn);
+  
+      const tokens = [Token1.address, Token2.address];
+      const time = Math.floor(Date.now() / 1000) + 200000;
+      const deadline = ethers.BigNumber.from(time);
 
     await this.state.Router.swapExactTokensForETH(
       amountIn,
@@ -155,7 +174,12 @@ class Swap extends _App {
     swapAE: (e) => {
       e.preventDefault();
       console.log("Swap E!");
-      this.SwapTokenforEth();
+      this.SwapTokenforEth(
+        this.state.TokenA,
+        this.state.Weth,
+        this.state.amountIn,
+        this.state.amount_out[2]
+      );
     },
 
     submitSwapE: (e) => {
@@ -196,7 +220,7 @@ class Swap extends _App {
           });
         });
 
-        let tokens = [
+        const tokens = [
           this.state._TokenA_address,
           this.state._TokenB_address,
           this.state.Weth_address,
