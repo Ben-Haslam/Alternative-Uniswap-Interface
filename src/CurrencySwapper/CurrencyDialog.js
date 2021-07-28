@@ -89,7 +89,7 @@ export default function CurrencyDialog(props) {
     // user closes the dialog without selecting anything), or will be a string containing the address of a currency.
 
     const classes = useStyles();
-    const {onClose, open, ...others} = props;
+    const {onClose, open, signer, ...others} = props;
 
     const [address, setAddress] = React.useState("");
     const [error, setError] = React.useState("");
@@ -97,7 +97,7 @@ export default function CurrencyDialog(props) {
     // Called when the user tries to input a custom address, this function will validate the address and will either
     // then close the dialog and return the validated address, or will display an error.
     const submit = () => {
-        if (doesTokenExist(address)) {
+        if (doesTokenExist(address, signer)) {
             exit(address)
         }
         else {

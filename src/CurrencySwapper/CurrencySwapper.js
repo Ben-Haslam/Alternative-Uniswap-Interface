@@ -195,8 +195,8 @@ function CurrencySwapper(props) {
     return (
         <div>
             {/* Dialog Windows */}
-            <CurrencyDialog open={dialog1Open} onClose={onToken1Selected}/>
-            <CurrencyDialog open={dialog2Open} onClose={onToken2Selected}/>
+            <CurrencyDialog open={dialog1Open} onClose={onToken1Selected} signer={signer}/>
+            <CurrencyDialog open={dialog2Open} onClose={onToken2Selected} signer={signer}/>
 
             {/* Currency Swapper */}
             <Container maxWidth="xs">

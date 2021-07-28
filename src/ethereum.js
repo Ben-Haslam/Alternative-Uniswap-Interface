@@ -72,9 +72,9 @@ export async function getTokenDate(address, signer) {
   }
 }
 
-export function doesTokenExist(address) {
+export function doesTokenExist(address, signer) {
   try {
-    return new Contract(address, ERC20.abi, this.state.signer)
+    return new Contract(address, ERC20.abi, signer)
   }
   catch (err) {
     return false
