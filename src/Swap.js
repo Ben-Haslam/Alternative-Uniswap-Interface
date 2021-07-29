@@ -9,8 +9,8 @@ class Swap extends _App {
   constructor(props) {
     super(props);
     this.state = {
-      dialogOpen: false,
-      dialogOnClose: (address) => console.log(address),
+      dialog1Open: false,
+      dialog2Open: false,
 
       account: "",
       provider: undefined,
@@ -257,23 +257,27 @@ class Swap extends _App {
     });
   };
 
-  selectTokenEvent = (f) => {
-    return () => this.setState({
-      dialogOpen: true,
-      dialogOnClose: (address) => {
-        f(address);
-        this.setState({
-          dialogOpen: false,
-          dialogOnClose: (address) => console.warn(address)
-        });
-      }
-    })
+  onToken1Selected = (address) => {
+    this.setState({ dialog1Open: false })
+    if (address) {
+      this.setState({ _TokenA_address: address });
+      this.handleSubmit.submitA(address);
+    }
+  }
+
+  onToken2Selected = (address) => {
+    this.setState({ dialog2Open: false })
+    if (address) {
+      this.setState({ _TokenB_address: address });
+      this.handleSubmit.submitB(address);
+    }
   }
 
   render() {
     return (
       <div>
-        <CurrencyDialog open={this.state.dialogOpen} onClose={this.state.dialogOnClose}/>
+        <CurrencyDialog open={this.state.dialog1Open} onClose={this.onToken1Selected.bind(this)}/>
+        <CurrencyDialog open={this.state.dialog2Open} onClose={this.onToken2Selected.bind(this)}/>
 
         <div className="outer">
           <div className="container">
@@ -289,10 +293,7 @@ class Swap extends _App {
 
             <Button
                 color="primary"
-                onClick={this.selectTokenEvent((address) => {
-                  this.setState({_TokenA_address: address});
-                  this.handleSubmit.submitA(address);
-                })}
+                onClick={() => this.setState({dialog1Open: true})}
             >
               Select Token
             </Button>
@@ -308,10 +309,7 @@ class Swap extends _App {
 
               <Button
                   color="primary"
-                  onClick={this.selectTokenEvent((address) => {
-                    this.setState({_TokenB_address: address});
-                    this.handleSubmit.submitB(address);
-                  })}
+                  onClick={() => this.setState({dialog2Open: true})}
               >
                 Select Token
               </Button>
