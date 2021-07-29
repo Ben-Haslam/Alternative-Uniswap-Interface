@@ -100,6 +100,7 @@ function CurrencySwapper(props) {
     const switchFields = () => {
         setCurrency1(currency2);
         setCurrency2(currency1);
+        setField1Value(field2Value)
     }
 
     // These functions take an HTML event, pull the data out and puts it into a state variable.
