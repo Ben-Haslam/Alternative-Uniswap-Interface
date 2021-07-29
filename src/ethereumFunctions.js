@@ -149,3 +149,27 @@ export async function swapCurrency(address1, address2, amount, routerContract, a
         );
     }
 }
+
+// This function returns the reserves stored in a the liquidity pool between the currency of address1 and the currency
+// of address2. Some extra logic was needed to make sure that the results were returned in the correct order, as
+// `pair.getReserves()` would always return the reserves in the same order regardless of which order the addresses were.
+//    `address1` - An Ethereum address of the currency to trade from (either a token or AUT)
+//    `address2` - An Ethereum address of the currency to trade to (either a token or AUT)
+//    `factory` - The current factory
+//    `signer` - The current signer
+export async function getReserves(address1, address2, factory, signer) {
+    const pairAddress = await factory.getPair(address1, address2);
+
+    const pair = new Contract(pairAddress, PAIR.abi, signer);
+    const reservesRaw = await pair.getReserves();
+
+    let results = [
+        Number(ethers.utils.formatEther(reservesRaw[0])).toFixed(2),
+        Number(ethers.utils.formatEther(reservesRaw[1])).toFixed(2)
+    ];
+
+    return [
+        await pair.token0() === address1 ? results[0] : results[1],
+        await pair.token1() === address2 ? results[1] : results[0],
+    ]
+}

@@ -1,6 +1,5 @@
 import React, {useEffect} from "react";
 import {
-    Button,
     Container,
     Grid,
     IconButton,
@@ -20,7 +19,7 @@ import {
     getSigner,
     getBalanceAndSymbol,
     getWeth,
-    swapCurrency
+    swapCurrency, getPair, getReserves
 } from "../ethereumFunctions";
 import CurrencyField from "./CurrencyField";
 import CurrencyDialog from "./CurrencyDialog";
@@ -80,6 +79,9 @@ function CurrencySwapper(props) {
     // Stores the current conversion rate between currency1 and currency2
     const [conversionRate, setConversionRate] = React.useState(undefined);
 
+    // Stores the current reserves in the liquidity pool between currency1 and currency2
+    const [reserves, setReserves] = React.useState(["0.0", "0.0"]);
+
     // Stores the current value of their respective text box
     const [field1Value, setField1Value] = React.useState("");
     const [field2Value, setField2Value] = React.useState("");
@@ -100,7 +102,8 @@ function CurrencySwapper(props) {
     const switchFields = () => {
         setCurrency1(currency2);
         setCurrency2(currency1);
-        setField1Value(field2Value)
+        setField1Value(field2Value);
+        setReserves(reserves.reverse());
     }
 
     // These functions take an HTML event, pull the data out and puts it into a state variable.
@@ -114,6 +117,14 @@ function CurrencySwapper(props) {
     const formatBalance = (balance, symbol) => {
         if (balance && symbol)
             return parseFloat(balance).toPrecision(8) + " " + symbol;
+        else
+            return "0.0";
+    }
+
+    // Turns the currency's reserves into something nice and readable
+    const formatReserve = (reserve, symbol) => {
+        if (reserve && symbol)
+            return reserve + " " + symbol;
         else
             return "0.0";
     }
@@ -216,6 +227,9 @@ function CurrencySwapper(props) {
         if (currency1.address && currency2.address) {
             getConversionRate(router, currency1.address, currency2.address)
                 .then(rate => setConversionRate(rate));
+
+            getReserves(currency1.address, currency2.address, factory, signer)
+                .then(data => setReserves(data))
         }
 
     }, [currency1.address, currency2.address]);
@@ -326,6 +340,23 @@ function CurrencySwapper(props) {
                             <Grid item xs={6}>
                                 <Typography variant="body1" className={classes.balance}>
                                     {formatBalance(currency2.balance, currency2.symbol)}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+
+                        <hr className={classes.hr}/>
+
+                        {/* Reserves Display */}
+                        <Typography variant="h6">Reserves</Typography>
+                        <Grid container direction="row" justifyContent="space-between">
+                            <Grid item xs={6}>
+                                <Typography variant="body1" className={classes.balance}>
+                                    {formatReserve(reserves[0], currency1.symbol)}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Typography variant="body1" className={classes.balance}>
+                                    {formatReserve(reserves[1], currency2.symbol)}
                                 </Typography>
                             </Grid>
                         </Grid>
