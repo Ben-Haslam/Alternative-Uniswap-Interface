@@ -105,6 +105,54 @@ export async function swapTokenForToken(address1, address2, amount, router, acco
   );
 }
 
+export async function swapEthForToken(wethAddress, tokenAddress, amount, router, account) {
+  const tokens = [wethAddress, tokenAddress];
+  const time = Math.floor(Date.now() / 1000) + 200000;
+  const deadline = ethers.BigNumber.from(time);
+
+  const amountIn = ethers.utils.parseEther(amount.toString());
+  const amountOut = await router.callStatic.getAmountsOut(amountIn, tokens);
+
+  const weth = new Contract(wethAddress, ERC20.abi, getSigner(getProvider()))
+  await weth.approve(router.address, amountIn);
+
+  await router.swapExactETHForTokens(
+      amountOut[1],
+      tokens,
+      account,
+      deadline,
+      { value: amountIn }
+  );
+}
+
+export async function swapTokenForEth(tokenAddress, wethAddress, amount, router, account) {
+  console.log("Token -> Eth")
+
+  const tokens = [tokenAddress, wethAddress];
+  const time = Math.floor(Date.now() / 1000) + 200000;
+  const deadline = ethers.BigNumber.from(time);
+
+  const amountIn = ethers.utils.parseEther(amount.toString());
+  const amountOut = await router.callStatic.getAmountsOut(amountIn, tokens);
+
+  const token = new Contract(tokenAddress, ERC20.abi, getSigner(getProvider()))
+  await token.approve(router.address, amountIn);
+
+  await router.swapExactTokensForETH(
+      amountIn,
+      amountOut[1],
+      tokens,
+      account,
+      deadline
+  );
+}
+
+export function getEthBalance() {
+  // TODO Implement
+
+  return 1_000_000;
+}
+
 export class _App extends Component {
   async loadBlockchainData() {
     const accounts = await window.ethereum.request({
@@ -121,21 +169,21 @@ export class _App extends Component {
     this.setState({ balance: balance_1 });
 
     const Router = new Contract(
-      this.state.Router_address,
-      ROUTER.abi,
-      this.state.signer
+        this.state.Router_address,
+        ROUTER.abi,
+        this.state.signer
     );
 
     const Weth = new Contract(
-      this.state.Weth_address,
-      ERC20.abi,
-      this.state.signer
+        this.state.Weth_address,
+        ERC20.abi,
+        this.state.signer
     );
 
     const Factory = new Contract(
-      this.state.Factory_address,
-      FACTORY.abi,
-      this.state.provider
+        this.state.Factory_address,
+        FACTORY.abi,
+        this.state.provider
     );
 
     this.setState({ Router: Router });
@@ -154,10 +202,10 @@ export class _App extends Component {
       this.setState({ TokenA_balance: TokenA_balance_1 });
       this.setState({ TokenA: TokenA });
       document.getElementById("TokenA_message").innerHTML =
-        TokenA_symbol.concat(" balance: ");
+          TokenA_symbol.concat(" balance: ");
     } catch (err) {
       document.getElementById("TokenA_message").innerHTML =
-        "Error: Please enter a valid token address";
+          "Error: Please enter a valid token address";
     }
   }
 
@@ -172,10 +220,10 @@ export class _App extends Component {
       this.setState({ TokenB_balance: TokenB_balance_1 });
       this.setState({ TokenB: TokenB });
       document.getElementById("TokenB_message").innerHTML =
-        TokenB_symbol.concat(" balance: ");
+          TokenB_symbol.concat(" balance: ");
     } catch (err) {
       document.getElementById("TokenB_message").innerHTML =
-        "Error: Please enter a valid token address";
+          "Error: Please enter a valid token address";
     }
   }
 
@@ -188,10 +236,10 @@ export class _App extends Component {
       const reserves_BN = await pair.getReserves();
 
       const reserves0 = Number(
-        ethers.utils.formatEther(reserves_BN[0])
+          ethers.utils.formatEther(reserves_BN[0])
       ).toFixed(2);
       const reserves1 = Number(
-        ethers.utils.formatEther(reserves_BN[1])
+          ethers.utils.formatEther(reserves_BN[1])
       ).toFixed(2);
 
       return [reserves0, reserves1];

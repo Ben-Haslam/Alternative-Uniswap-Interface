@@ -1,3 +1,9 @@
+export const AUTONITY = {
+    name: "Autonity",  // TODO Is this right?
+    abbr: "AUT",
+    address: "0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF"
+}
+
 export const TOKEN_A = {
     name: "Token A",
     abbr: "TA",
@@ -10,4 +16,4 @@ export const TOKEN_B = {
     address: "0xc108a13D00371520EbBeCc7DF5C8610C71F4FfbA"
 }
 
-export const ALL = [TOKEN_A, TOKEN_B];
+export const ALL = [AUTONITY, TOKEN_A, TOKEN_B];

@@ -13,18 +13,18 @@ import { useSnackbar } from "notistack";
 import LoopIcon from '@material-ui/icons/Loop';
 import {
     getAccount,
-    getConversionRate,
+    getConversionRate, getEthBalance,
     getFactory,
     getProvider,
     getRouter,
     getSigner,
     getTokenDate,
-    getWeth,
+    getWeth, swapEthForToken, swapTokenForEth,
     swapTokenForToken
 } from "../ethereum";
 import CurrencyField from "./CurrencyField";
 import CurrencyDialog from "./CurrencyDialog";
-
+import * as COINS from "../constants/coins";
 
 const styles = (theme) => ({
     paperContainer: {
@@ -127,15 +127,35 @@ function CurrencySwapper(props) {
     const swap = () => {
         console.log("Attempting to swap tokens...")
 
-        let promise = swapTokenForToken(
-            currency1.address,
-            currency2.address,
-            parseFloat(field1Value),
-            router,
-            account,
-            signer,
-            provider
-        );
+        let promise;
+
+        if (currency1.address === weth.address) {
+            promise = swapEthForToken(
+                weth.address,
+                currency2.address,
+                parseFloat(field1Value),
+                router,
+                account
+            )
+        }
+        else if (currency2.address === weth.address) {
+            promise = swapTokenForEth(
+                currency1.address,
+                weth.address,
+                parseFloat(field1Value),
+                router,
+                account
+            )
+        }
+        else {
+            promise = swapTokenForToken(
+                currency1.address,
+                currency2.address,
+                parseFloat(field1Value),
+                router,
+                account
+            );
+        }
 
         promise
             .then(() => {
@@ -159,15 +179,24 @@ function CurrencySwapper(props) {
         }
         // We only update the values if the user provides a token
         else if (address) {
-            // Getting some token data is async, so we need to wait for the data to return, hence the promise
-            getTokenDate(account, address, signer)
-                .then(data => {
-                    setCurrency1({
-                        address: address,
-                        symbol: data.symbol,
-                        balance: data.balance,
-                    })
+            if (address === weth.address) {
+                setCurrency1({
+                    address: address,
+                    symbol: COINS.AUTONITY.abbr,
+                    balance: getEthBalance(),  // TODO Change
                 })
+            }
+            else {
+                // Getting some token data is async, so we need to wait for the data to return, hence the promise
+                getTokenDate(account, address, signer)
+                    .then(data => {
+                        setCurrency1({
+                            address: address,
+                            symbol: data.symbol,
+                            balance: data.balance,
+                        })
+                    })
+            }
         }
     }
 
@@ -182,15 +211,23 @@ function CurrencySwapper(props) {
         }
         // We only update the values if the user provides a token
         else if (address) {
-            // Getting some token data is async, so we need to wait for the data to return, hence the promise
-            getTokenDate(account, address, signer)
-                .then(data => {
-                    setCurrency2({
-                        address: address,
-                        symbol: data.symbol,
-                        balance: data.balance,
-                    })
+            if (address === weth.address) {
+                setCurrency2({
+                    address: weth.address,
+                    symbol: COINS.AUTONITY.abbr,
+                    balance: getEthBalance(),  // TODO Change
                 })
+            } else {
+                // Getting some token data is async, so we need to wait for the data to return, hence the promise
+                getTokenDate(account, address, signer)
+                    .then(data => {
+                        setCurrency2({
+                            address: address,
+                            symbol: data.symbol,
+                            balance: data.balance,
+                        })
+                    })
+            }
         }
     }
 
@@ -220,8 +257,6 @@ function CurrencySwapper(props) {
         // This means that if the user types a new value into the conversion box or the conversion rate changes,
         // the value in the output box will change.
 
-        console.log("Calculating the second field")
-
         if (isNaN(parseFloat(field1Value))) {
             setField2Value("");
         }
@@ -243,7 +278,7 @@ function CurrencySwapper(props) {
         const currencyTimeout = setTimeout(() => {
             console.log("Checking balances...")
 
-            if (currency1) {
+            if (currency1 && currency1.address !== weth.address) {
                 getTokenDate(account, currency1.address, signer)
                     .then(data => {
                         setCurrency1({
@@ -252,7 +287,7 @@ function CurrencySwapper(props) {
                         })
                     })
             }
-            if (currency2) {
+            if (currency2 && currency2.address !== weth.address) {
                 getTokenDate(account, currency2.address, signer)
                     .then(data => {
                         setCurrency2({
