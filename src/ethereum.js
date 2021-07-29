@@ -99,66 +99,56 @@ export function doesTokenExist(address, signer) {
   }
 }
 
-export async function swapTokenForToken(address1, address2, amount, router, account) {
-  const tokens = [address1, address2];
+// This function swaps two particular currencies, it can handle switching from Eth to Token, Token to Eth, and Token to Token.
+// No error handling is done, so any issues can be caught with the use of .catch()
+// To work correctly, there needs to be 7 arguments:
+//    `address1` - An Ethereum address of the currency to trade from (either a token or AUT)
+//    `address2` - An Ethereum address of the currency to trade to (either a token or AUT)
+//    `amount` - A float or similar number representing how many of address1's currency to trade
+//    `routerContract` - The router contract to carry out this trade
+//    `accountAddress` - An Ethereum address of the current user's account
+//    `provider` - The current provider
+//    `signer` - The current signer
+export async function swapCurrency(address1, address2, amount, routerContract, accountAddress, provider, signer) {
+  const currencies = [address1, address2];
   const time = Math.floor(Date.now() / 1000) + 200000;
   const deadline = ethers.BigNumber.from(time);
 
   const amountIn = ethers.utils.parseEther(amount.toString());
-  const amountOut = await router.callStatic.getAmountsOut(amountIn, tokens);
+  const amountOut = await routerContract.callStatic.getAmountsOut(amountIn, currencies);
 
-  const token = new Contract(address1, ERC20.abi, getSigner(getProvider()))
-  await token.approve(router.address, amountIn);
+  const currency1 = new Contract(address1, ERC20.abi, signer)
+  await currency1.approve(routerContract.address, amountIn);
 
-  await router.swapExactTokensForTokens(
-      amountIn,
-      amountOut[1],
-      tokens,
-      account,
-      deadline
-  );
-}
-
-export async function swapEthForToken(wethAddress, tokenAddress, amount, router, account) {
-  const tokens = [wethAddress, tokenAddress];
-  const time = Math.floor(Date.now() / 1000) + 200000;
-  const deadline = ethers.BigNumber.from(time);
-
-  const amountIn = ethers.utils.parseEther(amount.toString());
-  const amountOut = await router.callStatic.getAmountsOut(amountIn, tokens);
-
-  const weth = new Contract(wethAddress, ERC20.abi, getSigner(getProvider()))
-  await weth.approve(router.address, amountIn);
-
-  await router.swapExactETHForTokens(
-      amountOut[1],
-      tokens,
-      account,
-      deadline,
-      { value: amountIn }
-  );
-}
-
-export async function swapTokenForEth(tokenAddress, wethAddress, amount, router, account) {
-  console.log("Token -> Eth")
-
-  const tokens = [tokenAddress, wethAddress];
-  const time = Math.floor(Date.now() / 1000) + 200000;
-  const deadline = ethers.BigNumber.from(time);
-
-  const amountIn = ethers.utils.parseEther(amount.toString());
-  const amountOut = await router.callStatic.getAmountsOut(amountIn, tokens);
-
-  const token = new Contract(tokenAddress, ERC20.abi, getSigner(getProvider()))
-  await token.approve(router.address, amountIn);
-
-  await router.swapExactTokensForETH(
-      amountIn,
-      amountOut[1],
-      tokens,
-      account,
-      deadline
-  );
+  if (address1 === COINS.AUTONITY.address) {
+    // Eth -> Token
+    await routerContract.swapExactETHForTokens(
+        amountOut[1],
+        currencies,
+        accountAddress,
+        deadline,
+        { value: amountIn }
+    );
+  }
+  else if (address2 === COINS.AUTONITY.address) {
+    // Token -> Eth
+    await routerContract.swapExactTokensForETH(
+        amountIn,
+        amountOut[1],
+        currencies,
+        accountAddress,
+        deadline
+    );
+  }
+  else {
+    await routerContract.swapExactTokensForTokens(
+        amountIn,
+        amountOut[1],
+        currencies,
+        accountAddress,
+        deadline
+    );
+  }
 }
 
 export class _App extends Component {

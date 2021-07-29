@@ -19,8 +19,8 @@ import {
     getRouter,
     getSigner,
     getBalanceAndSymbol,
-    getWeth, swapEthForToken, swapTokenForEth,
-    swapTokenForToken
+    getWeth,
+    swapCurrency
 } from "../ethereum";
 import CurrencyField from "./CurrencyField";
 import CurrencyDialog from "./CurrencyDialog";
@@ -127,37 +127,15 @@ function CurrencySwapper(props) {
     const swap = () => {
         console.log("Attempting to swap tokens...")
 
-        let promise;
-
-        if (currency1.address === weth.address) {
-            promise = swapEthForToken(
-                weth.address,
-                currency2.address,
-                parseFloat(field1Value),
-                router,
-                account
-            )
-        }
-        else if (currency2.address === weth.address) {
-            promise = swapTokenForEth(
-                currency1.address,
-                weth.address,
-                parseFloat(field1Value),
-                router,
-                account
-            )
-        }
-        else {
-            promise = swapTokenForToken(
-                currency1.address,
-                currency2.address,
-                parseFloat(field1Value),
-                router,
-                account
-            );
-        }
-
-        promise
+        swapCurrency(
+            currency1.address,
+            currency2.address,
+            parseFloat(field1Value),
+            router,
+            account,
+            provider,
+            signer
+        )
             .then(() => {
                 // If the transaction was successful, we clear to input to make sure the user doesn't accidental redo the transfer
                 setField1Value("");
@@ -261,8 +239,8 @@ function CurrencySwapper(props) {
         const currencyTimeout = setTimeout(() => {
             console.log("Checking balances...")
 
-            if (currency1 && currency1.address !== weth.address) {
-                getBalanceAndSymbol(account, currency1.address, signer)
+            if (currency1) {
+                getBalanceAndSymbol(account, currency1.address, provider, signer)
                     .then(data => {
                         setCurrency1({
                             ...currency1,
@@ -270,8 +248,8 @@ function CurrencySwapper(props) {
                         })
                     })
             }
-            if (currency2 && currency2.address !== weth.address) {
-                getBalanceAndSymbol(account, currency2.address, signer)
+            if (currency2) {
+                getBalanceAndSymbol(account, currency2.address, provider, signer)
                     .then(data => {
                         setCurrency2({
                             ...currency2,
