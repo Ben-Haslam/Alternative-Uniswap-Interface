@@ -96,7 +96,7 @@ export async function swapTokenForToken(address1, address2, amount, router, acco
   const token = new Contract(address1, ERC20.abi, getSigner(getProvider()))
   await token.approve(router.address, amountIn);
 
-  await router.callStatic.swapExactTokensForTokens(
+  await router.swapExactTokensForTokens(
       amountIn,
       amountOut[1],
       tokens,
