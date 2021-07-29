@@ -1,5 +1,6 @@
 import {Contract, ethers} from "ethers";
 import {Component} from "react";
+import * as COINS from "./constants/coins";
 
 const ROUTER = require("./build/UniswapV2Router02.json");
 const ERC20 = require("./build/ERC20.json");
@@ -57,18 +58,31 @@ export async function getConversionRate(router, token1_address, token2_address) 
   }
 }
 
-export async function getTokenDate(account, address, signer) {
+// This function returns an object with 2 fields: `balance` which container's the account's balance in the particular currency,
+// and `symbol` which is the abbreviation of the token name. To work correctly it must be provided with 4 arguments:
+//    `accountAddress` - An Ethereum address of the current user's account
+//    `address` - An Ethereum address of the currency to check for (either a token or AUT)
+//    `provider` - The current provider
+//    `signer` - The current signer
+export async function getBalanceAndSymbol(accountAddress, address, provider, signer) {
   try {
-    const token = new Contract(address, ERC20.abi, signer);
+    if (address === COINS.AUTONITY.address) {
+      const balanceRaw = await provider.getBalance(accountAddress);
 
-    const balance0 = await token.balanceOf(account);
-    const balance1 = ethers.utils.formatEther(balance0);
-    const symbol = await token.symbol();
+      return {
+        balance: ethers.utils.formatEther(balanceRaw),
+        symbol: COINS.AUTONITY.abbr
+      }
+    }
+    else {
+      const token = new Contract(address, ERC20.abi, signer);
+      const balanceRaw = await token.balanceOf(accountAddress);
+      const symbol = await token.symbol();
 
-    return {
-      token: token,
-      balance: balance1,
-      symbol: symbol
+      return {
+        balance: ethers.utils.formatEther(balanceRaw),
+        symbol: symbol
+      }
     }
   }
   catch (err) {
@@ -145,12 +159,6 @@ export async function swapTokenForEth(tokenAddress, wethAddress, amount, router,
       account,
       deadline
   );
-}
-
-export function getEthBalance() {
-  // TODO Implement
-
-  return 1_000_000;
 }
 
 export class _App extends Component {

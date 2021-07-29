@@ -13,12 +13,12 @@ import { useSnackbar } from "notistack";
 import LoopIcon from '@material-ui/icons/Loop';
 import {
     getAccount,
-    getConversionRate, getEthBalance,
+    getConversionRate,
     getFactory,
     getProvider,
     getRouter,
     getSigner,
-    getTokenDate,
+    getBalanceAndSymbol,
     getWeth, swapEthForToken, swapTokenForEth,
     swapTokenForToken
 } from "../ethereum";
@@ -179,24 +179,15 @@ function CurrencySwapper(props) {
         }
         // We only update the values if the user provides a token
         else if (address) {
-            if (address === weth.address) {
-                setCurrency1({
-                    address: address,
-                    symbol: COINS.AUTONITY.abbr,
-                    balance: getEthBalance(),  // TODO Change
-                })
-            }
-            else {
-                // Getting some token data is async, so we need to wait for the data to return, hence the promise
-                getTokenDate(account, address, signer)
-                    .then(data => {
-                        setCurrency1({
-                            address: address,
-                            symbol: data.symbol,
-                            balance: data.balance,
-                        })
+            // Getting some token data is async, so we need to wait for the data to return, hence the promise
+            getBalanceAndSymbol(account, address, provider, signer)
+                .then(data => {
+                    setCurrency1({
+                        address: address,
+                        symbol: data.symbol,
+                        balance: data.balance,
                     })
-            }
+                })
         }
     }
 
@@ -211,23 +202,15 @@ function CurrencySwapper(props) {
         }
         // We only update the values if the user provides a token
         else if (address) {
-            if (address === weth.address) {
-                setCurrency2({
-                    address: weth.address,
-                    symbol: COINS.AUTONITY.abbr,
-                    balance: getEthBalance(),  // TODO Change
-                })
-            } else {
-                // Getting some token data is async, so we need to wait for the data to return, hence the promise
-                getTokenDate(account, address, signer)
-                    .then(data => {
-                        setCurrency2({
-                            address: address,
-                            symbol: data.symbol,
-                            balance: data.balance,
-                        })
+            // Getting some token data is async, so we need to wait for the data to return, hence the promise
+            getBalanceAndSymbol(account, address, provider, signer)
+                .then(data => {
+                    setCurrency2({
+                        address: address,
+                        symbol: data.symbol,
+                        balance: data.balance,
                     })
-            }
+                })
         }
     }
 
@@ -279,7 +262,7 @@ function CurrencySwapper(props) {
             console.log("Checking balances...")
 
             if (currency1 && currency1.address !== weth.address) {
-                getTokenDate(account, currency1.address, signer)
+                getBalanceAndSymbol(account, currency1.address, signer)
                     .then(data => {
                         setCurrency1({
                             ...currency1,
@@ -288,7 +271,7 @@ function CurrencySwapper(props) {
                     })
             }
             if (currency2 && currency2.address !== weth.address) {
-                getTokenDate(account, currency2.address, signer)
+                getBalanceAndSymbol(account, currency2.address, signer)
                     .then(data => {
                         setCurrency2({
                             ...currency2,
