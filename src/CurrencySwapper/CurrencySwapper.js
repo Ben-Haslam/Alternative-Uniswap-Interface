@@ -12,13 +12,15 @@ import SwapVerticalCircleIcon from '@material-ui/icons/SwapVerticalCircle';
 import LoopIcon from '@material-ui/icons/Loop';
 import CurrencyDialog from "./CurrencyDialog";
 import {
+    getAccount,
     getConversionRate,
     getFactory,
     getProvider,
     getRouter,
     getSigner,
     getTokenDate,
-    getWeth
+    getWeth,
+    swapTokenForToken
 } from "../ethereum";
 import CurrencyField from "./CurrencyField";
 
@@ -83,6 +85,7 @@ function CurrencySwapper(props) {
     // Stores information for the Autonity Network
     const [provider, setProvider] = React.useState(getProvider());
     const [signer, setSigner] = React.useState(getSigner(provider));
+    const [account, setAccount] = React.useState(undefined);  // This is populated in a react hook
     const [router, setRouter] = React.useState(getRouter("0x4489D87C8440B19f11d63FA2246f943F492F3F5F", signer));
     const [weth, setWeth] = React.useState(getWeth("0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF", signer));
     const [factory, setFactory] = React.useState(getFactory("0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116", signer));
@@ -98,9 +101,6 @@ function CurrencySwapper(props) {
     const handleChange = {
         field1: (e) => {
             setField1Value(e.target.value);
-
-            if (e.target.value === "")
-                setField2Value("");
         }
     }
 
@@ -112,8 +112,28 @@ function CurrencySwapper(props) {
             return "0.0";
     }
 
+    // Determines whether the button should be enabled or not
     const isButtonEnabled = () => {
-        return (currency1.address && currency2.address) && (parseFloat(field1Value) <= currency1.balance);
+        let validFloat = new RegExp("^[0-9]*[.,]?[0-9]*$")
+
+        // If both currencies have been selected, and a valid float has been entered which is less than the user's balance, then return true
+        return (currency1.address && currency2.address)
+            && validFloat.test(field1Value)
+            && (parseFloat(field1Value) <= currency1.balance);
+    }
+
+    const swap = () => {
+        console.log("Attempting to swap tokens...")
+
+        swapTokenForToken(
+            currency1.address,
+            currency2.address,
+            parseFloat(field1Value),
+            router,
+            account,
+            signer,
+            provider
+        ). then(() => console.log("Transfer complete"))
     }
 
     // Called when the dialog window for currency1 exits
@@ -128,7 +148,7 @@ function CurrencySwapper(props) {
         // We only update the values if the user provides a token
         else if (address) {
             // Getting some token data is async, so we need to wait for the data to return, hence the promise
-            getTokenDate(address, signer)
+            getTokenDate(account, address, signer)
                 .then(data => {
                     setCurrency1({
                         address: address,
@@ -151,7 +171,7 @@ function CurrencySwapper(props) {
         // We only update the values if the user provides a token
         else if (address) {
             // Getting some token data is async, so we need to wait for the data to return, hence the promise
-            getTokenDate(address, signer)
+            getTokenDate(account, address, signer)
                 .then(data => {
                     setCurrency2({
                         address: address,
@@ -163,19 +183,19 @@ function CurrencySwapper(props) {
     }
 
     useEffect(() => {
-        // This hook is called when either of the state variables `currency1` or `currency2` change.
+        // This hook is called when either of the state variables `currency1.address` or `currency2.address` change.
         // It attempts to calculate and set the state variable `conversionRate`
         // This means that when the user selects a different currency to convert between, or the currencies are swapped,
         // the new conversion rate will be calculated.
 
-        console.log("Trying to get Conversion Rate: " + currency1.address + " " + currency2.address)
+        console.log("Trying to get Conversion Rate between:\n" + currency1.address + "\n" + currency2.address)
 
         if (currency1.address && currency2.address) {
             getConversionRate(router, currency1.address, currency2.address)
                 .then(rate => setConversionRate(rate));
         }
 
-    }, [currency1, currency2]);
+    }, [currency1.address, currency2.address]);
 
     useEffect(() => {
         // This hook is called when either of the state variables `field1Value` or `conversionRate` change.
@@ -185,12 +205,57 @@ function CurrencySwapper(props) {
 
         console.log("Calculating the second field")
 
-        if (field1Value && conversionRate) {
+        if (isNaN(parseFloat(field1Value))) {
+            setField2Value("");
+        }
+        else if (field1Value && conversionRate) {
             let amount = parseFloat(field1Value) * conversionRate;
             setField2Value(amount.toFixed(7));
         }
+        else {
+            setField2Value("");
+        }
 
     }, [field1Value, conversionRate]);
+
+    useEffect(() => {
+        // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
+        // updated has changed. This allows them to see when a transaction completes by looking at the balance output.
+        // It only updates the balance field in the currency state to prevent this hook from triggering the 'conversionRate' hook.
+
+        const currencyTimeout = setTimeout(() => {
+            console.log("Checking balances...")
+
+            if (currency1) {
+                getTokenDate(account, currency1.address, signer)
+                    .then(data => {
+                        setCurrency1({
+                            ...currency1,
+                            balance: data.balance,
+                        })
+                    })
+            }
+            if (currency2) {
+                getTokenDate(account, currency2.address, signer)
+                    .then(data => {
+                        setCurrency2({
+                            ...currency2,
+                            balance: data.balance,
+                        })
+                    })
+            }
+        }, 10000);
+
+        return () => clearTimeout(currencyTimeout);
+    })
+
+    useEffect(() => {
+        // This hook will run when the component first mounts, it can be useful to put logic to populate variables here
+
+        getAccount().then(account => {
+            setAccount(account);
+        })
+    })
 
     return (
         <div>
@@ -246,7 +311,7 @@ function CurrencySwapper(props) {
 
                         <hr className={classes.hr}/>
 
-                        <Button color="primary" size="large" variant="contained" disabled={!isButtonEnabled()}>
+                        <Button color="primary" size="large" variant="contained" onClick={swap} disabled={!isButtonEnabled()}>
                             <LoopIcon/>
                             Swap
                         </Button>
