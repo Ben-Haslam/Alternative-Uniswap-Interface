@@ -40,7 +40,7 @@ class Liquidity extends _App {
     this.loadBlockchainData();
   }
 
-  async addLiquidity() {
+  async addLiquidity(Token1, Token2) {
     const amountInA = ethers.utils.parseEther(this.state.amountInA.toString());
     const amountInB = ethers.utils.parseEther(this.state.amountInB.toString());
 
@@ -54,12 +54,12 @@ class Liquidity extends _App {
     const time = Math.floor(Date.now() / 1000) + 200000;
     const deadline = ethers.BigNumber.from(time);
 
-    await this.state.TokenA.approve(this.state.Router_address, amountInA);
-    await this.state.TokenB.approve(this.state.Router_address, amountInB);
+    await Token1.approve(this.state.Router_address, amountInA);
+    await Token2.approve(this.state.Router_address, amountInB);
 
     await this.state.Router.addLiquidity(
-      this.state._TokenA_address,
-      this.state._TokenB_address,
+      Token1.address,
+      Token2.address,
       amountInA,
       amountInB,
       amountAMin,
@@ -69,7 +69,7 @@ class Liquidity extends _App {
     );
   }
 
-  async addLiquidityTest() {
+  async addLiquidityTest(Token1, Token2) {
     const amountInA = ethers.utils.parseEther(this.state.amountInA.toString());
     const amountInB = ethers.utils.parseEther(this.state.amountInB.toString());
 
@@ -83,11 +83,9 @@ class Liquidity extends _App {
     const time = Math.floor(Date.now() / 1000) + 200000;
     const deadline = ethers.BigNumber.from(time);
 
-    console.log("Balls");
-
     await this.state.Router.callStatic.addLiquidity(
-      this.state._TokenA_address,
-      this.state._TokenB_address,
+      Token1.address,
+      Token2.address,
       amountInA,
       amountInB,
       amountAMin,
@@ -111,9 +109,35 @@ class Liquidity extends _App {
       this.setState({ Liquidity_transfer: [liquidity0, liquidity1, liquidity2] });
 
     });
-
-
   }
+
+  // async removeLiquidity() {
+
+  //   const amountAMin = ethers.utils.parseEther(
+  //     this.state.amountAMin.toString()
+  //   );
+  //   const amountBMin = ethers.utils.parseEther(
+  //     this.state.amountBMin.toString()
+  //   );
+
+  //   const time = Math.floor(Date.now() / 1000) + 200000;
+  //   const deadline = ethers.BigNumber.from(time);
+
+  //   // Somehow get and display liquidity tokens
+
+  //   // Approve liquidity tokens
+
+  //   await this.state.Router.addLiquidity(
+  //     this.state._TokenA_address,
+  //     this.state._TokenB_address,
+  //     liquidity_tokens,
+  //     amountAMin,
+  //     amountBMin,
+  //     this.state.account,
+  //     deadline
+  //   );
+  // }
+
 
   handleSubmit = {
     submitA: (e) => {
@@ -128,12 +152,12 @@ class Liquidity extends _App {
 
     deployLiquidityTest: (e) => {
       e.preventDefault();
-      this.addLiquidityTest();
+      this.addLiquidityTest(this.state.TokenA, this.state.TokenB);
     },
 
     deployLiquidity: (e) => {
       e.preventDefault();
-      this.addLiquidity();
+      this.addLiquidity(this.state.TokenA, this.state.TokenB);
     },
 
     getReserves: (e) => {

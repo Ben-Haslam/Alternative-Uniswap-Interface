@@ -40,8 +40,6 @@ class Swap extends _App {
 
   componentWillMount() {
     this.loadBlockchainData();
-    let A = 100.01;
-    console.log(A.toFixed(1));
   }
 
   async SwapTokenforToken(Token1, Token2, _amountIn, _amount_out) {
@@ -60,27 +58,6 @@ class Swap extends _App {
       this.state.account,
       deadline
     );
-  }
-
-  async SwapTokenforTokenTest(Token1, Token2, _amountIn, _amount_out) {
-    const amountIn = ethers.utils.parseEther(_amountIn.toString());
-    const amountOut = ethers.utils.parseEther(_amount_out.toString());
-    await Token1.approve(this.state.Router_address, amountIn);
-
-    const tokens = [Token1.address, Token2.address];
-    const time = Math.floor(Date.now() / 1000) + 200000;
-    const deadline = ethers.BigNumber.from(time);
-
-    await this.state.Router.callStatic.swapExactTokensForTokens(
-      amountIn,
-      amountOut,
-      tokens,
-      this.state.account,
-      deadline
-    ).then((values) => {
-      console.log(values);
-
-    });
   }
 
   async SwapTokenforEth(Token1, Token2, _amountIn, _amount_out) {
@@ -104,13 +81,21 @@ class Swap extends _App {
   async getSwap(_amount_in, tokens) {
     if (this.state.TokenA !== undefined && this.state.TokenB !== undefined) {
       const amount_in = ethers.utils.parseEther(_amount_in);
-      const amount_out = await this.state.Router.getAmountsOut(
+      // Find amount out for token 0 -> token 1
+      const amount_out_1 = await this.state.Router.getAmountsOut(
         amount_in,
-        tokens
+        [tokens[0], tokens[1]]
       );
-      const amount_out0 = ethers.utils.formatEther(amount_out[0]);
-      const amount_out1 = ethers.utils.formatEther(amount_out[1]);
-      const amount_out2 = ethers.utils.formatEther(amount_out[2]);
+      // Find amount out for token 0 -> token 2
+      const amount_out_2 = await this.state.Router.getAmountsOut(
+        amount_in,
+        [tokens[0], tokens[2]]
+      );
+
+      const amount_out0 = ethers.utils.formatEther(amount_in);
+      const amount_out1 = ethers.utils.formatEther(amount_out_1[1]);
+      const amount_out2 = ethers.utils.formatEther(amount_out_2[1]);
+
       const amount_out_A = [amount_out0, amount_out1, amount_out2];
       return amount_out_A;
     }
