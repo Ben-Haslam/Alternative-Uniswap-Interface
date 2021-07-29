@@ -38,6 +38,14 @@ export function getFactory(address, signer) {
   );
 }
 
+export async function getAccount() {
+  const accounts = await window.ethereum.request({
+    method: "eth_requestAccounts",
+  });
+
+  return accounts[0];
+}
+
 export async function getConversionRate(router, token1_address, token2_address) {
   try {
     const amount_out = await router.getAmountsOut(ethers.utils.parseEther("1"), [token1_address, token2_address]);
@@ -49,15 +57,11 @@ export async function getConversionRate(router, token1_address, token2_address) 
   }
 }
 
-export async function getTokenDate(address, signer) {
+export async function getTokenDate(account, address, signer) {
   try {
     const token = new Contract(address, ERC20.abi, signer);
 
-    const accounts = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
-
-    const balance0 = await token.balanceOf(accounts[0]);
+    const balance0 = await token.balanceOf(account);
     const balance1 = ethers.utils.formatEther(balance0);
     const symbol = await token.symbol();
 
@@ -79,6 +83,23 @@ export function doesTokenExist(address, signer) {
   catch (err) {
     return false
   }
+}
+
+export async function swapTokenForToken(address1, address2, amount, router, account) {
+  const tokens = [address1, address2];
+  const time = Math.floor(Date.now() / 1000) + 200000;
+  const deadline = ethers.BigNumber.from(time);
+
+  const amountIn = ethers.utils.parseEther(amount.toString());
+  const amountOut = await router.callStatic.getAmountsOut(amountIn, tokens);
+
+  await router.swapExactTokensForTokens(
+      amountIn,
+      amountOut[1],
+      tokens,
+      account,
+      deadline
+  );
 }
 
 export class _App extends Component {
