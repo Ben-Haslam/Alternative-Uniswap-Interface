@@ -12,7 +12,7 @@ import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import CloseIcon from '@material-ui/icons/Close';
 import CurrencyButton from "./CurrencyButton";
-import {doesTokenExist} from "../ethereum";
+import {doesTokenExist} from "../ethereumFunctions";
 import PropTypes from "prop-types";
 import * as COLORS from "@material-ui/core/colors"
 import * as COINS from '../constants/coins';

@@ -21,7 +21,7 @@ import {
     getBalanceAndSymbol,
     getWeth,
     swapCurrency
-} from "../ethereum";
+} from "../ethereumFunctions";
 import CurrencyField from "./CurrencyField";
 import CurrencyDialog from "./CurrencyDialog";
 import * as COINS from "../constants/coins";
