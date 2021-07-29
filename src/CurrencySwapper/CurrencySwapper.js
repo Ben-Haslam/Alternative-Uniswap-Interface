@@ -9,8 +9,8 @@ import {
     Typography,
 } from "@material-ui/core";
 import SwapVerticalCircleIcon from '@material-ui/icons/SwapVerticalCircle';
+import { useSnackbar } from "notistack";
 import LoopIcon from '@material-ui/icons/Loop';
-import CurrencyDialog from "./CurrencyDialog";
 import {
     getAccount,
     getConversionRate,
@@ -23,6 +23,7 @@ import {
     swapTokenForToken
 } from "../ethereum";
 import CurrencyField from "./CurrencyField";
+import CurrencyDialog from "./CurrencyDialog";
 
 
 const styles = (theme) => ({
@@ -58,6 +59,7 @@ const useStyles = makeStyles(styles);
 
 function CurrencySwapper(props) {
     const classes = useStyles();
+    const { enqueueSnackbar } = useSnackbar();
 
     // Stores a record of whether their respective dialog window is open
     const [dialog1Open, setDialog1Open] = React.useState(false);
@@ -125,7 +127,7 @@ function CurrencySwapper(props) {
     const swap = () => {
         console.log("Attempting to swap tokens...")
 
-        swapTokenForToken(
+        let promise = swapTokenForToken(
             currency1.address,
             currency2.address,
             parseFloat(field1Value),
@@ -133,7 +135,17 @@ function CurrencySwapper(props) {
             account,
             signer,
             provider
-        ). then(() => console.log("Transfer complete"))
+        );
+
+        promise
+            .then(() => {
+                // If the transaction was successful, we clear to input to make sure the user doesn't accidental redo the transfer
+                setField1Value("");
+                enqueueSnackbar("Transaction Successful", {variant: "success"});
+            })
+            .catch((e) => {
+                enqueueSnackbar("Transaction Failed (" + e.message + ")", {variant: "error", autoHideDuration: 10000});
+            })
     }
 
     // Called when the dialog window for currency1 exits
@@ -182,6 +194,11 @@ function CurrencySwapper(props) {
         }
     }
 
+    // The lambdas within these useEffects will be called when a particular dependency is updated. These dependencies
+    // are defined in the array of variables passed to the function after the lambda expression. If there are no dependencies
+    // the lambda will only ever be called when the component mounts. These are very useful for calculating new values
+    // after a particular state change, for example, calculating the new exchange rate whenever the addresses
+    // of the two currencies change.
     useEffect(() => {
         // This hook is called when either of the state variables `currency1.address` or `currency2.address` change.
         // It attempts to calculate and set the state variable `conversionRate`

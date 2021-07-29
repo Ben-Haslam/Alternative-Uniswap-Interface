@@ -7,16 +7,19 @@ import Liquidity from "./Liquidity";
 import NarBar from "./NavBar/NavBar";
 import CurrencySwapper from "./CurrencySwapper/CurrencySwapper"
 import { Route, Link } from "react-router-dom";
+import {SnackbarProvider} from "notistack";
 
 function App() {
-  return (
-    <div className="App">
-      <NarBar />
-      <Route exact path="/uniswap-react/" component={Swap} />
-      <Route exact path="/uniswap-react/swap-beta" component={CurrencySwapper} />
-      <Route exact path="/uniswap-react/liquidity" component={Liquidity} />
-    </div>
-  );
+    return (
+        <div className="App">
+            <SnackbarProvider maxSnack={3}>
+                <NarBar />
+                <Route exact path="/uniswap-react/" component={Swap} />
+                <Route exact path="/uniswap-react/swap-beta" component={CurrencySwapper} />
+                <Route exact path="/uniswap-react/liquidity" component={Liquidity} />
+            </SnackbarProvider>
+        </div>
+    );
 }
 
 export default App;
