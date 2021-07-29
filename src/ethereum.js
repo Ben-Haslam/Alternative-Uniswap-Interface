@@ -93,7 +93,10 @@ export async function swapTokenForToken(address1, address2, amount, router, acco
   const amountIn = ethers.utils.parseEther(amount.toString());
   const amountOut = await router.callStatic.getAmountsOut(amountIn, tokens);
 
-  await router.swapExactTokensForTokens(
+  const token = new Contract(address1, ERC20.abi, getSigner(getProvider()))
+  await token.approve(router.address, amountIn);
+
+  await router.callStatic.swapExactTokensForTokens(
       amountIn,
       amountOut[1],
       tokens,
