@@ -123,14 +123,12 @@ class Swap extends _App {
   }
 
   handleSubmit = {
-    submitA: (e) => {
-      e.preventDefault();
-      this.getTokenAData(this.state._TokenA_address);
+    submitA: (address) => {
+      this.getTokenAData(address);
     },
 
-    submitB: (e) => {
-      e.preventDefault();
-      this.getTokenBData(this.state._TokenB_address);
+    submitB: (address) => {
+      this.getTokenBData(address);
     },
 
     submitSwap: (e) => {
@@ -289,17 +287,15 @@ class Swap extends _App {
           <div className="container">
             <h4> Token A</h4>
 
-            <form class="myform" name="SubmitA" onSubmit={this.handleSubmit.submitA}>
-              <Button
-                  color="primary"
-                  onClick={this.selectTokenEvent((address) => this.setState({_TokenA_address: address}))}
-              >
-                Select Token
-              </Button>
-
-
-              <input type="submit" value="Submit" />
-            </form>
+            <Button
+                color="primary"
+                onClick={this.selectTokenEvent((address) => {
+                  this.setState({_TokenA_address: address});
+                  this.handleSubmit.submitA(address);
+                })}
+            >
+              Select Token
+            </Button>
 
             <p class="Token_message" id="TokenA_message"></p>
             <p class="Token_message"> {this.state.TokenA_balance}</p>
@@ -310,19 +306,15 @@ class Swap extends _App {
           <div className="container">
             <h4> Token B</h4>
 
-            <form
-              className="myform"
-              name="SubmitB"
-              onSubmit={this.handleSubmit.submitB}
-            >
-              <input
-                type="text"
-                name="_TokenB_address"
-                placeholder="enter token address"
-                onChange={this.handleInputChange}
-              />
-              <input type="submit" value="Submit" />
-            </form>
+              <Button
+                  color="primary"
+                  onClick={this.selectTokenEvent((address) => {
+                    this.setState({_TokenB_address: address});
+                    this.handleSubmit.submitB(address);
+                  })}
+              >
+                Select Token
+              </Button>
 
             <p className="Token_message" id="TokenB_message"></p>
             <p className="Token_message"> {this.state.TokenB_balance}</p>
