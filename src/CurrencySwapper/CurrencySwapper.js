@@ -24,7 +24,7 @@ import {
 } from "../ethereumFunctions";
 import CurrencyField from "./CurrencyField";
 import CurrencyDialog from "./CurrencyDialog";
-import * as COINS from "../constants/coins";
+import LoadingButton from "../Components/LoadingButton";
 
 const styles = (theme) => ({
     paperContainer: {
@@ -92,6 +92,9 @@ function CurrencySwapper(props) {
     const [weth, setWeth] = React.useState(getWeth("0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF", signer));
     const [factory, setFactory] = React.useState(getFactory("0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116", signer));
 
+    // Controls the loading button
+    const [loading, setLoading] = React.useState(false);
+
     // Switches the top and bottom currencies, this is called when users hit the swap button or select the opposite
     // token in the dialog (e.g. if currency1 is TokenA and the user selects TokenB when choosing currency2)
     const switchFields = () => {
@@ -126,6 +129,7 @@ function CurrencySwapper(props) {
 
     const swap = () => {
         console.log("Attempting to swap tokens...")
+        setLoading(true);
 
         swapCurrency(
             currency1.address,
@@ -137,11 +141,14 @@ function CurrencySwapper(props) {
             signer
         )
             .then(() => {
+                setLoading(false);
+
                 // If the transaction was successful, we clear to input to make sure the user doesn't accidental redo the transfer
                 setField1Value("");
                 enqueueSnackbar("Transaction Successful", {variant: "success"});
             })
             .catch((e) => {
+                setLoading(false);
                 enqueueSnackbar("Transaction Failed (" + e.message + ")", {variant: "error", autoHideDuration: 10000});
             })
     }
@@ -324,10 +331,16 @@ function CurrencySwapper(props) {
 
                         <hr className={classes.hr}/>
 
-                        <Button color="primary" size="large" variant="contained" onClick={swap} disabled={!isButtonEnabled()}>
+                        <LoadingButton
+                            loading={loading}
+                            valid={isButtonEnabled()}
+                            success={false}
+                            fail={false}
+                            onClick={swap}
+                        >
                             <LoopIcon/>
                             Swap
-                        </Button>
+                        </LoadingButton>
                     </Grid>
                 </Paper>
             </Container>
