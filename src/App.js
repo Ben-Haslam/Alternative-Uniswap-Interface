@@ -15,10 +15,10 @@ function App() {
         <div className="App">
             <SnackbarProvider maxSnack={3}>
                 <NarBar />
-                <Route exact path="/uniswap-react/" component={Swap} />
-                <Route exact path="/uniswap-react/swap-beta" component={CurrencySwapper} />
+                {/* <Route exact path="/uniswap-react/" component={Swap} /> */}
+                <Route exact path="/uniswap-react/" component={CurrencySwapper} />
                 <Route exact path="/uniswap-react/liquidity-beta" component={LiquidityDeployer} />
-                <Route exact path="/uniswap-react/liquidity" component={Liquidity} />
+                {/* <Route exact path="/uniswap-react/liquidity" component={Liquidity} /> */}
             </SnackbarProvider>
         </div>
     );
