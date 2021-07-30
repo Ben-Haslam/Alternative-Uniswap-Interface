@@ -17,3 +17,4 @@ export const TOKEN_B = {
 }
 
 export const ALL = [AUTONITY, TOKEN_A, TOKEN_B];
+export const ALL_WITHOUT_AUTONITY = [TOKEN_A, TOKEN_B];
