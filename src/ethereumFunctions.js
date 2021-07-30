@@ -173,3 +173,42 @@ export async function getReserves(address1, address2, factory, signer) {
         await pair.token1() === address2 ? results[1] : results[0],
     ]
 }
+
+export async function addLiquidity(address1, address2, amount1, amount2, amount1Min, amount2Min, routerContract, account, signer) {
+    const amountInA = ethers.utils.parseEther(amount1.toString());
+    const amountInB = ethers.utils.parseEther(amount2.toString());
+
+    const amountAMin = ethers.utils.parseEther(amount1Min.toString());
+    const amountBMin = ethers.utils.parseEther(amount2Min.toString());
+
+    const time = Math.floor(Date.now() / 1000) + 200000;
+    const deadline = ethers.BigNumber.from(time);
+
+    const token1 = new Contract(address1, ERC20.abi, signer)
+    const token2 = new Contract(address2, ERC20.abi, signer)
+
+    await token1.approve(routerContract.address, amountInA);
+    await token2.approve(routerContract.address, amountInB);
+
+    console.log([
+        address1,
+        address2,
+        Number(amountInA),
+        Number(amountInB),
+        Number(amountAMin),
+        Number(amountBMin),
+        account,
+        deadline
+    ])
+
+    await routerContract.addLiquidity(
+        address1,
+        address2,
+        amountInA,
+        amountInB,
+        amountAMin,
+        amountBMin,
+        account,
+        deadline
+    );
+}
