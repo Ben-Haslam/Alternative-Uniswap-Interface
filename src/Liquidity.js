@@ -2,11 +2,17 @@ import React from "react";
 import "./App.css";
 import { ethers } from "ethers";
 import _App from "./ethereum";
+import CurrencyDialog from "./CurrencySwapper/CurrencyDialog";
+import {Button} from "@material-ui/core";
+import * as COINS from './constants/coins';
 
 class Liquidity extends _App {
   constructor(props) {
     super(props);
     this.state = {
+      dialog1Open: false,
+      dialog2Open: false,
+
       account: "",
       provider: undefined,
       signer: undefined,
@@ -140,14 +146,12 @@ class Liquidity extends _App {
 
 
   handleSubmit = {
-    submitA: (e) => {
-      e.preventDefault();
-      this.getTokenAData(this.state._TokenA_address);
+    submitA: (address) => {
+      this.getTokenAData(address);
     },
 
-    submitB: (e) => {
-      e.preventDefault();
-      this.getTokenBData(this.state._TokenB_address);
+    submitB: (address) => {
+      this.getTokenBData(address);
     },
 
     deployLiquidityTest: (e) => {
@@ -183,9 +187,28 @@ class Liquidity extends _App {
     });
   };
 
+  onToken1Selected = (address) => {
+    this.setState({ dialog1Open: false })
+    if (address) {
+      this.setState({ _TokenA_address: address });
+      this.handleSubmit.submitA(address);
+    }
+  }
+
+  onToken2Selected = (address) => {
+    this.setState({ dialog2Open: false })
+    if (address) {
+      this.setState({ _TokenB_address: address });
+      this.handleSubmit.submitB(address);
+    }
+  }
+
   render() {
     return (
       <div>
+        <CurrencyDialog open={this.state.dialog1Open} coins={COINS.ALL_WITHOUT_AUTONITY} onClose={this.onToken1Selected.bind(this)}/>
+        <CurrencyDialog open={this.state.dialog2Open} coins={COINS.ALL_WITHOUT_AUTONITY} onClose={this.onToken2Selected.bind(this)}/>
+
         <div className="outer">
           <div className="container">
             <h4> Deploy liquidity</h4>
@@ -199,19 +222,12 @@ class Liquidity extends _App {
           <div className="container">
             <h4> Token A</h4>
 
-            <form
-              class="myform"
-              name="SubmitA"
-              onSubmit={this.handleSubmit.submitA}
+            <Button
+                color="primary"
+                onClick={() => this.setState({dialog1Open: true})}
             >
-              <input
-                type="text"
-                name="_TokenA_address"
-                placeholder="enter token address"
-                onChange={this.handleInputChange}
-              />
-              <input type="submit" value="Submit" />
-            </form>
+              Select Token
+            </Button>
 
             <p class="Token_message" id="TokenA_message"></p>
             <p class="Token_message"> {this.state.TokenA_balance}</p>
@@ -223,19 +239,12 @@ class Liquidity extends _App {
           <div className="container">
             <h4> Token B</h4>
 
-            <form
-              className="myform"
-              name="SubmitB"
-              onSubmit={this.handleSubmit.submitB}
+            <Button
+                color="primary"
+                onClick={() => this.setState({dialog2Open: true})}
             >
-              <input
-                type="text"
-                name="_TokenB_address"
-                placeholder="enter token address"
-                onChange={this.handleInputChange}
-              />
-              <input type="submit" value="Submit" />
-            </form>
+              Select Token
+            </Button>
 
             <p className="Token_message" id="TokenB_message"></p>
             <p className="Token_message"> {this.state.TokenB_balance}</p>

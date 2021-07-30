@@ -1,5 +1,6 @@
-import { ethers, Contract } from "ethers";
-import { Component } from "react";
+import {Contract, ethers} from "ethers";
+import {Component} from "react";
+
 const ROUTER = require("./build/UniswapV2Router02.json");
 const ERC20 = require("./build/ERC20.json");
 const FACTORY = require("./build/IUniswapV2Factory.json");
@@ -21,21 +22,21 @@ export class _App extends Component {
     this.setState({ balance: balance_1 });
 
     const Router = new Contract(
-      this.state.Router_address,
-      ROUTER.abi,
-      this.state.signer
+        this.state.Router_address,
+        ROUTER.abi,
+        this.state.signer
     );
 
     const Weth = new Contract(
-      this.state.Weth_address,
-      ERC20.abi,
-      this.state.signer
+        this.state.Weth_address,
+        ERC20.abi,
+        this.state.signer
     );
 
     const Factory = new Contract(
-      this.state.Factory_address,
-      FACTORY.abi,
-      this.state.provider
+        this.state.Factory_address,
+        FACTORY.abi,
+        this.state.provider
     );
 
     this.setState({ Router: Router });
@@ -54,10 +55,10 @@ export class _App extends Component {
       this.setState({ TokenA_balance: TokenA_balance_1 });
       this.setState({ TokenA: TokenA });
       document.getElementById("TokenA_message").innerHTML =
-        TokenA_symbol.concat(" balance: ");
+          TokenA_symbol.concat(" balance: ");
     } catch (err) {
       document.getElementById("TokenA_message").innerHTML =
-        "Error: Please enter a valid token address";
+          "Error: Please enter a valid token address";
     }
   }
 
@@ -72,10 +73,10 @@ export class _App extends Component {
       this.setState({ TokenB_balance: TokenB_balance_1 });
       this.setState({ TokenB: TokenB });
       document.getElementById("TokenB_message").innerHTML =
-        TokenB_symbol.concat(" balance: ");
+          TokenB_symbol.concat(" balance: ");
     } catch (err) {
       document.getElementById("TokenB_message").innerHTML =
-        "Error: Please enter a valid token address";
+          "Error: Please enter a valid token address";
     }
   }
 
@@ -88,10 +89,10 @@ export class _App extends Component {
       const reserves_BN = await pair.getReserves();
 
       const reserves0 = Number(
-        ethers.utils.formatEther(reserves_BN[0])
+          ethers.utils.formatEther(reserves_BN[0])
       ).toFixed(2);
       const reserves1 = Number(
-        ethers.utils.formatEther(reserves_BN[1])
+          ethers.utils.formatEther(reserves_BN[1])
       ).toFixed(2);
 
       return [reserves0, reserves1];
