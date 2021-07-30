@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import _App from "./ethereum";
 import CurrencyDialog from "./CurrencySwapper/CurrencyDialog";
 import {Button} from "@material-ui/core";
+import * as COINS from './constants/coins';
 
 class Liquidity extends _App {
   constructor(props) {
@@ -178,8 +179,8 @@ class Liquidity extends _App {
   render() {
     return (
       <div>
-        <CurrencyDialog open={this.state.dialog1Open} onClose={this.onToken1Selected.bind(this)}/>
-        <CurrencyDialog open={this.state.dialog2Open} onClose={this.onToken2Selected.bind(this)}/>
+        <CurrencyDialog open={this.state.dialog1Open} coins={COINS.ALL_WITHOUT_AUTONITY} onClose={this.onToken1Selected.bind(this)}/>
+        <CurrencyDialog open={this.state.dialog2Open} coins={COINS.ALL_WITHOUT_AUTONITY} onClose={this.onToken2Selected.bind(this)}/>
 
         <div className="outer">
           <div className="container">

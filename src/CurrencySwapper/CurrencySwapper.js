@@ -25,6 +25,7 @@ import {
 import CurrencyField from "./CurrencyField";
 import CurrencyDialog from "./CurrencyDialog";
 import LoadingButton from "../Components/LoadingButton";
+import * as COINS from '../constants/coins';
 
 const styles = (theme) => ({
     paperContainer: {
@@ -301,8 +302,8 @@ function CurrencySwapper(props) {
     return (
         <div>
             {/* Dialog Windows */}
-            <CurrencyDialog open={dialog1Open} onClose={onToken1Selected} signer={signer}/>
-            <CurrencyDialog open={dialog2Open} onClose={onToken2Selected} signer={signer}/>
+            <CurrencyDialog open={dialog1Open} onClose={onToken1Selected} coins={COINS.ALL} signer={signer}/>
+            <CurrencyDialog open={dialog2Open} onClose={onToken2Selected} coins={COINS.ALL} signer={signer}/>
 
             {/* Currency Swapper */}
             <Container maxWidth="xs">

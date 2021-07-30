@@ -15,7 +15,6 @@ import CurrencyButton from "./CurrencyButton";
 import {doesTokenExist} from "../ethereumFunctions";
 import PropTypes from "prop-types";
 import * as COLORS from "@material-ui/core/colors"
-import * as COINS from '../constants/coins';
 
 const styles = (theme) => ({
     dialogContainer: {
@@ -78,7 +77,8 @@ const DialogActions = withStyles((theme) => ({
 
 CurrencyDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
-    open: PropTypes.bool.isRequired
+    open: PropTypes.bool.isRequired,
+    coins: PropTypes.array.isRequired
 }
 
 export default function CurrencyDialog(props) {
@@ -89,7 +89,7 @@ export default function CurrencyDialog(props) {
     // user closes the dialog without selecting anything), or will be a string containing the address of a currency.
 
     const classes = useStyles();
-    const {onClose, open, signer, ...others} = props;
+    const {onClose, open, coins, signer, ...others} = props;
 
     const [address, setAddress] = React.useState("");
     const [error, setError] = React.useState("");
@@ -144,7 +144,7 @@ export default function CurrencyDialog(props) {
                     <Grid item className={classes.currencyList}>
                         <Grid container direction="column">
                             {/* Maps all of the currencies in the constants file to buttons */}
-                            {COINS.ALL.map((coin, index) => (
+                            {coins.map((coin, index) => (
                                 <Grid item key={index} xs={12}>
                                     <CurrencyButton
                                         coinName={coin.name}
