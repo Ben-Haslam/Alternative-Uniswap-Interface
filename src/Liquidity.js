@@ -75,6 +75,32 @@ class Liquidity extends _App {
     );
   }
 
+  async addLiquidityETH(Token1) {
+    const amountInT = ethers.utils.parseEther(this.state.amountInA.toString());
+    const amountInAUT = ethers.utils.parseEther(this.state.amountInB.toString());
+
+    const amountTMin = ethers.utils.parseEther("0");
+    const amountAUTMin = ethers.utils.parseEther("0");
+
+    const time = Math.floor(Date.now() / 1000) + 200000;
+    const deadline = ethers.BigNumber.from(time);
+
+    await Token1.approve(this.state.Router_address, amountInT);
+    await this.state.Weth.approve(this.state.Router_address, amountInAUT);
+
+    await this.state.Router.addLiquidityETH(
+      Token1.address,
+      amountInT,
+      amountTMin,
+      amountAUTMin,
+      this.state.account,
+      deadline,
+      {value: amountInAUT}
+    );
+  }
+
+
+
   async addLiquidityTest(Token1, Token2) {
     const amountInA = ethers.utils.parseEther(this.state.amountInA.toString());
     const amountInB = ethers.utils.parseEther(this.state.amountInB.toString());

@@ -201,14 +201,41 @@ export async function addLiquidity(address1, address2, amount1, amount2, amount1
         deadline
     ])
 
-    await routerContract.addLiquidity(
-        address1,
-        address2,
-        amountInA,
-        amountInB,
-        amountAMin,
-        amountBMin,
-        account,
-        deadline
-    );
+    if (address1 === COINS.AUTONITY.address) {
+        // Eth + Token
+        await routerContract.addLiquidityETH(
+            address2,
+            amountInB,
+            amountBMin,
+            amountAMin,
+            account,
+            deadline,
+            {value: amountInA}
+          );
+    }
+    else if (address2 === COINS.AUTONITY.address) {
+        // Token + Eth
+        await routerContract.addLiquidityETH(
+            address1,
+            amountInA,
+            amountAMin,
+            amountBMin,
+            account,
+            deadline,
+            {value: amountInB}
+          );
+    }
+    else {
+        // Token + Token
+        await routerContract.addLiquidity(
+            address1,
+            address2,
+            amountInA,
+            amountInB,
+            amountAMin,
+            amountBMin,
+            account,
+            deadline
+        );
+    }   
 }

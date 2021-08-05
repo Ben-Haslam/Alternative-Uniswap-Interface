@@ -274,8 +274,8 @@ function LiquidityDeployer(props) {
     return (
         <div>
             {/* Dialog Windows */}
-            <CurrencyDialog open={dialog1Open} onClose={onToken1Selected} coins={COINS.ALL_WITHOUT_AUTONITY} signer={signer}/>
-            <CurrencyDialog open={dialog2Open} onClose={onToken2Selected} coins={COINS.ALL_WITHOUT_AUTONITY} signer={signer}/>
+            <CurrencyDialog open={dialog1Open} onClose={onToken1Selected} coins={COINS.ALL} signer={signer}/>
+            <CurrencyDialog open={dialog2Open} onClose={onToken2Selected} coins={COINS.ALL} signer={signer}/>
 
             {/* Currency Swapper */}
             <Container maxWidth="xs">
