@@ -15,8 +15,13 @@ export const MenuItems = [
   //   cName: "nav-links",
   // },
   {
-    title: "Liquidity",
-    url: "/uniswap-react/liquidity-beta",
+    title: "Add Liquidity",
+    url: "/uniswap-react/add-liquidity",
+    cName: "nav-links",
+  },
+  {
+    title: "Remove Liquidity",
+    url: "/uniswap-react/remove-liquidity",
     cName: "nav-links",
   },
 ];

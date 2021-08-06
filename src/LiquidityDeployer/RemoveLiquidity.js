@@ -20,8 +20,11 @@ import {
   getReserves,
   addLiquidity,
   addLiquidityTest,
+  removeLiquidity,
 } from "../ethereumFunctions";
-import CurrencyField from "../CurrencySwapper/CurrencyField";
+import CurrencyField, {
+  CurrencyField_Reduced,
+} from "../CurrencySwapper/CurrencyField";
 import CurrencyDialog from "../CurrencySwapper/CurrencyDialog";
 import LoadingButton from "../Components/LoadingButton";
 import * as COINS from "../constants/coins";
@@ -56,7 +59,7 @@ const styles = (theme) => ({
 
 const useStyles = makeStyles(styles);
 
-function LiquidityDeployer(props) {
+function LiquidityRemover(props) {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -82,7 +85,6 @@ function LiquidityDeployer(props) {
 
   // Stores the current value of their respective text box
   const [field1Value, setField1Value] = React.useState("");
-  const [field2Value, setField2Value] = React.useState("");
 
   // Stores information for the Autonity Network
   const [provider, setProvider] = React.useState(getProvider());
@@ -104,13 +106,8 @@ function LiquidityDeployer(props) {
   // Switches the top and bottom currencies, this is called when users hit the swap button or select the opposite
   // token in the dialog (e.g. if currency1 is TokenA and the user selects TokenB when choosing currency2)
   const switchFields = () => {
-    let oldField1Value = field1Value;
-    let oldField2Value = field2Value;
-
     setCurrency1(currency2);
     setCurrency2(currency1);
-    setField1Value(oldField2Value);
-    setField2Value(oldField1Value);
     setReserves(reserves.reverse());
   };
 
@@ -118,9 +115,6 @@ function LiquidityDeployer(props) {
   const handleChange = {
     field1: (e) => {
       setField1Value(e.target.value);
-    },
-    field2: (e) => {
-      setField2Value(e.target.value);
     },
   };
 
@@ -146,34 +140,31 @@ function LiquidityDeployer(props) {
       currency1.address &&
       currency2.address &&
       validFloat.test(field1Value) &&
-      validFloat.test(field2Value) &&
-      parseFloat(field1Value) <= currency1.balance &&
-      parseFloat(field2Value) <= currency2.balance
+      parseFloat(field1Value) <= liquidity_tokens
     );
   };
 
   const deploy = () => {
-    console.log("Attempting to deploy liquidity...");
+    console.log("Attempting to remove liquidity...");
     setLoading(true);
 
-    addLiquidity(
+    removeLiquidity(
       currency1.address,
       currency2.address,
       parseFloat(field1Value),
-      parseFloat(field2Value),
       0,
       0,
       router,
       account,
-      signer
+      signer,
+      factory
     )
       .then(() => {
         setLoading(false);
 
         // If the transaction was successful, we clear to input to make sure the user doesn't accidental redo the transfer
         setField1Value("");
-        setField2Value("");
-        enqueueSnackbar("Deployment Successful", { variant: "success" });
+        enqueueSnackbar("Removal Successful", { variant: "success" });
       })
       .catch((e) => {
         setLoading(false);
@@ -256,20 +247,8 @@ function LiquidityDeployer(props) {
 
     if (isButtonEnabled()) {
       console.log("Trying to preview the liquidity deployment");
-
-      addLiquidityTest(
-        currency1.address,
-        currency2.address,
-        parseFloat(field1Value),
-        parseFloat(field2Value),
-        0,
-        0,
-        router,
-        account,
-        signer
-      );
     }
-  }, [currency1.address, currency2.address, field1Value, field2Value]);
+  }, [currency1.address, currency2.address, field1Value]);
 
   useEffect(() => {
     // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
@@ -344,7 +323,7 @@ function LiquidityDeployer(props) {
       <Container maxWidth="xs">
         <Paper className={classes.paperContainer}>
           <Typography variant="h5" className={classes.title}>
-            Deploy Liquidity
+            Remove Liquidity
           </Typography>
 
           <Grid container direction="column" alignItems="center" spacing={2}>
@@ -361,11 +340,9 @@ function LiquidityDeployer(props) {
             </Grid>
 
             <Grid item xs={12} className={classes.fullWidth}>
-              <CurrencyField
+              <CurrencyField_Reduced
                 activeField={true}
-                value={field2Value}
                 onClick={() => setDialog2Open(true)}
-                onChange={handleChange.field2}
                 symbol={
                   currency2.symbol !== undefined ? currency2.symbol : "Select"
                 }
@@ -437,4 +414,4 @@ function LiquidityDeployer(props) {
   );
 }
 
-export default LiquidityDeployer;
+export default LiquidityRemover;

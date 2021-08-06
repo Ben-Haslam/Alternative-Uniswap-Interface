@@ -177,7 +177,6 @@ export async function getReserves(
     const LiquidityTokens = Number(
       ethers.utils.formatEther(liquidityTokens_BN)
     ).toFixed(2);
-    console.log("Liquidity tokens:", LiquidityTokens);
 
     const reservesRaw = await pair.getReserves();
 
@@ -214,17 +213,17 @@ export async function addLiquidity(
   address2,
   amount1,
   amount2,
-  amount1Min,
-  amount2Min,
+  amount1min,
+  amount2min,
   routerContract,
   account,
   signer
 ) {
-  const amountInA = ethers.utils.parseEther(amount1.toString());
-  const amountInB = ethers.utils.parseEther(amount2.toString());
+  const amountIn1 = ethers.utils.parseEther(amount1.toString());
+  const amountIn2 = ethers.utils.parseEther(amount2.toString());
 
-  const amountAMin = ethers.utils.parseEther(amount1Min.toString());
-  const amountBMin = ethers.utils.parseEther(amount2Min.toString());
+  const amount1Min = ethers.utils.parseEther(amount1min.toString());
+  const amount2Min = ethers.utils.parseEther(amount2min.toString());
 
   const time = Math.floor(Date.now() / 1000) + 200000;
   const deadline = ethers.BigNumber.from(time);
@@ -232,16 +231,16 @@ export async function addLiquidity(
   const token1 = new Contract(address1, ERC20.abi, signer);
   const token2 = new Contract(address2, ERC20.abi, signer);
 
-  await token1.approve(routerContract.address, amountInA);
-  await token2.approve(routerContract.address, amountInB);
+  await token1.approve(routerContract.address, amountIn1);
+  await token2.approve(routerContract.address, amountIn2);
 
   console.log([
     address1,
     address2,
-    Number(amountInA),
-    Number(amountInB),
-    Number(amountAMin),
-    Number(amountBMin),
+    Number(amountIn1),
+    Number(amountIn2),
+    Number(amount1Min),
+    Number(amount2Min),
     account,
     deadline,
   ]);
@@ -250,33 +249,33 @@ export async function addLiquidity(
     // Eth + Token
     await routerContract.addLiquidityETH(
       address2,
-      amountInB,
-      amountBMin,
-      amountAMin,
+      amountIn2,
+      amount2Min,
+      amount1Min,
       account,
       deadline,
-      { value: amountInA }
+      { value: amountIn1 }
     );
   } else if (address2 === COINS.AUTONITY.address) {
     // Token + Eth
     await routerContract.addLiquidityETH(
       address1,
-      amountInA,
-      amountAMin,
-      amountBMin,
+      amountIn1,
+      amount1Min,
+      amount2Min,
       account,
       deadline,
-      { value: amountInB }
+      { value: amountIn2 }
     );
   } else {
     // Token + Token
     await routerContract.addLiquidity(
       address1,
       address2,
-      amountInA,
-      amountInB,
-      amountAMin,
-      amountBMin,
+      amountIn1,
+      amountIn2,
+      amount1Min,
+      amount2Min,
       account,
       deadline
     );
@@ -289,17 +288,17 @@ export async function addLiquidityTest(
   address2,
   amount1,
   amount2,
-  amount1Min,
-  amount2Min,
+  amount1min,
+  amount2min,
   routerContract,
   account,
   signer
 ) {
-  const amountInA = ethers.utils.parseEther(amount1.toString());
-  const amountInB = ethers.utils.parseEther(amount2.toString());
+  const amountIn1 = ethers.utils.parseEther(amount1.toString());
+  const amountIn2 = ethers.utils.parseEther(amount2.toString());
 
-  const amountAMin = ethers.utils.parseEther(amount1Min.toString());
-  const amountBMin = ethers.utils.parseEther(amount2Min.toString());
+  const amount1Min = ethers.utils.parseEther(amount1min.toString());
+  const amount2Min = ethers.utils.parseEther(amount2min.toString());
 
   const time = Math.floor(Date.now() / 1000) + 200000;
   const deadline = ethers.BigNumber.from(time);
@@ -309,12 +308,12 @@ export async function addLiquidityTest(
     await routerContract.callStatic
       .addLiquidityETH(
         address2,
-        amountInB,
-        amountBMin,
-        amountAMin,
+        amountIn2,
+        amount2Min,
+        amount1Min,
         account,
         deadline,
-        { value: amountInA }
+        { value: amountIn1 }
       )
       .then((values) => {
         console.log(values);
@@ -330,12 +329,12 @@ export async function addLiquidityTest(
     await routerContract.callStatic
       .addLiquidityETH(
         address1,
-        amountInA,
-        amountAMin,
-        amountBMin,
+        amountIn1,
+        amount1Min,
+        amount2Min,
         account,
         deadline,
-        { value: amountInB }
+        { value: amountIn2 }
       )
       .then((values) => {
         console.log(values);
@@ -353,10 +352,10 @@ export async function addLiquidityTest(
       .addLiquidity(
         address1,
         address2,
-        amountInA,
-        amountInB,
-        amountAMin,
-        amountBMin,
+        amountIn1,
+        amountIn2,
+        amount1Min,
+        amount2Min,
         account,
         deadline
       )
@@ -370,5 +369,84 @@ export async function addLiquidityTest(
           ethers.utils.formatEther(values[2])
         );
       });
+  }
+}
+
+// Function used to remove Liquidity from any pair of tokens or token-AUT
+// To work correctly, there needs to be 9 arguments:
+//    `address1` - An Ethereum address of the currency to recieve (either a token or AUT)
+//    `address2` - An Ethereum address of the currency to recieve (either a token or AUT)
+//    `liquidity_tokens` - A float or similar number representing the value of liquidity tokens you will burn to get tokens back
+//    `amount1Min` - A float or similar number representing the minimum of address1's currency to recieve
+//    `amount2Min` - A float or similar number representing the minimum of address2's currency to recieve
+//    `routerContract` - The router contract to carry out this trade
+//    `accountAddress` - An Ethereum address of the current user's account
+//    `provider` - The current provider
+//    `signer` - The current signer
+export async function removeLiquidity(
+  address1,
+  address2,
+  liquidity_tokens,
+  amount1min,
+  amount2min,
+  routerContract,
+  account,
+  signer,
+  factory
+) {
+  const liquidity = ethers.utils.parseEther(liquidity_tokens.toString());
+
+  const amount1Min = ethers.utils.parseEther(amount1min.toString());
+  const amount2Min = ethers.utils.parseEther(amount2min.toString());
+
+  const time = Math.floor(Date.now() / 1000) + 200000;
+  const deadline = ethers.BigNumber.from(time);
+
+  const pairAddress = await factory.getPair(address1, address2);
+  const pair = new Contract(pairAddress, PAIR.abi, signer);
+
+  await pair.approve(routerContract.address, liquidity);
+
+  console.log([
+    address1,
+    address2,
+    Number(liquidity),
+    Number(amount1Min),
+    Number(amount2Min),
+    account,
+    deadline,
+  ]);
+
+  if (address1 === COINS.AUTONITY.address) {
+    // Eth + Token
+    await routerContract.removeLiquidityETH(
+      address2,
+      liquidity,
+      amount2Min,
+      amount1Min,
+      account,
+      deadline
+    );
+  } else if (address2 === COINS.AUTONITY.address) {
+    // Token + Eth
+    await routerContract.addLiquidityETH(
+      address1,
+      liquidity,
+      amount1Min,
+      amount2Min,
+      account,
+      deadline
+    );
+  } else {
+    // Token + Token
+    await routerContract.addLiquidity(
+      address1,
+      address2,
+      liquidity,
+      amount1Min,
+      amount2Min,
+      account,
+      deadline
+    );
   }
 }
