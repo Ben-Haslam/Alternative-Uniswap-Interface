@@ -429,7 +429,7 @@ export async function removeLiquidity(
     );
   } else if (address2 === COINS.AUTONITY.address) {
     // Token + Eth
-    await routerContract.addLiquidityETH(
+    await routerContract.removeLiquidity(
       address1,
       liquidity,
       amount1Min,
@@ -439,7 +439,7 @@ export async function removeLiquidity(
     );
   } else {
     // Token + Token
-    await routerContract.addLiquidity(
+    await routerContract.removeLiquidity(
       address1,
       address2,
       liquidity,
