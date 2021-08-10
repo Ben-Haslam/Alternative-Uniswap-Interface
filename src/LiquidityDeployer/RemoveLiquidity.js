@@ -6,7 +6,7 @@ import {
   Paper,
   Typography,
 } from "@material-ui/core";
-import AccountBalanceIcon from "@material-ui/icons/AccountBalance";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { useSnackbar } from "notistack";
 import {
   getAccount,
@@ -397,7 +397,7 @@ function LiquidityRemover(props) {
           fail={false}
           onClick={deploy}
         >
-          <AccountBalanceIcon className={classes.buttonIcon} />
+          <ArrowDownwardIcon className={classes.buttonIcon} />
           Remove
         </LoadingButton>
       </Grid>

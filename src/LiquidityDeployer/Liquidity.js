@@ -18,6 +18,8 @@ const styles = (theme) => ({
     borderRadius: theme.spacing(2),
     padding: theme.spacing(1),
     paddingBottom: theme.spacing(3),
+    maxWidth: 700,
+    margin: "auto",
   },
   fullWidth: {
     width: "100%",
@@ -73,7 +75,7 @@ function Liquidity() {
 
   return (
     <div>
-      <Container maxWidth="xs">
+      <Container>
         <Paper className={classes.paperContainer}>
           <Typography
             variant="h5"

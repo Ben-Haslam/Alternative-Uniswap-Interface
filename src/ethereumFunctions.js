@@ -1,4 +1,5 @@
 import { Contract, ethers } from "ethers";
+import { func } from "prop-types";
 import * as COINS from "./constants/coins";
 
 const ROUTER = require("./build/UniswapV2Router02.json");
@@ -155,6 +156,24 @@ export async function swapCurrency(
   }
 }
 
+async function fetchReserves(address1, address2, pair) {
+  try {
+    const reservesRaw = await pair.getReserves();
+    let results = [
+      Number(ethers.utils.formatEther(reservesRaw[0])),
+      Number(ethers.utils.formatEther(reservesRaw[1])),
+    ];
+
+    return [
+      (await pair.token0()) === address1 ? results[0] : results[1],
+      (await pair.token1()) === address2 ? results[1] : results[0],
+    ];
+  } catch (err) {
+    console.log("no reserves yet");
+    return [0, 0];
+  }
+}
+
 // This function returns the reserves stored in a the liquidity pool between the currency of address1 and the currency
 // of address2. Some extra logic was needed to make sure that the results were returned in the correct order, as
 // `pair.getReserves()` would always return the reserves in the same order regardless of which order the addresses were.
@@ -172,28 +191,17 @@ export async function getReserves(
   const pairAddress = await factory.getPair(address1, address2);
   const pair = new Contract(pairAddress, PAIR.abi, signer);
 
-  try {
-    const liquidityTokens_BN = await pair.balanceOf(accountAddress);
-    const LiquidityTokens = Number(
-      ethers.utils.formatEther(liquidityTokens_BN)
-    ).toFixed(2);
+  const reservesRaw = await fetchReserves(address1, address2, pair);
+  const liquidityTokens_BN = await pair.balanceOf(accountAddress);
+  const LiquidityTokens = Number(
+    ethers.utils.formatEther(liquidityTokens_BN)
+  ).toFixed(2);
 
-    const reservesRaw = await pair.getReserves();
-
-    let results = [
-      Number(ethers.utils.formatEther(reservesRaw[0])).toFixed(2),
-      Number(ethers.utils.formatEther(reservesRaw[1])).toFixed(2),
-    ];
-
-    return [
-      (await pair.token0()) === address1 ? results[0] : results[1],
-      (await pair.token1()) === address2 ? results[1] : results[0],
-      LiquidityTokens,
-    ];
-  } catch (err) {
-    console.log("no reserves yet");
-    return [0, 0, 0];
-  }
+  return [
+    reservesRaw[0].toFixed(2),
+    reservesRaw[1].toFixed(2),
+    LiquidityTokens,
+  ];
 }
 
 // Function used to add Liquidity to any pair of tokens or token-AUT
@@ -305,28 +313,19 @@ export async function addLiquidityTest(
 
   if (address1 === COINS.AUTONITY.address) {
     // Eth + Token
-    await routerContract.callStatic
-      .addLiquidityETH(
-        address2,
-        amountIn2,
-        amount2Min,
-        amount1Min,
-        account,
-        deadline,
-        { value: amountIn1 }
-      )
-      .then((values) => {
-        console.log(values);
-        console.log("tokenA in: ", ethers.utils.formatEther(values[0]));
-        console.log("tokenB in: ", ethers.utils.formatEther(values[1]));
-        console.log(
-          "liquidity tokens out: ",
-          ethers.utils.formatEther(values[2])
-        );
-      });
+    const values = await routerContract.callStatic.addLiquidityETH(
+      address2,
+      amountIn2,
+      amount2Min,
+      amount1Min,
+      account,
+      deadline,
+      { value: amountIn1 }
+    );
+    // return ethers.utils.formatEther(values[2]);
   } else if (address2 === COINS.AUTONITY.address) {
     // Token + Eth
-    await routerContract.callStatic
+    const values = await routerContract.callStatic
       .addLiquidityETH(
         address1,
         amountIn1,
@@ -337,8 +336,6 @@ export async function addLiquidityTest(
         { value: amountIn2 }
       )
       .then((values) => {
-        console.log(values);
-        console.log(values);
         console.log("tokenA in: ", ethers.utils.formatEther(values[0]));
         console.log("tokenB in: ", ethers.utils.formatEther(values[1]));
         console.log(
@@ -346,9 +343,10 @@ export async function addLiquidityTest(
           ethers.utils.formatEther(values[2])
         );
       });
+    // return ethers.utils.formatEther(values[2]);
   } else {
     // Token + Token
-    await routerContract.callStatic
+    const values = await routerContract.callStatic
       .addLiquidity(
         address1,
         address2,
@@ -360,8 +358,6 @@ export async function addLiquidityTest(
         deadline
       )
       .then((values) => {
-        console.log(values);
-        console.log(values);
         console.log("tokenA in: ", ethers.utils.formatEther(values[0]));
         console.log("tokenB in: ", ethers.utils.formatEther(values[1]));
         console.log(
@@ -369,6 +365,7 @@ export async function addLiquidityTest(
           ethers.utils.formatEther(values[2])
         );
       });
+    // return ethers.utils.formatEther(values[2]);
   }
 }
 
@@ -448,5 +445,46 @@ export async function removeLiquidity(
       account,
       deadline
     );
+  }
+}
+
+const quote = (amountA, reserveA, reserveB) => {
+  const amountB = amountA * (reserveB / reserveA);
+  return amountB;
+};
+
+// Function used to get a quote of the liquidity addition
+//    `amountA_desired` - The prefered value of the first token that the user would like to deploy as liquidity
+//    `amountB_desired` - The prefered value of the second token that the user would like to deploy as liquidity
+//    `reserveA` - The liquidity reserves of the first token
+//    `reserveB` - The liquidity reserves of the second token
+export async function getQuote(
+  address1,
+  address2,
+  amountA_desired,
+  amountB_desired,
+  factory,
+  signer
+) {
+  const amountADesired = amountA_desired;
+  const amountBDesired = amountB_desired;
+
+  const pairAddress = await factory.getPair(address1, address2);
+  const pair = new Contract(pairAddress, PAIR.abi, signer);
+
+  const reservesRaw = await fetchReserves(address1, address2, pair); // Returns the reserves already formated as ethers
+  const reserveA = reservesRaw[0];
+  const reserveB = reservesRaw[1];
+
+  if (reserveA == 0 && reserveB == 0) {
+    return [amountADesired.toString(), amountBDesired.toString()];
+  } else {
+    const amountBOptimal = quote(amountADesired, reserveA, reserveB);
+    if (amountBOptimal <= amountBDesired) {
+      return [amountADesired.toString(), amountBOptimal.toString()];
+    } else {
+      const amountAOptimal = quote(amountBDesired, reserveB, reserveA);
+      return [amountAOptimal.toString(), amountBDesired.toString()];
+    }
   }
 }
