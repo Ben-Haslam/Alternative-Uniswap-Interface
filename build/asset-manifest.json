@@ -1,26 +1,26 @@
 {
   "files": {
-    "main.css": "/uniswap-react/static/css/main.91270fd0.chunk.css",
-    "main.js": "/uniswap-react/static/js/main.c69305a8.chunk.js",
-    "main.js.map": "/uniswap-react/static/js/main.c69305a8.chunk.js.map",
-    "runtime-main.js": "/uniswap-react/static/js/runtime-main.445bc0f2.js",
-    "runtime-main.js.map": "/uniswap-react/static/js/runtime-main.445bc0f2.js.map",
+    "main.css": "/uniswap-react/static/css/main.797d0e06.chunk.css",
+    "main.js": "/uniswap-react/static/js/main.413591be.chunk.js",
+    "main.js.map": "/uniswap-react/static/js/main.413591be.chunk.js.map",
+    "runtime-main.js": "/uniswap-react/static/js/runtime-main.2d4ca069.js",
+    "runtime-main.js.map": "/uniswap-react/static/js/runtime-main.2d4ca069.js.map",
     "static/css/2.3ab4f688.chunk.css": "/uniswap-react/static/css/2.3ab4f688.chunk.css",
-    "static/js/2.a5d65a43.chunk.js": "/uniswap-react/static/js/2.a5d65a43.chunk.js",
-    "static/js/2.a5d65a43.chunk.js.map": "/uniswap-react/static/js/2.a5d65a43.chunk.js.map",
-    "static/js/3.43a3a349.chunk.js": "/uniswap-react/static/js/3.43a3a349.chunk.js",
-    "static/js/3.43a3a349.chunk.js.map": "/uniswap-react/static/js/3.43a3a349.chunk.js.map",
+    "static/js/2.3d04e088.chunk.js": "/uniswap-react/static/js/2.3d04e088.chunk.js",
+    "static/js/2.3d04e088.chunk.js.map": "/uniswap-react/static/js/2.3d04e088.chunk.js.map",
+    "static/js/3.88662c50.chunk.js": "/uniswap-react/static/js/3.88662c50.chunk.js",
+    "static/js/3.88662c50.chunk.js.map": "/uniswap-react/static/js/3.88662c50.chunk.js.map",
     "index.html": "/uniswap-react/index.html",
     "static/css/2.3ab4f688.chunk.css.map": "/uniswap-react/static/css/2.3ab4f688.chunk.css.map",
-    "static/css/main.91270fd0.chunk.css.map": "/uniswap-react/static/css/main.91270fd0.chunk.css.map",
-    "static/js/2.a5d65a43.chunk.js.LICENSE.txt": "/uniswap-react/static/js/2.a5d65a43.chunk.js.LICENSE.txt",
+    "static/css/main.797d0e06.chunk.css.map": "/uniswap-react/static/css/main.797d0e06.chunk.css.map",
+    "static/js/2.3d04e088.chunk.js.LICENSE.txt": "/uniswap-react/static/js/2.3d04e088.chunk.js.LICENSE.txt",
     "static/media/logo.28418735.svg": "/uniswap-react/static/media/logo.28418735.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.445bc0f2.js",
+    "static/js/runtime-main.2d4ca069.js",
     "static/css/2.3ab4f688.chunk.css",
-    "static/js/2.a5d65a43.chunk.js",
-    "static/css/main.91270fd0.chunk.css",
-    "static/js/main.c69305a8.chunk.js"
+    "static/js/2.3d04e088.chunk.js",
+    "static/css/main.797d0e06.chunk.css",
+    "static/js/main.413591be.chunk.js"
   ]
 }

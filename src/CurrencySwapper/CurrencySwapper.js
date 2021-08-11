@@ -54,6 +54,9 @@ const styles = (theme) => ({
     overflow: "wrap",
     textAlign: "center",
   },
+  footer: {
+    marginTop: "285px",
+  },
 });
 
 const useStyles = makeStyles(styles);
@@ -420,6 +423,19 @@ function CurrencySwapper(props) {
           </Grid>
         </Paper>
       </Container>
+
+      <Grid
+        container
+        className={classes.footer}
+        direction="row"
+        justifyContent="center"
+        alignItems="flex-end"
+      >
+        <p>
+          Clearmatics Autonity Uniswap | Get AUT for use in the bakerloo testnet{" "}
+          <a href="https://faucet.bakerloo.autonity.network/">here</a>
+        </p>
+      </Grid>
     </div>
   );
 }
