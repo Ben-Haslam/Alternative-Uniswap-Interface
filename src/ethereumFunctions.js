@@ -426,7 +426,7 @@ export async function removeLiquidity(
     );
   } else if (address2 === COINS.AUTONITY.address) {
     // Token + Eth
-    await routerContract.removeLiquidity(
+    await routerContract.removeLiquidityETH(
       address1,
       liquidity,
       amount1Min,
@@ -454,21 +454,21 @@ const quote = (amountA, reserveA, reserveB) => {
 };
 
 // Function used to get a quote of the liquidity addition
+//    `address1` - An Ethereum address of the currency to recieve (either a token or AUT)
+//    `address2` - An Ethereum address of the currency to recieve (either a token or AUT)
 //    `amountA_desired` - The prefered value of the first token that the user would like to deploy as liquidity
 //    `amountB_desired` - The prefered value of the second token that the user would like to deploy as liquidity
-//    `reserveA` - The liquidity reserves of the first token
-//    `reserveB` - The liquidity reserves of the second token
-export async function getQuote(
+//    `factory` - The current factory
+//    `signer` - The current signer
+
+export async function quoteAddLiquidity(
   address1,
   address2,
-  amountA_desired,
-  amountB_desired,
+  amountADesired,
+  amountBDesired,
   factory,
   signer
 ) {
-  const amountADesired = amountA_desired;
-  const amountBDesired = amountB_desired;
-
   const pairAddress = await factory.getPair(address1, address2);
   const pair = new Contract(pairAddress, PAIR.abi, signer);
 
@@ -487,4 +487,36 @@ export async function getQuote(
       return [amountAOptimal.toString(), amountBDesired.toString()];
     }
   }
+}
+
+// Function used to get a quote of the liquidity removal
+//    `address1` - An Ethereum address of the currency to recieve (either a token or AUT)
+//    `address2` - An Ethereum address of the currency to recieve (either a token or AUT)
+//    `liquidity` - The amount of liquidity tokens the user will burn to get their tokens back
+//    `factory` - The current factory
+//    `signer` - The current signer
+
+export async function quoteRemoveLiquidity(
+  address1,
+  address2,
+  liquidity,
+  factory,
+  signer
+) {
+  const pairAddress = await factory.getPair(address1, address2);
+  console.log("pair address", pairAddress);
+  const pair = new Contract(pairAddress, PAIR.abi, signer);
+
+  const reservesRaw = await fetchReserves(address1, address2, pair); // Returns the reserves already formated as ethers
+  const reserveA = reservesRaw[0];
+  const reserveB = reservesRaw[1];
+
+  const Aout =
+    (liquidity * Math.sqrt(2)) /
+    Math.sqrt(1 + Math.pow(reserveB / reserveA, 2));
+  const Bout =
+    (liquidity * Math.sqrt(2)) /
+    Math.sqrt(1 + Math.pow(reserveA / reserveB, 2));
+
+  return [liquidity, Aout, Bout];
 }

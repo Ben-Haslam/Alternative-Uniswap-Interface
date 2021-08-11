@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 import { ethers } from "ethers";
-import _App from "./ethereum";
+// import _App from "./ethereum";
 // import Swap from "./Swap";
 // import Liquidity from "./Liquidity";
 import NarBar from "./NavBar/NavBar";

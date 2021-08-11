@@ -41,6 +41,9 @@ const styles = (theme) => ({
     marginRight: theme.spacing(1),
     padding: theme.spacing(0.4),
   },
+  footer: {
+    marginTop: "155px",
+  },
 });
 
 const useStyles = makeStyles(styles);
@@ -112,6 +115,19 @@ function Liquidity() {
           {deploy_or_remove(deploy)}
         </Paper>
       </Container>
+
+      <Grid
+        container
+        className={classes.footer}
+        direction="row"
+        justifyContent="center"
+        alignItems="flex-end"
+      >
+        <p>
+          Clearmatics Autonity Uniswap | Get AUT for use in the bakerloo testnet{" "}
+          <a href="https://faucet.bakerloo.autonity.network/">here</a>
+        </p>
+      </Grid>
     </div>
   );
 }
