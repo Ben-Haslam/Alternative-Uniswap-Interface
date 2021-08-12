@@ -511,12 +511,15 @@ export async function quoteRemoveLiquidity(
   const reserveA = reservesRaw[0];
   const reserveB = reservesRaw[1];
 
-  const Aout =
-    (liquidity * Math.sqrt(2)) /
-    Math.sqrt(1 + Math.pow(reserveB / reserveA, 2));
-  const Bout =
-    (liquidity * Math.sqrt(2)) /
-    Math.sqrt(1 + Math.pow(reserveA / reserveB, 2));
+  // const Aout =
+  //   (liquidity * Math.sqrt(2)) /
+  //   Math.sqrt(1 + Math.pow(reserveB / reserveA, 2));
+  // const Bout =
+  //   (liquidity * Math.sqrt(2)) /
+  //   Math.sqrt(1 + Math.pow(reserveA / reserveB, 2));
+
+  const Aout = liquidity * Math.sqrt(reserveA / reserveB);
+  const Bout = liquidity * Math.sqrt(reserveB / reserveA);
 
   return [liquidity, Aout, Bout];
 }
