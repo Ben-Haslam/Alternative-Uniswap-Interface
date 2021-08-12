@@ -17,9 +17,8 @@ import {
   getBalanceAndSymbol,
   getWeth,
   getReserves,
-  removeLiquidity,
-  quoteRemoveLiquidity,
 } from "../ethereumFunctions";
+import { removeLiquidity, quoteRemoveLiquidity } from "./liquidityFunctions";
 import CurrencyField, {
   CurrencyField_Reduced,
 } from "../CurrencySwapper/CurrencyField";
