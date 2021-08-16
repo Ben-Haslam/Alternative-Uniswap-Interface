@@ -19,8 +19,9 @@ import {
   getReserves,
 } from "../ethereumFunctions";
 import { removeLiquidity, quoteRemoveLiquidity } from "./liquidityFunctions";
-import CurrencyField, {
-  CurrencyField_Reduced,
+import {
+  RemoveLiquidity_Field1,
+  RemoveLiquidity_Field2,
 } from "../CurrencySwapper/CurrencyField";
 import CurrencyDialog from "../CurrencySwapper/CurrencyDialog";
 import LoadingButton from "../Components/LoadingButton";
@@ -341,7 +342,7 @@ function LiquidityRemover(props) {
 
       <Grid container direction="column" alignItems="center" spacing={2}>
         <Grid item xs={12} className={classes.fullWidth}>
-          <CurrencyField
+          <RemoveLiquidity_Field1
             activeField={true}
             value={field1Value}
             onClick={() => setDialog1Open(true)}
@@ -353,7 +354,7 @@ function LiquidityRemover(props) {
         </Grid>
 
         <Grid item xs={12} className={classes.fullWidth}>
-          <CurrencyField_Reduced
+          <RemoveLiquidity_Field2
             activeField={true}
             onClick={() => setDialog2Open(true)}
             symbol={
