@@ -1,7 +1,7 @@
 export const AUTONITY = {
-  name: "Autonity", // TODO Is this right?
+  name: "Aut",
   abbr: "AUT",
-  address: "0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF",
+  address: "0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF", // Weth address
 };
 
 export const TOKEN_A = {
