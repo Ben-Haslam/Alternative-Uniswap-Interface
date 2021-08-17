@@ -316,15 +316,29 @@ export async function quoteRemoveLiquidity(
   const reserveA = reservesRaw[0];
   const reserveB = reservesRaw[1];
 
-  // const Aout =
-  //   (liquidity * Math.sqrt(2)) /
-  //   Math.sqrt(1 + Math.pow(reserveB / reserveA, 2));
-  // const Bout =
-  //   (liquidity * Math.sqrt(2)) /
-  //   Math.sqrt(1 + Math.pow(reserveA / reserveB, 2));
+  //// Older, simpler method
+  // const Aout = liquidity * Math.sqrt(reserveA / reserveB);
+  // const Bout = liquidity * Math.sqrt(reserveB / reserveA);
 
-  const Aout = liquidity * Math.sqrt(reserveA / reserveB);
-  const Bout = liquidity * Math.sqrt(reserveB / reserveA);
+  // New, precise method
+  const feeOn =
+    (await factory.feeTo()) != 0x0000000000000000000000000000000000000000;
+
+  const _kLast = await pair.kLast();
+  const kLast = Number(ethers.utils.formatEther(_kLast));
+
+  const _totalSupply = await pair.totalSupply();
+  let totalSupply = Number(ethers.utils.formatEther(_totalSupply));
+
+  if (feeOn && kLast > 0) {
+    const feeLiquidity =
+      (totalSupply * (Math.sqrt(reserveA * reserveB) - Math.sqrt(kLast))) /
+      (5 * Math.sqrt(reserveA * reserveB) + Math.sqrt(kLast));
+    totalSupply = totalSupply + feeLiquidity;
+  }
+
+  const Aout = (reserveA * liquidity) / totalSupply;
+  const Bout = (reserveB * liquidity) / totalSupply;
 
   return [liquidity, Aout, Bout];
 }
