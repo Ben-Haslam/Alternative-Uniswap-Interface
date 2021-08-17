@@ -18,10 +18,14 @@ import {
   getBalanceAndSymbol,
   getWeth,
   getReserves,
+} from "../ethereumFunctions";
+
+import {
   addLiquidity,
   addLiquidityTest,
   quoteAddLiquidity,
-} from "../ethereumFunctions";
+} from "./liquidityFunctions";
+
 import CurrencyField from "../CurrencySwapper/CurrencyField";
 import CurrencyDialog from "../CurrencySwapper/CurrencyDialog";
 import LoadingButton from "../Components/LoadingButton";
