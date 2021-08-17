@@ -1,5 +1,5 @@
 export const AUTONITY = {
-  name: "Aut",
+  name: "Auton",
   abbr: "AUT",
   address: "0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF", // Weth address
 };
