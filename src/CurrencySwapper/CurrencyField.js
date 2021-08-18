@@ -53,7 +53,7 @@ CurrencyField.propTypes = {
   activeField: PropTypes.bool.isRequired,
 };
 
-export function RemoveLiquidity_Field1(props) {
+export function RemoveLiquidityField1(props) {
   // This component is used to selecting a currency and entering a value, the props are explained below:
   //      onClick - (string) => void - Called when the button is clicked
   //      symbol - string - The text displayed on the button
@@ -103,7 +103,7 @@ export function RemoveLiquidity_Field1(props) {
   );
 }
 
-export function RemoveLiquidity_Field2(props) {
+export function RemoveLiquidityField2(props) {
   // This component is used to selecting a currency and entering a value, the props are explained below:
   //      onClick - (string) => void - Called when the button is clicked
   //      symbol - string - The text displayed on the button

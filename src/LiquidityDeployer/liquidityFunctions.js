@@ -1,12 +1,9 @@
 import { Contract, ethers } from "ethers";
-import { func } from "prop-types";
 import * as COINS from "../constants/coins";
 
 import { fetchReserves } from "../ethereumFunctions";
 
-const ROUTER = require("../build/UniswapV2Router02.json");
 const ERC20 = require("../build/ERC20.json");
-const FACTORY = require("../build/IUniswapV2Factory.json");
 const PAIR = require("../build/IUniswapV2Pair.json");
 
 // Function used to add Liquidity to any pair of tokens or token-AUT
@@ -92,85 +89,6 @@ export async function addLiquidity(
       account,
       deadline
     );
-  }
-}
-
-// Exactly the same as above but executes a static call to get the result of the liquidity addition for a preview
-export async function addLiquidityTest(
-  address1,
-  address2,
-  amount1,
-  amount2,
-  amount1min,
-  amount2min,
-  routerContract,
-  account,
-  signer
-) {
-  const amountIn1 = ethers.utils.parseEther(amount1.toString());
-  const amountIn2 = ethers.utils.parseEther(amount2.toString());
-
-  const amount1Min = ethers.utils.parseEther(amount1min.toString());
-  const amount2Min = ethers.utils.parseEther(amount2min.toString());
-
-  const time = Math.floor(Date.now() / 1000) + 200000;
-  const deadline = ethers.BigNumber.from(time);
-
-  if (address1 === COINS.AUTONITY.address) {
-    // Eth + Token
-    const values = await routerContract.callStatic.addLiquidityETH(
-      address2,
-      amountIn2,
-      amount2Min,
-      amount1Min,
-      account,
-      deadline,
-      { value: amountIn1 }
-    );
-    // return ethers.utils.formatEther(values[2]);
-  } else if (address2 === COINS.AUTONITY.address) {
-    // Token + Eth
-    const values = await routerContract.callStatic
-      .addLiquidityETH(
-        address1,
-        amountIn1,
-        amount1Min,
-        amount2Min,
-        account,
-        deadline,
-        { value: amountIn2 }
-      )
-      .then((values) => {
-        console.log("tokenA in: ", ethers.utils.formatEther(values[0]));
-        console.log("tokenB in: ", ethers.utils.formatEther(values[1]));
-        console.log(
-          "liquidity tokens out: ",
-          ethers.utils.formatEther(values[2])
-        );
-      });
-    // return ethers.utils.formatEther(values[2]);
-  } else {
-    // Token + Token
-    const values = await routerContract.callStatic
-      .addLiquidity(
-        address1,
-        address2,
-        amountIn1,
-        amountIn2,
-        amount1Min,
-        amount2Min,
-        account,
-        deadline
-      )
-      .then((values) => {
-        console.log("tokenA in: ", ethers.utils.formatEther(values[0]));
-        console.log("tokenB in: ", ethers.utils.formatEther(values[1]));
-        console.log(
-          "liquidity tokens out: ",
-          ethers.utils.formatEther(values[2])
-        );
-      });
-    // return ethers.utils.formatEther(values[2]);
   }
 }
 
@@ -281,7 +199,7 @@ export async function quoteAddLiquidity(
   const reserveA = reservesRaw[0];
   const reserveB = reservesRaw[1];
 
-  if (reserveA == 0 && reserveB == 0) {
+  if (reserveA === 0 && reserveB === 0) {
     return [amountADesired.toString(), amountBDesired.toString()];
   } else {
     const amountBOptimal = quote(amountADesired, reserveA, reserveB);
@@ -322,7 +240,7 @@ export async function quoteRemoveLiquidity(
 
   // New, precise method
   const feeOn =
-    (await factory.feeTo()) != 0x0000000000000000000000000000000000000000;
+    (await factory.feeTo()) !== 0x0000000000000000000000000000000000000000;
 
   const _kLast = await pair.kLast();
   const kLast = Number(ethers.utils.formatEther(_kLast));

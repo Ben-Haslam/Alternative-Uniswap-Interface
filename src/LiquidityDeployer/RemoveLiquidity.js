@@ -1,11 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  Container,
-  Grid,
-  makeStyles,
-  Paper,
-  Typography,
-} from "@material-ui/core";
+import { Grid, makeStyles, Paper, Typography } from "@material-ui/core";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { useSnackbar } from "notistack";
 import {
@@ -20,8 +14,8 @@ import {
 } from "../ethereumFunctions";
 import { removeLiquidity, quoteRemoveLiquidity } from "./liquidityFunctions";
 import {
-  RemoveLiquidity_Field1,
-  RemoveLiquidity_Field2,
+  RemoveLiquidityField1,
+  RemoveLiquidityField2,
 } from "../CurrencySwapper/CurrencyField";
 import CurrencyDialog from "../CurrencySwapper/CurrencyDialog";
 import LoadingButton from "../Components/LoadingButton";
@@ -248,7 +242,7 @@ function LiquidityRemover(props) {
         setLiquidity_tokens(data[2]);
       });
     }
-  }, [currency1.address, currency2.address]);
+  }, [currency1.address, currency2.address, account, factory, signer]);
 
   useEffect(() => {
     // This hook runs whenever the field values change or currencies change, it will attempt to give a preview of the liquidity removal.
@@ -266,7 +260,7 @@ function LiquidityRemover(props) {
         setTokensOut(data);
       });
     }
-  }, [currency1.address, currency2.address, field1Value]);
+  }, [currency1.address, currency2.address, field1Value, factory, signer]);
 
   useEffect(() => {
     // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
@@ -342,7 +336,7 @@ function LiquidityRemover(props) {
 
       <Grid container direction="column" alignItems="center" spacing={2}>
         <Grid item xs={12} className={classes.fullWidth}>
-          <RemoveLiquidity_Field1
+          <RemoveLiquidityField1
             activeField={true}
             value={field1Value}
             onClick={() => setDialog1Open(true)}
@@ -354,7 +348,7 @@ function LiquidityRemover(props) {
         </Grid>
 
         <Grid item xs={12} className={classes.fullWidth}>
-          <RemoveLiquidity_Field2
+          <RemoveLiquidityField2
             activeField={true}
             onClick={() => setDialog2Open(true)}
             symbol={
