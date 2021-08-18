@@ -1,14 +1,7 @@
 import React, { useEffect } from "react";
-import {
-  Container,
-  Grid,
-  makeStyles,
-  Paper,
-  Typography,
-} from "@material-ui/core";
+import { Grid, makeStyles, Paper, Typography } from "@material-ui/core";
 import AccountBalanceIcon from "@material-ui/icons/AccountBalance";
 import { useSnackbar } from "notistack";
-import LoopIcon from "@material-ui/icons/Loop";
 import {
   getAccount,
   getFactory,
@@ -20,11 +13,7 @@ import {
   getReserves,
 } from "../ethereumFunctions";
 
-import {
-  addLiquidity,
-  addLiquidityTest,
-  quoteAddLiquidity,
-} from "./liquidityFunctions";
+import { addLiquidity, quoteAddLiquidity } from "./liquidityFunctions";
 
 import CurrencyField from "../CurrencySwapper/CurrencyField";
 import CurrencyDialog from "../CurrencySwapper/CurrencyDialog";
@@ -264,28 +253,13 @@ function LiquidityDeployer(props) {
         setLiquidity_tokens(data[2]);
       });
     }
-  }, [currency1.address, currency2.address]);
+  }, [currency1.address, currency2.address, account, factory, signer]);
 
   useEffect(() => {
     // This hook runs whenever the field values change or currencies change, it will attempt to do a static call to give a preview of the liquidity deployment.
 
     if (isButtonEnabled()) {
       console.log("Trying to preview the liquidity deployment");
-
-      // addLiquidityTest(
-      //   currency1.address,
-      //   currency2.address,
-      //   parseFloat(field1Value),
-      //   parseFloat(field2Value),
-      //   0,
-      //   0,
-      //   router,
-      //   account,
-      //   signer
-      // ).then((data) => {
-      //   // console.log(data);
-      //   // setLiquidity_out1(data);
-      // });
 
       quoteAddLiquidity(
         currency1.address,
@@ -303,7 +277,14 @@ function LiquidityDeployer(props) {
         setLiquidity_out([data[0], data[1], liquidity_out]);
       });
     }
-  }, [currency1.address, currency2.address, field1Value, field2Value]);
+  }, [
+    currency1.address,
+    currency2.address,
+    field1Value,
+    field2Value,
+    factory,
+    signer,
+  ]);
 
   useEffect(() => {
     // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has

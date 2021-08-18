@@ -1,5 +1,4 @@
 import { Contract, ethers } from "ethers";
-import { func } from "prop-types";
 import * as COINS from "./constants/coins";
 
 const ROUTER = require("./build/UniswapV2Router02.json");

@@ -92,6 +92,7 @@ function CurrencySwapper(props) {
   const [field2Value, setField2Value] = React.useState("");
 
   // Stores information for the Autonity Network
+
   const [provider, setProvider] = React.useState(getProvider());
   const [signer, setSigner] = React.useState(getSigner(provider));
   const [account, setAccount] = React.useState(undefined); // This is populated in a react hook
@@ -254,7 +255,7 @@ function CurrencySwapper(props) {
         account
       ).then((data) => setReserves(data));
     }
-  }, [currency1.address, currency2.address]);
+  }, [currency1.address, currency2.address, account, factory, router, signer]);
 
   useEffect(() => {
     // This hook is called when either of the state variables `field1Value` or `conversionRate` change.

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Container,
   Grid,
@@ -9,7 +9,6 @@ import {
   Button,
 } from "@material-ui/core";
 
-import { Save, Delete } from "@material-ui/icons";
 import LiquidityDeployer from "./LiquidityDeployer";
 import LiquidityRemover from "./RemoveLiquidity";
 
@@ -54,14 +53,14 @@ function Liquidity() {
   const [deploy, setDeploy] = React.useState(true);
 
   const deploy_or_remove = (deploy) => {
-    if (deploy == true) {
+    if (deploy === true) {
       return <LiquidityDeployer />;
     }
     return <LiquidityRemover />;
   };
 
   const changeStyles = (K) => {
-    if (K == true) {
+    if (K === true) {
       let add_button = document.getElementById("add-button");
       add_button.style.backgroundColor = "#ff0000";
 
