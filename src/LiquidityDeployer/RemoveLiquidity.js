@@ -230,7 +230,7 @@ function LiquidityRemover(props) {
         currency2.address
     );
 
-    if (currency1.address && currency2.address) {
+    if (currency1.address && currency2.address && account) {
       getReserves(
         currency1.address,
         currency2.address,
@@ -269,7 +269,7 @@ function LiquidityRemover(props) {
     const currencyTimeout = setTimeout(() => {
       console.log("Checking balances & Getting reserves...");
 
-      if (currency1.address && currency2.address) {
+      if (currency1.address && currency2.address && account) {
         getReserves(
           currency1.address,
           currency2.address,
@@ -282,7 +282,7 @@ function LiquidityRemover(props) {
         });
       }
 
-      if (currency1) {
+      if (currency1 && account) {
         getBalanceAndSymbol(account, currency1.address, provider, signer).then(
           (data) => {
             setCurrency1({
@@ -292,7 +292,7 @@ function LiquidityRemover(props) {
           }
         );
       }
-      if (currency2) {
+      if (currency2 && account) {
         getBalanceAndSymbol(account, currency2.address, provider, signer).then(
           (data) => {
             setCurrency2({
@@ -444,7 +444,7 @@ function LiquidityRemover(props) {
 
             {/* Liquidity Tokens Display */}
             <Typography variant="h6">Tokens Out</Typography>
-            <Grid container direction="row" justifyContent="spaces-between">
+            <Grid container direction="row" justifyContent="space-between">
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
                   {formatBalance(tokensOut[1], currency1.symbol)}

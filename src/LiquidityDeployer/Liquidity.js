@@ -79,11 +79,7 @@ function Liquidity() {
     <div>
       <Container>
         <Paper className={classes.paperContainer}>
-          <Typography
-            variant="h5"
-            className={classes.title}
-            color="common.white"
-          >
+          <Typography variant="h5" className={classes.title}>
             <ButtonGroup size="large" variant="contained">
               <Button
                 id="add-button"

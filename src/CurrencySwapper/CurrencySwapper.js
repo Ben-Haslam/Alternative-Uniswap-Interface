@@ -281,7 +281,7 @@ function CurrencySwapper(props) {
     const currencyTimeout = setTimeout(() => {
       console.log("Checking balances...");
 
-      if (currency1.address && currency2.address) {
+      if (currency1.address && currency2.address && account) {
         getReserves(
           currency1.address,
           currency2.address,
@@ -291,7 +291,7 @@ function CurrencySwapper(props) {
         ).then((data) => setReserves(data));
       }
 
-      if (currency1) {
+      if (currency1 && account) {
         getBalanceAndSymbol(account, currency1.address, provider, signer).then(
           (data) => {
             setCurrency1({
@@ -301,7 +301,7 @@ function CurrencySwapper(props) {
           }
         );
       }
-      if (currency2) {
+      if (currency2 && account) {
         getBalanceAndSymbol(account, currency2.address, provider, signer).then(
           (data) => {
             setCurrency2({
