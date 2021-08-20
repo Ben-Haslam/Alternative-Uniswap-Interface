@@ -152,7 +152,7 @@ export default function CurrencyDialog(props) {
 
           <Grid item className={classes.currencyList}>
             <Grid container direction="column">
-              {/* Maps all of the currencies in the constants file to buttons */}
+              {/* Maps all of the tokens in the constants file to buttons */}
               {coins.map((coin, index) => (
                 <Grid item key={index} xs={12}>
                   <CurrencyButton

@@ -12,14 +12,14 @@ import { useSnackbar } from "notistack";
 import LoopIcon from "@material-ui/icons/Loop";
 import {
   getAccount,
-  getConversionRate,
   getFactory,
   getProvider,
   getRouter,
   getSigner,
+  getAmountOut,
   getBalanceAndSymbol,
   getWeth,
-  swapCurrency,
+  swapTokens,
   getReserves,
 } from "../ethereumFunctions";
 import CurrencyField from "./CurrencyField";
@@ -80,9 +80,6 @@ function CurrencySwapper(props) {
     symbol: undefined,
     balance: undefined,
   });
-
-  // Stores the current conversion rate between currency1 and currency2
-  const [conversionRate, setConversionRate] = React.useState(undefined);
 
   // Stores the current reserves in the liquidity pool between currency1 and currency2
   const [reserves, setReserves] = React.useState(["0.0", "0.0"]);
@@ -155,13 +152,12 @@ function CurrencySwapper(props) {
     console.log("Attempting to swap tokens...");
     setLoading(true);
 
-    swapCurrency(
+    swapTokens(
       currency1.address,
       currency2.address,
       parseFloat(field1Value),
       router,
       account,
-      provider,
       signer
     )
       .then(() => {
@@ -231,22 +227,17 @@ function CurrencySwapper(props) {
   // of the two currencies change.
   useEffect(() => {
     // This hook is called when either of the state variables `currency1.address` or `currency2.address` change.
-    // It attempts to calculate and set the state variable `conversionRate`
     // This means that when the user selects a different currency to convert between, or the currencies are swapped,
-    // the new conversion rate will be calculated.
+    // the new reserves will be calculated.
 
     console.log(
-      "Trying to get Conversion Rate between:\n" +
+      "Trying to get Reserves between:\n" +
         currency1.address +
         "\n" +
         currency2.address
     );
 
     if (currency1.address && currency2.address) {
-      getConversionRate(router, currency1.address, currency2.address).then(
-        (rate) => setConversionRate(rate)
-      );
-
       getReserves(
         currency1.address,
         currency2.address,
@@ -258,25 +249,28 @@ function CurrencySwapper(props) {
   }, [currency1.address, currency2.address, account, factory, router, signer]);
 
   useEffect(() => {
-    // This hook is called when either of the state variables `field1Value` or `conversionRate` change.
+    // This hook is called when either of the state variables `field1Value` `currency1.address` or `currency2.address` change.
     // It attempts to calculate and set the state variable `field2Value`
     // This means that if the user types a new value into the conversion box or the conversion rate changes,
     // the value in the output box will change.
 
     if (isNaN(parseFloat(field1Value))) {
       setField2Value("");
-    } else if (field1Value && conversionRate) {
-      let amount = parseFloat(field1Value) * conversionRate;
-      setField2Value(amount.toFixed(7));
+    } else if (field1Value && currency1.address && currency2.address) {
+      getAmountOut(
+        currency1.address,
+        currency2.address,
+        field1Value,
+        router
+      ).then((amount) => setField2Value(amount.toFixed(7)));
     } else {
       setField2Value("");
     }
-  }, [field1Value, conversionRate]);
+  }, [field1Value, currency1.address, currency2.address]);
 
   useEffect(() => {
     // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
     // updated has changed. This allows them to see when a transaction completes by looking at the balance output.
-    // It only updates the balance field in the currency state to prevent this hook from triggering the 'conversionRate' hook.
 
     const currencyTimeout = setTimeout(() => {
       console.log("Checking balances...");
