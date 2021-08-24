@@ -1,4 +1,4 @@
-Publishes to [https://clearmatics.github.io/uniswap-react/]()
+Publishes to [https://clearmatics.github.io/autonity-uniswap-interface/]()
 
 # Getting Started with Create React App
 
