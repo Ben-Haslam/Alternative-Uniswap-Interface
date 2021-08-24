@@ -12,7 +12,7 @@ import {
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import MuiDialogActions from "@material-ui/core/DialogActions";
 import CloseIcon from "@material-ui/icons/Close";
-import CurrencyButton from "./CurrencyButton";
+import CoinButton from "./CoinButton";
 import { doesTokenExist } from "../ethereumFunctions";
 import PropTypes from "prop-types";
 import * as COLORS from "@material-ui/core/colors";
@@ -35,11 +35,11 @@ const styles = (theme) => ({
     paddingRight: theme.spacing(2.5),
     paddingBottom: theme.spacing(2),
   },
-  currencyList: {
+  coinList: {
     height: "300px",
     overflowY: "scroll",
   },
-  currencyContainer: {
+  coinContainer: {
     paddingLeft: theme.spacing(0.5),
     paddingRight: theme.spacing(0.5),
     paddingTop: theme.spacing(2),
@@ -87,18 +87,18 @@ const DialogActions = withStyles((theme) => ({
   },
 }))(MuiDialogActions);
 
-CurrencyDialog.propTypes = {
+CoinDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
   coins: PropTypes.array.isRequired,
 };
 
-export default function CurrencyDialog(props) {
-  // The CurrencyDialog component will display a dialog window on top of the page, allowing a user to select a currency
+export default function CoinDialog(props) {
+  // The CoinDialog component will display a dialog window on top of the page, allowing a user to select a coin
   // from a list (list can be found in 'src/constants/coins.js') or enter an address into a search field. Any entered
   // addresses will first be validated to make sure they exist.
   // When the dialog closes, it will call the `onClose` prop with 1 argument which will either be undefined (if the
-  // user closes the dialog without selecting anything), or will be a string containing the address of a currency.
+  // user closes the dialog without selecting anything), or will be a string containing the address of a coin.
 
   const classes = useStyles();
   const { onClose, open, coins, signer, ...others } = props;
@@ -135,7 +135,7 @@ export default function CurrencyDialog(props) {
 
       <hr className={classes.hr} />
 
-      <div className={classes.currencyContainer}>
+      <div className={classes.coinContainer}>
         <Grid container direction="column" spacing={1} alignContent="center">
           <TextField
             value={address}
@@ -150,12 +150,12 @@ export default function CurrencyDialog(props) {
 
           <hr className={classes.hr} />
 
-          <Grid item className={classes.currencyList}>
+          <Grid item className={classes.coinList}>
             <Grid container direction="column">
               {/* Maps all of the tokens in the constants file to buttons */}
               {coins.map((coin, index) => (
                 <Grid item key={index} xs={12}>
-                  <CurrencyButton
+                  <CoinButton
                     coinName={coin.name}
                     coinAbbr={coin.abbr}
                     onClick={() => exit(coin.address)}

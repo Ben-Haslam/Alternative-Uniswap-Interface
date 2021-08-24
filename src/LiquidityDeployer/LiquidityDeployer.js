@@ -15,8 +15,8 @@ import {
 
 import { addLiquidity, quoteAddLiquidity } from "./liquidityFunctions";
 
-import CurrencyField from "../CurrencySwapper/CurrencyField";
-import CurrencyDialog from "../CurrencySwapper/CurrencyDialog";
+import CoinField from "../CoinSwapper/CoinField";
+import CoinDialog from "../CoinSwapper/CoinDialog";
 import LoadingButton from "../Components/LoadingButton";
 import * as COINS from "../constants/coins";
 
@@ -65,19 +65,19 @@ function LiquidityDeployer(props) {
   const [dialog1Open, setDialog1Open] = React.useState(false);
   const [dialog2Open, setDialog2Open] = React.useState(false);
 
-  // Stores data about their respective currency
-  const [currency1, setCurrency1] = React.useState({
+  // Stores data about their respective coin
+  const [coin1, setCoin1] = React.useState({
     address: undefined,
     symbol: undefined,
     balance: undefined,
   });
-  const [currency2, setCurrency2] = React.useState({
+  const [coin2, setCoin2] = React.useState({
     address: undefined,
     symbol: undefined,
     balance: undefined,
   });
 
-  // Stores the current reserves in the liquidity pool between currency1 and currency2
+  // Stores the current reserves in the liquidity pool between coin1 and coin2
   const [reserves, setReserves] = React.useState(["0.0", "0.0"]);
   const [liquidity_tokens, setLiquidity_tokens] = React.useState("");
 
@@ -105,14 +105,14 @@ function LiquidityDeployer(props) {
   // Used when getting a quote of liquidity
   const [liquidity_out, setLiquidity_out] = React.useState([0, 0, 0]);
 
-  // Switches the top and bottom currencies, this is called when users hit the swap button or select the opposite
-  // token in the dialog (e.g. if currency1 is TokenA and the user selects TokenB when choosing currency2)
+  // Switches the top and bottom coins, this is called when users hit the swap button or select the opposite
+  // token in the dialog (e.g. if coin1 is TokenA and the user selects TokenB when choosing coin2)
   const switchFields = () => {
     let oldField1Value = field1Value;
     let oldField2Value = field2Value;
 
-    setCurrency1(currency2);
-    setCurrency2(currency1);
+    setCoin1(coin2);
+    setCoin2(coin1);
     setField1Value(oldField2Value);
     setField2Value(oldField1Value);
     setReserves(reserves.reverse());
@@ -135,7 +135,7 @@ function LiquidityDeployer(props) {
     else return "0.0";
   };
 
-  // Turns the currency's reserves into something nice and readable
+  // Turns the coin's reserves into something nice and readable
   const formatReserve = (reserve, symbol) => {
     if (reserve && symbol) return reserve + " " + symbol;
     else return "0.0";
@@ -145,14 +145,14 @@ function LiquidityDeployer(props) {
   const isButtonEnabled = () => {
     let validFloat = new RegExp("^[0-9]*[.,]?[0-9]*$");
 
-    // If both currencies have been selected, and a valid float has been entered for both, which are less than the user's balances, then return true
+    // If both coins have been selected, and a valid float has been entered for both, which are less than the user's balances, then return true
     return (
-      currency1.address &&
-      currency2.address &&
+      coin1.address &&
+      coin2.address &&
       validFloat.test(field1Value) &&
       validFloat.test(field2Value) &&
-      parseFloat(field1Value) <= currency1.balance &&
-      parseFloat(field2Value) <= currency2.balance
+      parseFloat(field1Value) <= coin1.balance &&
+      parseFloat(field2Value) <= coin2.balance
     );
   };
 
@@ -161,8 +161,8 @@ function LiquidityDeployer(props) {
     setLoading(true);
 
     addLiquidity(
-      currency1.address,
-      currency2.address,
+      coin1.address,
+      coin2.address,
       parseFloat(field1Value),
       parseFloat(field2Value),
       0,
@@ -188,20 +188,20 @@ function LiquidityDeployer(props) {
       });
   };
 
-  // Called when the dialog window for currency1 exits
+  // Called when the dialog window for coin1 exits
   const onToken1Selected = (address) => {
     // Close the dialog window
     setDialog1Open(false);
 
     // If the user inputs the same token, we want to switch the data in the fields
-    if (address === currency2.address) {
+    if (address === coin2.address) {
       switchFields();
     }
     // We only update the values if the user provides a token
     else if (address) {
       // Getting some token data is async, so we need to wait for the data to return, hence the promise
       getBalanceAndSymbol(account, address, provider, signer).then((data) => {
-        setCurrency1({
+        setCoin1({
           address: address,
           symbol: data.symbol,
           balance: data.balance,
@@ -210,20 +210,20 @@ function LiquidityDeployer(props) {
     }
   };
 
-  // Called when the dialog window for currency2 exits
+  // Called when the dialog window for coin2 exits
   const onToken2Selected = (address) => {
     // Close the dialog window
     setDialog2Open(false);
 
     // If the user inputs the same token, we want to switch the data in the fields
-    if (address === currency1.address) {
+    if (address === coin1.address) {
       switchFields();
     }
     // We only update the values if the user provides a token
     else if (address) {
       // Getting some token data is async, so we need to wait for the data to return, hence the promise
       getBalanceAndSymbol(account, address, provider, signer).then((data) => {
-        setCurrency2({
+        setCoin2({
           address: address,
           symbol: data.symbol,
           balance: data.balance,
@@ -233,37 +233,30 @@ function LiquidityDeployer(props) {
   };
 
   useEffect(() => {
-    // This hook runs whenever the currencies change, it will attempt to fetch the new liquidity reserves.
+    // This hook runs whenever the coins change, it will attempt to fetch the new liquidity reserves.
     console.log(
-      "Trying to get reserves between:\n" +
-        currency1.address +
-        "\n" +
-        currency2.address
+      "Trying to get reserves between:\n" + coin1.address + "\n" + coin2.address
     );
 
-    if (currency1.address && currency2.address && account) {
-      getReserves(
-        currency1.address,
-        currency2.address,
-        factory,
-        signer,
-        account
-      ).then((data) => {
-        setReserves([data[0], data[1]]);
-        setLiquidity_tokens(data[2]);
-      });
+    if (coin1.address && coin2.address && account) {
+      getReserves(coin1.address, coin2.address, factory, signer, account).then(
+        (data) => {
+          setReserves([data[0], data[1]]);
+          setLiquidity_tokens(data[2]);
+        }
+      );
     }
-  }, [currency1.address, currency2.address, account, factory, signer]);
+  }, [coin1.address, coin2.address, account, factory, signer]);
 
   useEffect(() => {
-    // This hook runs whenever the field values change or currencies change, it will attempt to do a static call to give a preview of the liquidity deployment.
+    // This hook runs whenever the field values change or coins change, it will attempt to do a static call to give a preview of the liquidity deployment.
 
     if (isButtonEnabled()) {
       console.log("Trying to preview the liquidity deployment");
 
       quoteAddLiquidity(
-        currency1.address,
-        currency2.address,
+        coin1.address,
+        coin2.address,
         parseFloat(field1Value),
         parseFloat(field2Value),
         factory,
@@ -277,26 +270,19 @@ function LiquidityDeployer(props) {
         setLiquidity_out([data[0], data[1], liquidity_out]);
       });
     }
-  }, [
-    currency1.address,
-    currency2.address,
-    field1Value,
-    field2Value,
-    factory,
-    signer,
-  ]);
+  }, [coin1.address, coin2.address, field1Value, field2Value, factory, signer]);
 
   useEffect(() => {
     // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
     // updated has changed. This allows them to see when a transaction completes by looking at the balance output.
 
-    const currencyTimeout = setTimeout(() => {
+    const coinTimeout = setTimeout(() => {
       console.log("Checking balances & Getting reserves...");
 
-      if (currency1.address && currency2.address && account) {
+      if (coin1.address && coin2.address && account) {
         getReserves(
-          currency1.address,
-          currency2.address,
+          coin1.address,
+          coin2.address,
           factory,
           signer,
           account
@@ -306,21 +292,21 @@ function LiquidityDeployer(props) {
         });
       }
 
-      if (currency1 && account) {
-        getBalanceAndSymbol(account, currency1.address, provider, signer).then(
+      if (coin1 && account) {
+        getBalanceAndSymbol(account, coin1.address, provider, signer).then(
           (data) => {
-            setCurrency1({
-              ...currency1,
+            setCoin1({
+              ...coin1,
               balance: data.balance,
             });
           }
         );
       }
-      if (currency2 && account) {
-        getBalanceAndSymbol(account, currency2.address, provider, signer).then(
+      if (coin2 && account) {
+        getBalanceAndSymbol(account, coin2.address, provider, signer).then(
           (data) => {
-            setCurrency2({
-              ...currency2,
+            setCoin2({
+              ...coin2,
               balance: data.balance,
             });
           }
@@ -328,7 +314,7 @@ function LiquidityDeployer(props) {
       }
     }, 10000);
 
-    return () => clearTimeout(currencyTimeout);
+    return () => clearTimeout(coinTimeout);
   });
 
   useEffect(() => {
@@ -345,13 +331,13 @@ function LiquidityDeployer(props) {
       <Typography variant="h5" className={classes.title}></Typography>
 
       {/* Dialog Windows */}
-      <CurrencyDialog
+      <CoinDialog
         open={dialog1Open}
         onClose={onToken1Selected}
         coins={COINS.ALL}
         signer={signer}
       />
-      <CurrencyDialog
+      <CoinDialog
         open={dialog2Open}
         onClose={onToken2Selected}
         coins={COINS.ALL}
@@ -360,26 +346,22 @@ function LiquidityDeployer(props) {
 
       <Grid container direction="column" alignItems="center" spacing={2}>
         <Grid item xs={12} className={classes.fullWidth}>
-          <CurrencyField
+          <CoinField
             activeField={true}
             value={field1Value}
             onClick={() => setDialog1Open(true)}
             onChange={handleChange.field1}
-            symbol={
-              currency1.symbol !== undefined ? currency1.symbol : "Select"
-            }
+            symbol={coin1.symbol !== undefined ? coin1.symbol : "Select"}
           />
         </Grid>
 
         <Grid item xs={12} className={classes.fullWidth}>
-          <CurrencyField
+          <CoinField
             activeField={true}
             value={field2Value}
             onClick={() => setDialog2Open(true)}
             onChange={handleChange.field2}
-            symbol={
-              currency2.symbol !== undefined ? currency2.symbol : "Select"
-            }
+            symbol={coin2.symbol !== undefined ? coin2.symbol : "Select"}
           />
         </Grid>
       </Grid>
@@ -406,12 +388,12 @@ function LiquidityDeployer(props) {
           <Grid container direction="row" justifyContent="space-between">
             <Grid item xs={6}>
               <Typography variant="body1" className={classes.balance}>
-                {formatBalance(currency1.balance, currency1.symbol)}
+                {formatBalance(coin1.balance, coin1.symbol)}
               </Typography>
             </Grid>
             <Grid item xs={6}>
               <Typography variant="body1" className={classes.balance}>
-                {formatBalance(currency2.balance, currency2.symbol)}
+                {formatBalance(coin2.balance, coin2.symbol)}
               </Typography>
             </Grid>
           </Grid>
@@ -423,12 +405,12 @@ function LiquidityDeployer(props) {
           <Grid container direction="row" justifyContent="space-between">
             <Grid item xs={6}>
               <Typography variant="body1" className={classes.balance}>
-                {formatReserve(reserves[0], currency1.symbol)}
+                {formatReserve(reserves[0], coin1.symbol)}
               </Typography>
             </Grid>
             <Grid item xs={6}>
               <Typography variant="body1" className={classes.balance}>
-                {formatReserve(reserves[1], currency2.symbol)}
+                {formatReserve(reserves[1], coin2.symbol)}
               </Typography>
             </Grid>
           </Grid>
@@ -460,12 +442,12 @@ function LiquidityDeployer(props) {
             <Grid container direction="row" justifyContent="space-between">
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatBalance(liquidity_out[0], currency1.symbol)}
+                  {formatBalance(liquidity_out[0], coin1.symbol)}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatBalance(liquidity_out[1], currency2.symbol)}
+                  {formatBalance(liquidity_out[1], coin2.symbol)}
                 </Typography>
               </Grid>
             </Grid>

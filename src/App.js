@@ -2,7 +2,7 @@ import React from "react";
 import "./App.css";
 import { ethers } from "ethers";
 import NarBar from "./NavBar/NavBar";
-import CurrencySwapper from "./CurrencySwapper/CurrencySwapper";
+import CoinSwapper from "./CoinSwapper/CoinSwapper";
 import { Route } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import Liquidity from "./LiquidityDeployer/Liquidity";
@@ -31,7 +31,7 @@ function App() {
         <SnackbarProvider maxSnack={3}>
           <ThemeProvider theme={theme}>
             <NarBar />
-            <Route exact path="/uniswap-react/" component={CurrencySwapper} />
+            <Route exact path="/uniswap-react/" component={CoinSwapper} />
             <Route
               exact
               path="/uniswap-react/liquidity"

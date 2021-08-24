@@ -22,8 +22,8 @@ import {
   swapTokens,
   getReserves,
 } from "../ethereumFunctions";
-import CurrencyField from "./CurrencyField";
-import CurrencyDialog from "./CurrencyDialog";
+import CoinField from "./CoinField";
+import CoinDialog from "./CoinDialog";
 import LoadingButton from "../Components/LoadingButton";
 import * as COINS from "../constants/coins";
 
@@ -61,7 +61,7 @@ const styles = (theme) => ({
 
 const useStyles = makeStyles(styles);
 
-function CurrencySwapper(props) {
+function CoinSwapper(props) {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -84,19 +84,19 @@ function CurrencySwapper(props) {
   const [dialog1Open, setDialog1Open] = React.useState(false);
   const [dialog2Open, setDialog2Open] = React.useState(false);
 
-  // Stores data about their respective currency
-  const [currency1, setCurrency1] = React.useState({
+  // Stores data about their respective coin
+  const [coin1, setCoin1] = React.useState({
     address: undefined,
     symbol: undefined,
     balance: undefined,
   });
-  const [currency2, setCurrency2] = React.useState({
+  const [coin2, setCoin2] = React.useState({
     address: undefined,
     symbol: undefined,
     balance: undefined,
   });
 
-  // Stores the current reserves in the liquidity pool between currency1 and currency2
+  // Stores the current reserves in the liquidity pool between coin1 and coin2
   const [reserves, setReserves] = React.useState(["0.0", "0.0"]);
 
   // Stores the current value of their respective text box
@@ -106,11 +106,11 @@ function CurrencySwapper(props) {
   // Controls the loading button
   const [loading, setLoading] = React.useState(false);
 
-  // Switches the top and bottom currencies, this is called when users hit the swap button or select the opposite
-  // token in the dialog (e.g. if currency1 is TokenA and the user selects TokenB when choosing currency2)
+  // Switches the top and bottom coins, this is called when users hit the swap button or select the opposite
+  // token in the dialog (e.g. if coin1 is TokenA and the user selects TokenB when choosing coin2)
   const switchFields = () => {
-    setCurrency1(currency2);
-    setCurrency2(currency1);
+    setCoin1(coin2);
+    setCoin2(coin1);
     setField1Value(field2Value);
     setReserves(reserves.reverse());
   };
@@ -129,7 +129,7 @@ function CurrencySwapper(props) {
     else return "0.0";
   };
 
-  // Turns the currency's reserves into something nice and readable
+  // Turns the coin's reserves into something nice and readable
   const formatReserve = (reserve, symbol) => {
     if (reserve && symbol) return reserve + " " + symbol;
     else return "0.0";
@@ -139,29 +139,29 @@ function CurrencySwapper(props) {
   const isButtonEnabled = () => {
     let validFloat = new RegExp("^[0-9]*[.,]?[0-9]*$");
 
-    // If both currencies have been selected, and a valid float has been entered which is less than the user's balance, then return true
+    // If both coins have been selected, and a valid float has been entered which is less than the user's balance, then return true
     return (
-      currency1.address &&
-      currency2.address &&
+      coin1.address &&
+      coin2.address &&
       validFloat.test(field1Value) &&
-      parseFloat(field1Value) <= currency1.balance
+      parseFloat(field1Value) <= coin1.balance
     );
   };
 
-  // Called when the dialog window for currency1 exits
+  // Called when the dialog window for coin1 exits
   const onToken1Selected = (address) => {
     // Close the dialog window
     setDialog1Open(false);
 
     // If the user inputs the same token, we want to switch the data in the fields
-    if (address === currency2.address) {
+    if (address === coin2.address) {
       switchFields();
     }
     // We only update the values if the user provides a token
     else if (address) {
       // Getting some token data is async, so we need to wait for the data to return, hence the promise
       getBalanceAndSymbol(account, address, provider, signer).then((data) => {
-        setCurrency1({
+        setCoin1({
           address: address,
           symbol: data.symbol,
           balance: data.balance,
@@ -170,20 +170,20 @@ function CurrencySwapper(props) {
     }
   };
 
-  // Called when the dialog window for currency2 exits
+  // Called when the dialog window for coin2 exits
   const onToken2Selected = (address) => {
     // Close the dialog window
     setDialog2Open(false);
 
     // If the user inputs the same token, we want to switch the data in the fields
-    if (address === currency1.address) {
+    if (address === coin1.address) {
       switchFields();
     }
     // We only update the values if the user provides a token
     else if (address) {
       // Getting some token data is async, so we need to wait for the data to return, hence the promise
       getBalanceAndSymbol(account, address, provider, signer).then((data) => {
-        setCurrency2({
+        setCoin2({
           address: address,
           symbol: data.symbol,
           balance: data.balance,
@@ -198,8 +198,8 @@ function CurrencySwapper(props) {
     setLoading(true);
 
     swapTokens(
-      currency1.address,
-      currency2.address,
+      coin1.address,
+      coin2.address,
       parseFloat(field1Value),
       router,
       account,
@@ -225,80 +225,70 @@ function CurrencySwapper(props) {
   // are defined in the array of variables passed to the function after the lambda expression. If there are no dependencies
   // the lambda will only ever be called when the component mounts. These are very useful for calculating new values
   // after a particular state change, for example, calculating the new exchange rate whenever the addresses
-  // of the two currencies change.
+  // of the two coins change.
 
-  // This hook is called when either of the state variables `currency1.address` or `currency2.address` change.
-  // This means that when the user selects a different currency to convert between, or the currencies are swapped,
+  // This hook is called when either of the state variables `coin1.address` or `coin2.address` change.
+  // This means that when the user selects a different coin to convert between, or the coins are swapped,
   // the new reserves will be calculated.
   useEffect(() => {
     console.log(
-      "Trying to get Reserves between:\n" +
-        currency1.address +
-        "\n" +
-        currency2.address
+      "Trying to get Reserves between:\n" + coin1.address + "\n" + coin2.address
     );
 
-    if (currency1.address && currency2.address) {
-      getReserves(
-        currency1.address,
-        currency2.address,
-        factory,
-        signer,
-        account
-      ).then((data) => setReserves(data));
+    if (coin1.address && coin2.address) {
+      getReserves(coin1.address, coin2.address, factory, signer, account).then(
+        (data) => setReserves(data)
+      );
     }
-  }, [currency1.address, currency2.address, account, factory, router, signer]);
+  }, [coin1.address, coin2.address, account, factory, router, signer]);
 
-  // This hook is called when either of the state variables `field1Value` `currency1.address` or `currency2.address` change.
+  // This hook is called when either of the state variables `field1Value` `coin1.address` or `coin2.address` change.
   // It attempts to calculate and set the state variable `field2Value`
   // This means that if the user types a new value into the conversion box or the conversion rate changes,
   // the value in the output box will change.
   useEffect(() => {
     if (isNaN(parseFloat(field1Value))) {
       setField2Value("");
-    } else if (field1Value && currency1.address && currency2.address) {
-      getAmountOut(
-        currency1.address,
-        currency2.address,
-        field1Value,
-        router
-      ).then((amount) => setField2Value(amount.toFixed(7)));
+    } else if (field1Value && coin1.address && coin2.address) {
+      getAmountOut(coin1.address, coin2.address, field1Value, router).then(
+        (amount) => setField2Value(amount.toFixed(7))
+      );
     } else {
       setField2Value("");
     }
-  }, [field1Value, currency1.address, currency2.address]);
+  }, [field1Value, coin1.address, coin2.address]);
 
   // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
   // updated has changed. This allows them to see when a transaction completes by looking at the balance output.
   useEffect(() => {
-    const currencyTimeout = setTimeout(() => {
+    const coinTimeout = setTimeout(() => {
       console.log("Checking balances...");
 
-      if (currency1.address && currency2.address && account) {
+      if (coin1.address && coin2.address && account) {
         getReserves(
-          currency1.address,
-          currency2.address,
+          coin1.address,
+          coin2.address,
           factory,
           signer,
           account
         ).then((data) => setReserves(data));
       }
 
-      if (currency1 && account) {
-        getBalanceAndSymbol(account, currency1.address, provider, signer).then(
+      if (coin1 && account) {
+        getBalanceAndSymbol(account, coin1.address, provider, signer).then(
           (data) => {
-            setCurrency1({
-              ...currency1,
+            setCoin1({
+              ...coin1,
               balance: data.balance,
             });
           }
         );
       }
-      if (currency2 && account) {
-        getBalanceAndSymbol(account, currency2.address, provider, signer).then(
+      if (coin2 && account) {
+        getBalanceAndSymbol(account, coin2.address, provider, signer).then(
           (data) => {
-            setCurrency2({
-              ...currency2,
+            setCoin2({
+              ...coin2,
               balance: data.balance,
             });
           }
@@ -306,7 +296,7 @@ function CurrencySwapper(props) {
       }
     }, 10000);
 
-    return () => clearTimeout(currencyTimeout);
+    return () => clearTimeout(coinTimeout);
   });
 
   // This hook will run when the component first mounts, it can be useful to put logic to populate variables here
@@ -319,20 +309,20 @@ function CurrencySwapper(props) {
   return (
     <div>
       {/* Dialog Windows */}
-      <CurrencyDialog
+      <CoinDialog
         open={dialog1Open}
         onClose={onToken1Selected}
         coins={COINS.ALL}
         signer={signer}
       />
-      <CurrencyDialog
+      <CoinDialog
         open={dialog2Open}
         onClose={onToken2Selected}
         coins={COINS.ALL}
         signer={signer}
       />
 
-      {/* Currency Swapper */}
+      {/* Coin Swapper */}
       <Container maxWidth="xs">
         <Paper className={classes.paperContainer}>
           <Typography variant="h5" className={classes.title}>
@@ -341,14 +331,12 @@ function CurrencySwapper(props) {
 
           <Grid container direction="column" alignItems="center" spacing={2}>
             <Grid item xs={12} className={classes.fullWidth}>
-              <CurrencyField
+              <CoinField
                 activeField={true}
                 value={field1Value}
                 onClick={() => setDialog1Open(true)}
                 onChange={handleChange.field1}
-                symbol={
-                  currency1.symbol !== undefined ? currency1.symbol : "Select"
-                }
+                symbol={coin1.symbol !== undefined ? coin1.symbol : "Select"}
               />
             </Grid>
 
@@ -357,13 +345,11 @@ function CurrencySwapper(props) {
             </IconButton>
 
             <Grid item xs={12} className={classes.fullWidth}>
-              <CurrencyField
+              <CoinField
                 activeField={false}
                 value={field2Value}
                 onClick={() => setDialog2Open(true)}
-                symbol={
-                  currency2.symbol !== undefined ? currency2.symbol : "Select"
-                }
+                symbol={coin2.symbol !== undefined ? coin2.symbol : "Select"}
               />
             </Grid>
 
@@ -374,12 +360,12 @@ function CurrencySwapper(props) {
             <Grid container direction="row" justifyContent="space-between">
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatBalance(currency1.balance, currency1.symbol)}
+                  {formatBalance(coin1.balance, coin1.symbol)}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatBalance(currency2.balance, currency2.symbol)}
+                  {formatBalance(coin2.balance, coin2.symbol)}
                 </Typography>
               </Grid>
             </Grid>
@@ -391,12 +377,12 @@ function CurrencySwapper(props) {
             <Grid container direction="row" justifyContent="space-between">
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatReserve(reserves[0], currency1.symbol)}
+                  {formatReserve(reserves[0], coin1.symbol)}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatReserve(reserves[1], currency2.symbol)}
+                  {formatReserve(reserves[1], coin2.symbol)}
                 </Typography>
               </Grid>
             </Grid>
@@ -433,4 +419,4 @@ function CurrencySwapper(props) {
   );
 }
 
-export default CurrencySwapper;
+export default CoinSwapper;
