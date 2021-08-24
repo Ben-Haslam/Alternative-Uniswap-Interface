@@ -65,6 +65,21 @@ function CurrencySwapper(props) {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
 
+  // Stores information for the Autonity Network
+
+  const [provider, setProvider] = React.useState(getProvider());
+  const [signer, setSigner] = React.useState(getSigner(provider));
+  const [account, setAccount] = React.useState(undefined); // This is populated in a react hook
+  const [router, setRouter] = React.useState(
+    getRouter("0x4489D87C8440B19f11d63FA2246f943F492F3F5F", signer)
+  );
+  const [weth, setWeth] = React.useState(
+    getWeth("0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF", signer)
+  );
+  const [factory, setFactory] = React.useState(
+    getFactory("0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116", signer)
+  );
+
   // Stores a record of whether their respective dialog window is open
   const [dialog1Open, setDialog1Open] = React.useState(false);
   const [dialog2Open, setDialog2Open] = React.useState(false);
@@ -87,21 +102,6 @@ function CurrencySwapper(props) {
   // Stores the current value of their respective text box
   const [field1Value, setField1Value] = React.useState("");
   const [field2Value, setField2Value] = React.useState("");
-
-  // Stores information for the Autonity Network
-
-  const [provider, setProvider] = React.useState(getProvider());
-  const [signer, setSigner] = React.useState(getSigner(provider));
-  const [account, setAccount] = React.useState(undefined); // This is populated in a react hook
-  const [router, setRouter] = React.useState(
-    getRouter("0x4489D87C8440B19f11d63FA2246f943F492F3F5F", signer)
-  );
-  const [weth, setWeth] = React.useState(
-    getWeth("0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF", signer)
-  );
-  const [factory, setFactory] = React.useState(
-    getFactory("0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116", signer)
-  );
 
   // Controls the loading button
   const [loading, setLoading] = React.useState(false);
@@ -148,34 +148,6 @@ function CurrencySwapper(props) {
     );
   };
 
-  const swap = () => {
-    console.log("Attempting to swap tokens...");
-    setLoading(true);
-
-    swapTokens(
-      currency1.address,
-      currency2.address,
-      parseFloat(field1Value),
-      router,
-      account,
-      signer
-    )
-      .then(() => {
-        setLoading(false);
-
-        // If the transaction was successful, we clear to input to make sure the user doesn't accidental redo the transfer
-        setField1Value("");
-        enqueueSnackbar("Transaction Successful", { variant: "success" });
-      })
-      .catch((e) => {
-        setLoading(false);
-        enqueueSnackbar("Transaction Failed (" + e.message + ")", {
-          variant: "error",
-          autoHideDuration: 10000,
-        });
-      });
-  };
-
   // Called when the dialog window for currency1 exits
   const onToken1Selected = (address) => {
     // Close the dialog window
@@ -220,16 +192,45 @@ function CurrencySwapper(props) {
     }
   };
 
+  // Calls the swapTokens Ethereum function to make the swap, then resets nessicary state variables
+  const swap = () => {
+    console.log("Attempting to swap tokens...");
+    setLoading(true);
+
+    swapTokens(
+      currency1.address,
+      currency2.address,
+      parseFloat(field1Value),
+      router,
+      account,
+      signer
+    )
+      .then(() => {
+        setLoading(false);
+
+        // If the transaction was successful, we clear to input to make sure the user doesn't accidental redo the transfer
+        setField1Value("");
+        enqueueSnackbar("Transaction Successful", { variant: "success" });
+      })
+      .catch((e) => {
+        setLoading(false);
+        enqueueSnackbar("Transaction Failed (" + e.message + ")", {
+          variant: "error",
+          autoHideDuration: 10000,
+        });
+      });
+  };
+
   // The lambdas within these useEffects will be called when a particular dependency is updated. These dependencies
   // are defined in the array of variables passed to the function after the lambda expression. If there are no dependencies
   // the lambda will only ever be called when the component mounts. These are very useful for calculating new values
   // after a particular state change, for example, calculating the new exchange rate whenever the addresses
   // of the two currencies change.
-  useEffect(() => {
-    // This hook is called when either of the state variables `currency1.address` or `currency2.address` change.
-    // This means that when the user selects a different currency to convert between, or the currencies are swapped,
-    // the new reserves will be calculated.
 
+  // This hook is called when either of the state variables `currency1.address` or `currency2.address` change.
+  // This means that when the user selects a different currency to convert between, or the currencies are swapped,
+  // the new reserves will be calculated.
+  useEffect(() => {
     console.log(
       "Trying to get Reserves between:\n" +
         currency1.address +
@@ -248,12 +249,11 @@ function CurrencySwapper(props) {
     }
   }, [currency1.address, currency2.address, account, factory, router, signer]);
 
+  // This hook is called when either of the state variables `field1Value` `currency1.address` or `currency2.address` change.
+  // It attempts to calculate and set the state variable `field2Value`
+  // This means that if the user types a new value into the conversion box or the conversion rate changes,
+  // the value in the output box will change.
   useEffect(() => {
-    // This hook is called when either of the state variables `field1Value` `currency1.address` or `currency2.address` change.
-    // It attempts to calculate and set the state variable `field2Value`
-    // This means that if the user types a new value into the conversion box or the conversion rate changes,
-    // the value in the output box will change.
-
     if (isNaN(parseFloat(field1Value))) {
       setField2Value("");
     } else if (field1Value && currency1.address && currency2.address) {
@@ -268,10 +268,9 @@ function CurrencySwapper(props) {
     }
   }, [field1Value, currency1.address, currency2.address]);
 
+  // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
+  // updated has changed. This allows them to see when a transaction completes by looking at the balance output.
   useEffect(() => {
-    // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
-    // updated has changed. This allows them to see when a transaction completes by looking at the balance output.
-
     const currencyTimeout = setTimeout(() => {
       console.log("Checking balances...");
 
@@ -310,9 +309,8 @@ function CurrencySwapper(props) {
     return () => clearTimeout(currencyTimeout);
   });
 
+  // This hook will run when the component first mounts, it can be useful to put logic to populate variables here
   useEffect(() => {
-    // This hook will run when the component first mounts, it can be useful to put logic to populate variables here
-
     getAccount().then((account) => {
       setAccount(account);
     });
