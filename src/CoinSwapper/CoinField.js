@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-CurrencyField.propTypes = {
+CoinField.propTypes = {
   onClick: PropTypes.func.isRequired,
   symbol: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
@@ -54,7 +54,7 @@ CurrencyField.propTypes = {
 };
 
 export function RemoveLiquidityField1(props) {
-  // This component is used to selecting a currency and entering a value, the props are explained below:
+  // This component is used to selecting a coin and entering a value, the props are explained below:
   //      onClick - (string) => void - Called when the button is clicked
   //      symbol - string - The text displayed on the button
   //      value - string - The value of the text field
@@ -104,7 +104,7 @@ export function RemoveLiquidityField1(props) {
 }
 
 export function RemoveLiquidityField2(props) {
-  // This component is used to selecting a currency and entering a value, the props are explained below:
+  // This component is used to selecting a coin and entering a value, the props are explained below:
   //      onClick - (string) => void - Called when the button is clicked
   //      symbol - string - The text displayed on the button
   //      value - string - The value of the text field
@@ -140,7 +140,7 @@ export function RemoveLiquidityField2(props) {
   );
 }
 
-export default function CurrencyField(props) {
+export default function CoinField(props) {
   // This component is used to selecting a token and entering a value, the props are explained below:
   //      onClick - (string) => void - Called when the button is clicked
   //      symbol - string - The text displayed on the button
