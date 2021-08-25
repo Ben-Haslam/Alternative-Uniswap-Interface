@@ -24,7 +24,7 @@ I also defined a function `getAccount`, which prompts the user to select account
 
 #### ethereumFunctions.js
 
-```javascript=1
+```javascript
 import { Contract, ethers } from "ethers";
 import * as COINS from "./constants/coins";
 
@@ -66,7 +66,7 @@ These functions were all imported into the `CoinSwapper.js` file, and used to se
 
 #### CoinSwapper.js
 
-```javascript=70
+```javascript
 const [provider, setProvider] = React.useState(getProvider());
 const [signer, setSigner] = React.useState(getSigner(provider));
 const [account, setAccount] = React.useState(undefined); // This is populated in a react hook
@@ -87,7 +87,7 @@ The next two functions in the `ethereumFunctions.js` file are used to get inform
 
 `doesTokenExist` does a check to make sure the address provided corresponds to a token deployed on the blockchain:
 
-```javascript=40
+```javascript
 export function doesTokenExist(address, signer) {
   try {
     return new Contract(address, ERC20.abi, signer);
@@ -99,7 +99,7 @@ export function doesTokenExist(address, signer) {
 
 `getBalanceAndSymbol` checks if a provided address is the address of the Weth contract on the blockchain, in which case it returns the native AUT balance of the user. Otherwise it returns the ERC20 token balance of the user, along with the symbol of the token (e.g. TA, TB, etc):
 
-```javascript=54
+```javascript
 export async function getBalanceAndSymbol(
   accountAddress,
   address,
@@ -140,7 +140,7 @@ The `swapTokens` function in `ethereumFunctions.js` makes a transaction to the R
 - If `address2` is the address of the Weth contract, it calls the Router function `swapExactTokensForETH`
 - If neither `address1` or `address2` is the address of the Weth contract, and the `swapTokens` function calls the Router function `swapExactTokensForTokens`
 
-```javascript=92
+```javascript
 export async function swapTokens(
   address1,
   address2,
@@ -194,7 +194,7 @@ export async function swapTokens(
 
 The function `getAmountOut` is used to get a preview of a swap. It calls the Router function `getAmountsOut` with the amount of the first token and an array of the addresses of the tokens to be swapped as parameters. It returns the amount out of the second token.
 
-```javascript=147
+```javascript
 export async function getAmountOut(
   address1,
   address2,
@@ -218,7 +218,7 @@ export async function getAmountOut(
 
 Finally, the `getReserves` function in `ethereumFunctions.js` returns the liquidity pool reserves for a given pair of tokens, as well as the liquidity token balance for the user. Internally this function calls another function `fetchReserves`, which fetches the reserves by making a call to the pair contract then making sure the reserves are returned in the right order.
 
-```javascript=171
+```javascript
 export async function fetchReserves(address1, address2, pair) {
   try {
     const reservesRaw = await pair.getReserves();
@@ -238,7 +238,7 @@ export async function fetchReserves(address1, address2, pair) {
 }
 ```
 
-```javascript=195
+```javascript
 export async function getReserves(
   address1,
   address2,
@@ -281,7 +281,7 @@ The next part is a mapping that maps each of the default tokens in `Constants/co
 
 Finally, there is the `Enter` button, which on click calls the `submit` function, which checks a token exists with the address in the `TextField` with the ethereum function `doesTokenExist`, before calling `exit` to close `CoinDialog` returning the address.
 
-```javascript=111
+```javascript
 const submit = () => {
     if (doesTokenExist(address, signer)) {
       exit(address);
@@ -358,7 +358,7 @@ This component, as well as all the others, makes use of the MaterialUI `makeStyl
 
 The `CoinButton` component, defined in `CoinSwapper/CoinButton.js`, extends the MaterialUI `ButtonBase` component, which contains text of the token symbol (coinAbbr) and token name (coinName), which are passed in via props.
 
-```javascript=26
+```javascript
 export default function CoinButton(props) {
     const {coinName, coinAbbr, onClick, ...other} = props;
     const classes = useStyles();
@@ -382,7 +382,7 @@ export default function CoinButton(props) {
 
 The `CoinField` component, defined in `CoinSwapper/CoinField`, renders the input bar with a "SELECT" button used to select each token and input an amount for swapping. The component is relatively simple and consists of MaterialUI components `Fab` (floating action button) and `InputBase` (a text field), both wrapped in `Grid` components for spacing. The relative properties for the `Fab` and `InputBase` components are passed into the `CoinField` component via props.
 
-```javascript=151
+```javascript
 const classes = useStyles();
 const { onClick, symbol, value, onChange, activeField } = props;
 
@@ -427,7 +427,7 @@ return (
 
 The `LoadingButton` component, defined in `Components/LoadingButton.js`, extends the MaterialUI `Button` component, so it will be dissabled depending on the `valid` prop, and displays a spinning loading icon on click until the swap transaction is complete.
 
-```javascript=21
+```javascript
 export default function LoadingButton(props) {
   const classes = useStyles();
   const { children, loading, valid, success, fail, onClick, ...other } = props;
@@ -458,7 +458,7 @@ The main function of the application, `CoinSwapper`, in `CoinSwapper/CoinSwapper
 
 Finally there is the `LoadingButton` component at the bottom, and a short instructional paragraph with a link to the AUT faucet.
 
-```javascript=319
+```javascript
 return (
     <div>
       {/* Dialog Windows */}
@@ -591,7 +591,7 @@ The return statement above references several state variables that keep track of
 
 These are defined with `React.useState` hooks from line 83:
 
-```javascript=83
+```javascript
 // Stores a record of whether their respective dialog window is open
 const [dialog1Open, setDialog1Open] = React.useState(false);
 const [dialog2Open, setDialog2Open] = React.useState(false);
@@ -634,7 +634,7 @@ Also referenced in the return statement above are several internal functions, th
 
 `switchFields` switches the top and bottom coins. This is called when users hit the swap button or select the opposite token in the dialog (e.g. if coin1 is TokenA and the user selects TokenB when choosing coin2):
 
-```javascript=111
+```javascript
 const switchFields = () => {
     setCoin1(coin2);
     setCoin2(coin1);
@@ -645,7 +645,7 @@ const switchFields = () => {
 
 `handleChange` takes an HTML event, pulls the data out, and puts it into a state variable:
 
-```javascript=119
+```javascript
 const handleChange = {
     field1: (e) => {
       setField1Value(e.target.value);
@@ -655,7 +655,7 @@ const handleChange = {
 
 `formatBalance` turns the account's balance into something nice and readable:
 
-```javascript=126
+```javascript
 const formatBalance = (balance, symbol) => {
     if (balance && symbol)
       return parseFloat(balance).toPrecision(8) + " " + symbol;
@@ -665,7 +665,7 @@ const formatBalance = (balance, symbol) => {
 
 `formatReserve` turns the coin's reserves into something nice and readable:
 
-```javascript=133
+```javascript
 const formatReserve = (reserve, symbol) => {
     if (reserve && symbol) return reserve + " " + symbol;
     else return "0.0";
@@ -674,7 +674,7 @@ const formatReserve = (reserve, symbol) => {
 
 `isButtonEnabled` determines whether the button should be enabled or not:
 
-```javascript=139
+```javascript
 const isButtonEnabled = () => {
     let validFloat = new RegExp("^[0-9]*[.,]?[0-9]*$");
 
@@ -690,7 +690,7 @@ const isButtonEnabled = () => {
 
 `onToken1Selected` is called when the dialog window for coin1 exits, and sets the relevant state variables:
 
-```javascript=152
+```javascript
 const onToken1Selected = (address) => {
     // Close the dialog window
     setDialog1Open(false);
@@ -715,7 +715,7 @@ const onToken1Selected = (address) => {
 
 `onToken2Selected` is called when the dialog window for coin2 exits, and sets the relevant state variables:
 
-```javascript=174
+```javascript
 const onToken2Selected = (address) => {
     // Close the dialog window
     setDialog2Open(false);
@@ -740,7 +740,7 @@ const onToken2Selected = (address) => {
 
 `swap` calls the `swapTokens` Ethereum function to make the swap, then resets necessary state variables:
 
-```javascript=196
+```javascript
 const swap = () => {
     console.log("Attempting to swap tokens...");
     setLoading(true);
@@ -770,7 +770,7 @@ const swap = () => {
 };
 ```
 
-Line 213 in the swap function uses `enqueueSnackbar`, a component from the node module Notistack. Notistack is a great library for making tempory notifications. Check the repo [here](https://github.com/iamhosseindhv/notistack).
+Line 16 in the swap function uses `enqueueSnackbar`, a component from the node module Notistack. Notistack is a great library for making tempory notifications. Check the repo [here](https://github.com/iamhosseindhv/notistack).
 
 ### useEffect hooks
 
@@ -778,7 +778,7 @@ Finally, in `CoinSwapper/CoinSwapper.js`, there are four `useEffect` hooks, whic
 
 The first `useEffect` is called when either of the state variables `coin1.address` or `coin2.address` change. This means that when the user selects a different coin to convert between, or the coins are swapped, the new reserves will be calculated:
 
-```javascript=233
+```javascript
 useEffect(() => {
     console.log(
       "Trying to get Reserves between:\n" +
@@ -802,7 +802,7 @@ useEffect(() => {
 
 The second hook is called when any of the state variables `field1Value` `coin1.address` or `coin2.address` change. It attempts to calculate and set the state variable `field2Value`. This means that if the user enters a new value into the conversion box or the conversion rate changes, the value in the output box will change:
 
-```javascript=256
+```javascript
 useEffect(() => {
     if (isNaN(parseFloat(field1Value))) {
       setField2Value("");
@@ -821,7 +821,7 @@ useEffect(() => {
 
 The third hook creates a timeout that will run every ~10 seconds, its role is to check if the user's balance has updated and changed. This allows them to see when a transaction completes by looking at the balance output:
 
-```javascript= 273
+```javascript
 useEffect(() => {
     const coinTimeout = setTimeout(() => {
       console.log("Checking balances...");
@@ -864,7 +864,7 @@ useEffect(() => {
 
 The final hook will run when the component first mounts. It is used to set the account:
 
-```javascript=313
+```javascript
 useEffect(() => {
     getAccount().then((account) => {
       setAccount(account);
