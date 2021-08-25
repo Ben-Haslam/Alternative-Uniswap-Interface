@@ -1,8 +1,8 @@
-# How to tame the uniswap dragon :-)
+# How I made a Uniswap interface from scratch
 
 ## Intro
 
-So that users could easily make swaps and deploy or remove liquidity on the Autonity network, my goal was to make an interface to Uniswap.
+With the goal of allowing users to easily make swaps and deploy or remove liquidity on the Autonity network, I decided to make an interface for Uniswap contracts deployed on the network.
 
 Initially, I wanted to fork the official Uniswap interface for our own private network, but it couldn't be done for various reasons that are out of scope for this blog. For this reason, and because I wanted to have a smaller codebase that I understood top to bottom, I decided to write my own simpler application.
 
