@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Grid, makeStyles, Paper, Typography } from "@material-ui/core";
-import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
+import AccountBalanceIcon from "@material-ui/icons/AccountBalance";
 import { useSnackbar } from "notistack";
 import {
   getAccount,
@@ -12,11 +12,10 @@ import {
   getWeth,
   getReserves,
 } from "../ethereumFunctions";
-import { removeLiquidity, quoteRemoveLiquidity } from "./liquidityFunctions";
-import {
-  RemoveLiquidityField1,
-  RemoveLiquidityField2,
-} from "../CoinSwapper/CoinField";
+
+import { addLiquidity, quoteAddLiquidity } from "./LiquidityFunctions";
+
+import CoinField from "../CoinSwapper/CoinField";
 import CoinDialog from "../CoinSwapper/CoinDialog";
 import LoadingButton from "../Components/LoadingButton";
 import * as COINS from "../constants/coins";
@@ -58,9 +57,23 @@ const styles = (theme) => ({
 
 const useStyles = makeStyles(styles);
 
-function LiquidityRemover(props) {
+function LiquidityDeployer(props) {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
+
+  // Stores information for the Autonity Network
+  const [provider, setProvider] = React.useState(getProvider());
+  const [signer, setSigner] = React.useState(getSigner(provider));
+  const [account, setAccount] = React.useState(undefined); // This is populated in a react hook
+  const [router, setRouter] = React.useState(
+    getRouter("0x4489D87C8440B19f11d63FA2246f943F492F3F5F", signer)
+  );
+  const [weth, setWeth] = React.useState(
+    getWeth("0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF", signer)
+  );
+  const [factory, setFactory] = React.useState(
+    getFactory("0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116", signer)
+  );
 
   // Stores a record of whether their respective dialog window is open
   const [dialog1Open, setDialog1Open] = React.useState(false);
@@ -80,36 +93,28 @@ function LiquidityRemover(props) {
 
   // Stores the current reserves in the liquidity pool between coin1 and coin2
   const [reserves, setReserves] = React.useState(["0.0", "0.0"]);
-  // Stores the liquidity tokens the use has
   const [liquidity_tokens, setLiquidity_tokens] = React.useState("");
-  // Stores the input and output for the liquidity removal preview
-  const [tokensOut, setTokensOut] = React.useState([0, 0, 0]);
 
   // Stores the current value of their respective text box
   const [field1Value, setField1Value] = React.useState("");
-
-  // Stores information for the Autonity Network
-  const [provider, setProvider] = React.useState(getProvider());
-  const [signer, setSigner] = React.useState(getSigner(provider));
-  const [account, setAccount] = React.useState(undefined); // This is populated in a react hook
-  const [router, setRouter] = React.useState(
-    getRouter("0x4489D87C8440B19f11d63FA2246f943F492F3F5F", signer)
-  );
-  const [weth, setWeth] = React.useState(
-    getWeth("0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF", signer)
-  );
-  const [factory, setFactory] = React.useState(
-    getFactory("0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116", signer)
-  );
+  const [field2Value, setField2Value] = React.useState("");
 
   // Controls the loading button
   const [loading, setLoading] = React.useState(false);
 
+  // Used when getting a quote of liquidity
+  const [liquidity_out, setLiquidity_out] = React.useState([0, 0, 0]);
+
   // Switches the top and bottom coins, this is called when users hit the swap button or select the opposite
   // token in the dialog (e.g. if coin1 is TokenA and the user selects TokenB when choosing coin2)
   const switchFields = () => {
+    let oldField1Value = field1Value;
+    let oldField2Value = field2Value;
+
     setCoin1(coin2);
     setCoin2(coin1);
+    setField1Value(oldField2Value);
+    setField2Value(oldField1Value);
     setReserves(reserves.reverse());
   };
 
@@ -117,6 +122,9 @@ function LiquidityRemover(props) {
   const handleChange = {
     field1: (e) => {
       setField1Value(e.target.value);
+    },
+    field2: (e) => {
+      setField2Value(e.target.value);
     },
   };
 
@@ -142,31 +150,34 @@ function LiquidityRemover(props) {
       coin1.address &&
       coin2.address &&
       validFloat.test(field1Value) &&
-      parseFloat(field1Value) <= liquidity_tokens
+      validFloat.test(field2Value) &&
+      parseFloat(field1Value) <= coin1.balance &&
+      parseFloat(field2Value) <= coin2.balance
     );
   };
 
   const deploy = () => {
-    console.log("Attempting to remove liquidity...");
+    console.log("Attempting to deploy liquidity...");
     setLoading(true);
 
-    removeLiquidity(
+    addLiquidity(
       coin1.address,
       coin2.address,
       parseFloat(field1Value),
+      parseFloat(field2Value),
       0,
       0,
       router,
       account,
-      signer,
-      factory
+      signer
     )
       .then(() => {
         setLoading(false);
 
         // If the transaction was successful, we clear to input to make sure the user doesn't accidental redo the transfer
         setField1Value("");
-        enqueueSnackbar("Removal Successful", { variant: "success" });
+        setField2Value("");
+        enqueueSnackbar("Deployment Successful", { variant: "success" });
       })
       .catch((e) => {
         setLoading(false);
@@ -238,22 +249,27 @@ function LiquidityRemover(props) {
   }, [coin1.address, coin2.address, account, factory, signer]);
 
   useEffect(() => {
-    // This hook runs whenever the field values change or coins change, it will attempt to give a preview of the liquidity removal.
+    // This hook runs whenever the field values change or coins change, it will attempt to do a static call to give a preview of the liquidity deployment.
 
     if (isButtonEnabled()) {
-      console.log("Trying to preview the liquidity removal");
-      quoteRemoveLiquidity(
+      console.log("Trying to preview the liquidity deployment");
+
+      quoteAddLiquidity(
         coin1.address,
         coin2.address,
-        field1Value,
+        parseFloat(field1Value),
+        parseFloat(field2Value),
         factory,
         signer
       ).then((data) => {
-        console.log(data);
-        setTokensOut(data);
+        // console.log(data);
+        console.log("TokenA in: ", data[0]);
+        console.log("TokenB in: ", data[1]);
+        console.log("Liquidity out: ", data[2]);
+        setLiquidity_out([data[0], data[1], data[2]]);
       });
     }
-  }, [coin1.address, coin2.address, field1Value, factory, signer]);
+  }, [coin1.address, coin2.address, field1Value, field2Value, factory, signer]);
 
   useEffect(() => {
     // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
@@ -310,7 +326,7 @@ function LiquidityRemover(props) {
 
   return (
     <div>
-      {/* Coin Swapper */}
+      {/* Liquidity deployer */}
       <Typography variant="h5" className={classes.title}></Typography>
 
       {/* Dialog Windows */}
@@ -329,7 +345,7 @@ function LiquidityRemover(props) {
 
       <Grid container direction="column" alignItems="center" spacing={2}>
         <Grid item xs={12} className={classes.fullWidth}>
-          <RemoveLiquidityField1
+          <CoinField
             activeField={true}
             value={field1Value}
             onClick={() => setDialog1Open(true)}
@@ -339,9 +355,11 @@ function LiquidityRemover(props) {
         </Grid>
 
         <Grid item xs={12} className={classes.fullWidth}>
-          <RemoveLiquidityField2
+          <CoinField
             activeField={true}
+            value={field2Value}
             onClick={() => setDialog2Open(true)}
+            onChange={handleChange.field2}
             symbol={coin2.symbol !== undefined ? coin2.symbol : "Select"}
           />
         </Grid>
@@ -408,7 +426,6 @@ function LiquidityRemover(props) {
             </Grid>
           </Grid>
         </Grid>
-
         <Paper className={classes.paperContainer}>
           {/*Red  Display to show the quote */}
           <Grid
@@ -420,11 +437,16 @@ function LiquidityRemover(props) {
             className={classes.fullWidth}
           >
             {/* Tokens in */}
-            <Typography variant="h6">Liquidity Pool Tokens in</Typography>
-            <Grid container direction="row" justifyContent="center">
+            <Typography variant="h6">Tokens in</Typography>
+            <Grid container direction="row" justifyContent="space-between">
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatBalance(tokensOut[0], "UNI-V2")}
+                  {formatBalance(liquidity_out[0], coin1.symbol)}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="body1" className={classes.balance}>
+                  {formatBalance(liquidity_out[1], coin2.symbol)}
                 </Typography>
               </Grid>
             </Grid>
@@ -432,24 +454,19 @@ function LiquidityRemover(props) {
             <hr className={classes.hr} />
 
             {/* Liquidity Tokens Display */}
-            <Typography variant="h6">Tokens Out</Typography>
-            <Grid container direction="row" justifyContent="space-between">
+            <Typography variant="h6">Liquidity Pool Tokens Out</Typography>
+            <Grid container direction="row" justifyContent="center">
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatBalance(tokensOut[1], coin1.symbol)}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body1" className={classes.balance}>
-                  {formatBalance(tokensOut[2], coin2.symbol)}
+                  {formatReserve(liquidity_out[2], "UNI-V2")}
                 </Typography>
               </Grid>
             </Grid>
           </Grid>
         </Paper>
+
         <hr className={classes.hr} />
       </Grid>
-
       <Grid container direction="column" alignItems="center" spacing={2}>
         <LoadingButton
           loading={loading}
@@ -458,12 +475,12 @@ function LiquidityRemover(props) {
           fail={false}
           onClick={deploy}
         >
-          <ArrowDownwardIcon className={classes.buttonIcon} />
-          Remove
+          <AccountBalanceIcon className={classes.buttonIcon} />
+          Deploy
         </LoadingButton>
       </Grid>
     </div>
   );
 }
 
-export default LiquidityRemover;
+export default LiquidityDeployer;

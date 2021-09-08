@@ -8,12 +8,12 @@ const PAIR = require("../build/IUniswapV2Pair.json");
 
 // Function used to add Liquidity to any pair of tokens or token-AUT
 // To work correctly, there needs to be 9 arguments:
-//    `address1` - An Ethereum address of the currency to add from (either a token or AUT)
-//    `address2` - An Ethereum address of the currency to add to (either a token or AUT)
-//    `amount1` - A float or similar number representing the value of address1's currency to add
-//    `amount2` - A float or similar number representing the value of address2's currency to add
-//    `amount1Min` - A float or similar number representing the minimum of address1's currency to add
-//    `amount2Min` - A float or similar number representing the minimum of address2's currency to add
+//    `address1` - An Ethereum address of the coin to add from (either a token or AUT)
+//    `address2` - An Ethereum address of the coin to add to (either a token or AUT)
+//    `amount1` - A float or similar number representing the value of address1's coin to add
+//    `amount2` - A float or similar number representing the value of address2's coin to add
+//    `amount1Min` - A float or similar number representing the minimum of address1's coin to add
+//    `amount2Min` - A float or similar number representing the minimum of address2's coin to add
 //    `routerContract` - The router contract to carry out this trade
 //    `accountAddress` - An Ethereum address of the current user's account
 //    `provider` - The current provider
@@ -94,11 +94,11 @@ export async function addLiquidity(
 
 // Function used to remove Liquidity from any pair of tokens or token-AUT
 // To work correctly, there needs to be 9 arguments:
-//    `address1` - An Ethereum address of the currency to recieve (either a token or AUT)
-//    `address2` - An Ethereum address of the currency to recieve (either a token or AUT)
+//    `address1` - An Ethereum address of the coin to recieve (either a token or AUT)
+//    `address2` - An Ethereum address of the coin to recieve (either a token or AUT)
 //    `liquidity_tokens` - A float or similar number representing the value of liquidity tokens you will burn to get tokens back
-//    `amount1Min` - A float or similar number representing the minimum of address1's currency to recieve
-//    `amount2Min` - A float or similar number representing the minimum of address2's currency to recieve
+//    `amount1Min` - A float or similar number representing the minimum of address1's coin to recieve
+//    `amount2Min` - A float or similar number representing the minimum of address2's coin to recieve
 //    `routerContract` - The router contract to carry out this trade
 //    `accountAddress` - An Ethereum address of the current user's account
 //    `provider` - The current provider
@@ -171,14 +171,15 @@ export async function removeLiquidity(
   }
 }
 
-const quote = (amountA, reserveA, reserveB) => {
-  const amountB = amountA * (reserveB / reserveA);
-  return amountB;
+const quote = (amount1, reserve1, reserve2) => {
+  const amount2 = amount1 * (reserve2 / reserve1);
+  const amountOut = Math.sqrt(amount2 * amount1);
+  return [amount2, amountOut];
 };
 
 // Function used to get a quote of the liquidity addition
-//    `address1` - An Ethereum address of the currency to recieve (either a token or AUT)
-//    `address2` - An Ethereum address of the currency to recieve (either a token or AUT)
+//    `address1` - An Ethereum address of the coin to recieve (either a token or AUT)
+//    `address2` - An Ethereum address of the coin to recieve (either a token or AUT)
 //    `amountA_desired` - The prefered value of the first token that the user would like to deploy as liquidity
 //    `amountB_desired` - The prefered value of the second token that the user would like to deploy as liquidity
 //    `factory` - The current factory
@@ -200,21 +201,39 @@ export async function quoteAddLiquidity(
   const reserveB = reservesRaw[1];
 
   if (reserveA === 0 && reserveB === 0) {
-    return [amountADesired.toString(), amountBDesired.toString()];
+    let amountOut = Math.sqrt(reserveA * reserveB);
+    return [
+      amountADesired.toString(),
+      amountBDesired.toString(),
+      amountOut.toString(),
+    ];
   } else {
-    const amountBOptimal = quote(amountADesired, reserveA, reserveB);
+    let [amountBOptimal, amountOut] = quote(amountADesired, reserveA, reserveB);
     if (amountBOptimal <= amountBDesired) {
-      return [amountADesired.toString(), amountBOptimal.toString()];
+      return [
+        amountADesired.toString(),
+        amountBOptimal.toString(),
+        amountOut.toString(),
+      ];
     } else {
-      const amountAOptimal = quote(amountBDesired, reserveB, reserveA);
-      return [amountAOptimal.toString(), amountBDesired.toString()];
+      let [amountAOptimal, amountOut] = quote(
+        amountBDesired,
+        reserveB,
+        reserveA
+      );
+      console.log(amountAOptimal, amountOut);
+      return [
+        amountAOptimal.toString(),
+        amountBDesired.toString(),
+        amountOut.toString(),
+      ];
     }
   }
 }
 
 // Function used to get a quote of the liquidity removal
-//    `address1` - An Ethereum address of the currency to recieve (either a token or AUT)
-//    `address2` - An Ethereum address of the currency to recieve (either a token or AUT)
+//    `address1` - An Ethereum address of the coin to recieve (either a token or AUT)
+//    `address2` - An Ethereum address of the coin to recieve (either a token or AUT)
 //    `liquidity` - The amount of liquidity tokens the user will burn to get their tokens back
 //    `factory` - The current factory
 //    `signer` - The current signer
@@ -234,11 +253,6 @@ export async function quoteRemoveLiquidity(
   const reserveA = reservesRaw[0];
   const reserveB = reservesRaw[1];
 
-  //// Older, simpler method
-  // const Aout = liquidity * Math.sqrt(reserveA / reserveB);
-  // const Bout = liquidity * Math.sqrt(reserveB / reserveA);
-
-  // New, precise method
   const feeOn =
     (await factory.feeTo()) !== 0x0000000000000000000000000000000000000000;
 

@@ -5,7 +5,7 @@ import NarBar from "./NavBar/NavBar";
 import CoinSwapper from "./CoinSwapper/CoinSwapper";
 import { Route } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
-import Liquidity from "./LiquidityDeployer/Liquidity";
+import Liquidity from "./Liquidity/Liquidity";
 import ConnectWalletPage from "./Components/connectWalletPage";
 import { createTheme, ThemeProvider } from "@material-ui/core";
 
@@ -31,10 +31,14 @@ function App() {
         <SnackbarProvider maxSnack={3}>
           <ThemeProvider theme={theme}>
             <NarBar />
-            <Route exact path="/uniswap-react/" component={CoinSwapper} />
             <Route
               exact
-              path="/uniswap-react/liquidity"
+              path="/autonity-uniswap-interface/"
+              component={CoinSwapper}
+            />
+            <Route
+              exact
+              path="/autonity-uniswap-interface/liquidity"
               component={Liquidity}
             />
           </ThemeProvider>
