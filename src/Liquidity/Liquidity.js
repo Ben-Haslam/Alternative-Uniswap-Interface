@@ -7,9 +7,9 @@ import {
   Typography,
 } from "@material-ui/core";
 
+import SwitchButton from "./SwitchButton";
 import LiquidityDeployer from "./LiquidityDeployer";
 import LiquidityRemover from "./RemoveLiquidity";
-import SwitchButton from "./SwitchButton";
 
 const styles = (theme) => ({
   paperContainer: {

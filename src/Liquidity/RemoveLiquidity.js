@@ -80,10 +80,6 @@ function LiquidityRemover(props) {
 
   // Stores the current reserves in the liquidity pool between coin1 and coin2
   const [reserves, setReserves] = React.useState(["0.0", "0.0"]);
-  // Stores the liquidity tokens the use has
-  const [liquidity_tokens, setLiquidity_tokens] = React.useState("");
-  // Stores the input and output for the liquidity removal preview
-  const [tokensOut, setTokensOut] = React.useState([0, 0, 0]);
 
   // Stores the current value of their respective text box
   const [field1Value, setField1Value] = React.useState("");
@@ -104,6 +100,12 @@ function LiquidityRemover(props) {
 
   // Controls the loading button
   const [loading, setLoading] = React.useState(false);
+
+  // Stores the liquidity tokens balance of the user
+  const [liquidityTokens, setLiquidityTokens] = React.useState("");
+
+  // Stores the input and output for the liquidity removal preview
+  const [tokensOut, setTokensOut] = React.useState([0, 0, 0]);
 
   // Switches the top and bottom coins, this is called when users hit the swap button or select the opposite
   // token in the dialog (e.g. if coin1 is TokenA and the user selects TokenB when choosing coin2)
@@ -142,11 +144,11 @@ function LiquidityRemover(props) {
       coin1.address &&
       coin2.address &&
       validFloat.test(field1Value) &&
-      parseFloat(field1Value) <= liquidity_tokens
+      parseFloat(field1Value) <= liquidityTokens
     );
   };
 
-  const deploy = () => {
+  const remove = () => {
     console.log("Attempting to remove liquidity...");
     setLoading(true);
 
@@ -221,8 +223,10 @@ function LiquidityRemover(props) {
     }
   };
 
+  // This hook is called when either of the state variables `coin1.address` or `coin2.address` change.
+  // This means that when the user selects a different coin to convert between, or the coins are swapped,
+  // the new reserves will be calculated.
   useEffect(() => {
-    // This hook runs whenever the coins change, it will attempt to fetch the new liquidity reserves.
     console.log(
       "Trying to get reserves between:\n" + coin1.address + "\n" + coin2.address
     );
@@ -231,15 +235,15 @@ function LiquidityRemover(props) {
       getReserves(coin1.address, coin2.address, factory, signer, account).then(
         (data) => {
           setReserves([data[0], data[1]]);
-          setLiquidity_tokens(data[2]);
+          setLiquidityTokens(data[2]);
         }
       );
     }
   }, [coin1.address, coin2.address, account, factory, signer]);
 
+  // This hook is called when either of the state variables `field1Value`, `coin1.address` or `coin2.address` change.
+  // It will give a preview of the liquidity removal.
   useEffect(() => {
-    // This hook runs whenever the field values change or coins change, it will attempt to give a preview of the liquidity removal.
-
     if (isButtonEnabled()) {
       console.log("Trying to preview the liquidity removal");
       quoteRemoveLiquidity(
@@ -271,7 +275,7 @@ function LiquidityRemover(props) {
           account
         ).then((data) => {
           setReserves([data[0], data[1]]);
-          setLiquidity_tokens(data[2]);
+          setLiquidityTokens(data[2]);
         });
       }
 
@@ -403,7 +407,7 @@ function LiquidityRemover(props) {
           <Grid container direction="row" justifyContent="center">
             <Grid item xs={6}>
               <Typography variant="body1" className={classes.balance}>
-                {formatReserve(liquidity_tokens, "UNI-V2")}
+                {formatReserve(liquidityTokens, "UNI-V2")}
               </Typography>
             </Grid>
           </Grid>
@@ -456,7 +460,7 @@ function LiquidityRemover(props) {
           valid={isButtonEnabled()}
           success={false}
           fail={false}
-          onClick={deploy}
+          onClick={remove}
         >
           <ArrowDownwardIcon className={classes.buttonIcon} />
           Remove

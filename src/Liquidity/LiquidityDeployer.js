@@ -93,7 +93,6 @@ function LiquidityDeployer(props) {
 
   // Stores the current reserves in the liquidity pool between coin1 and coin2
   const [reserves, setReserves] = React.useState(["0.0", "0.0"]);
-  const [liquidity_tokens, setLiquidity_tokens] = React.useState("");
 
   // Stores the current value of their respective text box
   const [field1Value, setField1Value] = React.useState("");
@@ -102,8 +101,11 @@ function LiquidityDeployer(props) {
   // Controls the loading button
   const [loading, setLoading] = React.useState(false);
 
+  // Stores the user's balance of liquidity tokens for the current pair
+  const [liquidityTokens, setLiquidityTokens] = React.useState("");
+
   // Used when getting a quote of liquidity
-  const [liquidity_out, setLiquidity_out] = React.useState([0, 0, 0]);
+  const [liquidityOut, setLiquidityOut] = React.useState([0, 0, 0]);
 
   // Switches the top and bottom coins, this is called when users hit the swap button or select the opposite
   // token in the dialog (e.g. if coin1 is TokenA and the user selects TokenB when choosing coin2)
@@ -232,8 +234,10 @@ function LiquidityDeployer(props) {
     }
   };
 
+  // This hook is called when either of the state variables `coin1.address` or `coin2.address` change.
+  // This means that when the user selects a different coin to convert between, or the coins are swapped,
+  // the new reserves will be calculated.
   useEffect(() => {
-    // This hook runs whenever the coins change, it will attempt to fetch the new liquidity reserves.
     console.log(
       "Trying to get reserves between:\n" + coin1.address + "\n" + coin2.address
     );
@@ -242,15 +246,15 @@ function LiquidityDeployer(props) {
       getReserves(coin1.address, coin2.address, factory, signer, account).then(
         (data) => {
           setReserves([data[0], data[1]]);
-          setLiquidity_tokens(data[2]);
+          setLiquidityTokens(data[2]);
         }
       );
     }
   }, [coin1.address, coin2.address, account, factory, signer]);
 
+  // This hook is called when either of the state variables `field1Value`, `field2Value`, `coin1.address` or `coin2.address` change.
+  // It will give a preview of the liquidity deployment.
   useEffect(() => {
-    // This hook runs whenever the field values change or coins change, it will attempt to do a static call to give a preview of the liquidity deployment.
-
     if (isButtonEnabled()) {
       console.log("Trying to preview the liquidity deployment");
 
@@ -266,15 +270,14 @@ function LiquidityDeployer(props) {
         console.log("TokenA in: ", data[0]);
         console.log("TokenB in: ", data[1]);
         console.log("Liquidity out: ", data[2]);
-        setLiquidity_out([data[0], data[1], data[2]]);
+        setLiquidityOut([data[0], data[1], data[2]]);
       });
     }
   }, [coin1.address, coin2.address, field1Value, field2Value, factory, signer]);
 
+  // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
+  // updated has changed. This allows them to see when a transaction completes by looking at the balance output.
   useEffect(() => {
-    // This hook creates a timeout that will run every ~10 seconds, it's role is to check if the user's balance has
-    // updated has changed. This allows them to see when a transaction completes by looking at the balance output.
-
     const coinTimeout = setTimeout(() => {
       console.log("Checking balances & Getting reserves...");
 
@@ -287,7 +290,7 @@ function LiquidityDeployer(props) {
           account
         ).then((data) => {
           setReserves([data[0], data[1]]);
-          setLiquidity_tokens(data[2]);
+          setLiquidityTokens(data[2]);
         });
       }
 
@@ -421,7 +424,7 @@ function LiquidityDeployer(props) {
           <Grid container direction="row" justifyContent="center">
             <Grid item xs={6}>
               <Typography variant="body1" className={classes.balance}>
-                {formatReserve(liquidity_tokens, "UNI-V2")}
+                {formatReserve(liquidityTokens, "UNI-V2")}
               </Typography>
             </Grid>
           </Grid>
@@ -441,12 +444,12 @@ function LiquidityDeployer(props) {
             <Grid container direction="row" justifyContent="space-between">
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatBalance(liquidity_out[0], coin1.symbol)}
+                  {formatBalance(liquidityOut[0], coin1.symbol)}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatBalance(liquidity_out[1], coin2.symbol)}
+                  {formatBalance(liquidityOut[1], coin2.symbol)}
                 </Typography>
               </Grid>
             </Grid>
@@ -458,7 +461,7 @@ function LiquidityDeployer(props) {
             <Grid container direction="row" justifyContent="center">
               <Grid item xs={6}>
                 <Typography variant="body1" className={classes.balance}>
-                  {formatReserve(liquidity_out[2], "UNI-V2")}
+                  {formatReserve(liquidityOut[2], "UNI-V2")}
                 </Typography>
               </Grid>
             </Grid>
