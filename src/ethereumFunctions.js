@@ -14,6 +14,11 @@ export function getSigner(provider) {
   return provider.getSigner();
 }
 
+export async function getNetwork(provider) {
+  const network = await provider.getNetwork();
+  return network.chainId;
+}
+
 export function getRouter(address, signer) {
   return new Contract(address, ROUTER.abi, signer);
 }
@@ -109,8 +114,9 @@ export async function swapTokens(
 
   const token1 = new Contract(address1, ERC20.abi, signer);
   await token1.approve(routerContract.address, amountIn);
+  const wethAddress = await routerContract.WETH();
 
-  if (address1 === COINS.AUTONITY.address) {
+  if (address1 === wethAddress) {
     // Eth -> Token
     await routerContract.swapExactETHForTokens(
       amountOut[1],
@@ -119,7 +125,7 @@ export async function swapTokens(
       deadline,
       { value: amountIn }
     );
-  } else if (address2 === COINS.AUTONITY.address) {
+  } else if (address2 === wethAddress) {
     // Token -> Eth
     await routerContract.swapExactTokensForETH(
       amountIn,
