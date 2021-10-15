@@ -16,6 +16,7 @@ import {
   getProvider,
   getRouter,
   getSigner,
+  getNetwork,
   getAmountOut,
   getBalanceAndSymbol,
   getWeth,
@@ -26,6 +27,7 @@ import CoinField from "./CoinField";
 import CoinDialog from "./CoinDialog";
 import LoadingButton from "../Components/LoadingButton";
 import * as COINS from "../constants/coins";
+import * as chains from "../constants/chains";
 
 const styles = (theme) => ({
   paperContainer: {
@@ -69,16 +71,13 @@ function CoinSwapper(props) {
 
   const [provider, setProvider] = React.useState(getProvider());
   const [signer, setSigner] = React.useState(getSigner(provider));
-  const [account, setAccount] = React.useState(undefined); // This is populated in a react hook
-  const [router, setRouter] = React.useState(
-    getRouter("0x4489D87C8440B19f11d63FA2246f943F492F3F5F", signer)
-  );
-  const [weth, setWeth] = React.useState(
-    getWeth("0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF", signer)
-  );
-  const [factory, setFactory] = React.useState(
-    getFactory("0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116", signer)
-  );
+
+  // The following are populated in a react hook
+  const [account, setAccount] = React.useState(undefined);
+  const [chainId, setChainId] = React.useState(undefined);
+  const [router, setRouter] = React.useState(undefined);
+  const [weth, setWeth] = React.useState(undefined);
+  const [factory, setFactory] = React.useState(undefined);
 
   // Stores a record of whether their respective dialog window is open
   const [dialog1Open, setDialog1Open] = React.useState(false);
@@ -304,7 +303,15 @@ function CoinSwapper(props) {
     getAccount().then((account) => {
       setAccount(account);
     });
-  });
+
+    getNetwork(provider).then((chainId) => {
+      setChainId(chainId);
+      console.log('chainID: ', chainId);
+      setRouter(getRouter (chains.routerAddress.get(chainId), signer));
+      setWeth(getWeth (chains.wethAddress.get(chainId), signer));
+      setFactory(getFactory (chains.factoryAddress.get(chainId), signer));
+      });
+  }, []);
 
   return (
     <div>

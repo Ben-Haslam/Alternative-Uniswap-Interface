@@ -44,6 +44,8 @@ export async function addLiquidity(
   await token1.approve(routerContract.address, amountIn1);
   await token2.approve(routerContract.address, amountIn2);
 
+  const wethAddress = await routerContract.WETH();
+
   console.log([
     address1,
     address2,
@@ -55,7 +57,7 @@ export async function addLiquidity(
     deadline,
   ]);
 
-  if (address1 === COINS.AUTONITY.address) {
+  if (address1 === wethAddress) {
     // Eth + Token
     await routerContract.addLiquidityETH(
       address2,
@@ -66,7 +68,7 @@ export async function addLiquidity(
       deadline,
       { value: amountIn1 }
     );
-  } else if (address2 === COINS.AUTONITY.address) {
+  } else if (address2 === wethAddress) {
     // Token + Eth
     await routerContract.addLiquidityETH(
       address1,
@@ -122,6 +124,7 @@ export async function removeLiquidity(
   const time = Math.floor(Date.now() / 1000) + 200000;
   const deadline = ethers.BigNumber.from(time);
 
+  const wethAddress = await routerContract.WETH();
   const pairAddress = await factory.getPair(address1, address2);
   const pair = new Contract(pairAddress, PAIR.abi, signer);
 
@@ -137,7 +140,7 @@ export async function removeLiquidity(
     deadline,
   ]);
 
-  if (address1 === COINS.AUTONITY.address) {
+  if (address1 === wethAddress) {
     // Eth + Token
     await routerContract.removeLiquidityETH(
       address2,
@@ -147,7 +150,7 @@ export async function removeLiquidity(
       account,
       deadline
     );
-  } else if (address2 === COINS.AUTONITY.address) {
+  } else if (address2 === wethAddress) {
     // Token + Eth
     await routerContract.removeLiquidityETH(
       address1,
