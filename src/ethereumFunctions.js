@@ -1,6 +1,6 @@
 import { Contract, ethers } from "ethers";
 import * as chains from "./constants/chains";
-import * as COINS from "./constants/coins";
+import COINS from "./constants/coins";
 
 const ROUTER = require("./build/UniswapV2Router02.json");
 const ERC20 = require("./build/ERC20.json");
@@ -69,15 +69,17 @@ export async function getBalanceAndSymbol(
   accountAddress,
   address,
   provider,
-  signer
+  signer,
+  weth_address,
+  coins
 ) {
   try {
-    if (address === COINS.AUTONITY.address) {
+    if (address === weth_address) {
       const balanceRaw = await provider.getBalance(accountAddress);
 
       return {
         balance: ethers.utils.formatEther(balanceRaw),
-        symbol: COINS.AUTONITY.abbr,
+        symbol: coins[0].abbr,
       };
     } else {
       const token = new Contract(address, ERC20.abi, signer);

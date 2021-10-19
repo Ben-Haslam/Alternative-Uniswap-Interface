@@ -21,7 +21,7 @@ import {
 import CoinDialog from "../CoinSwapper/CoinDialog";
 import LoadingButton from "../Components/LoadingButton";
 import WrongNetwork from "../Components/wrongNetwork";
-import * as COINS from "../constants/coins";
+import COINS from "../constants/coins";
 import * as chains from "../constants/chains";
 
 const styles = (theme) => ({
@@ -93,6 +93,8 @@ function LiquidityRemover(props) {
     symbol: undefined,
     balance: undefined,
   });
+
+  const [coins, setCoins] = React.useState([]);
 
   // Stores the current reserves in the liquidity pool between coin1 and coin2
   const [reserves, setReserves] = React.useState(["0.0", "0.0"]);
@@ -193,7 +195,7 @@ function LiquidityRemover(props) {
     // We only update the values if the user provides a token
     else if (address) {
       // Getting some token data is async, so we need to wait for the data to return, hence the promise
-      getBalanceAndSymbol(account, address, provider, signer).then((data) => {
+      getBalanceAndSymbol(account, address, provider, signer, weth.address, coins).then((data) => {
         setCoin1({
           address: address,
           symbol: data.symbol,
@@ -215,7 +217,7 @@ function LiquidityRemover(props) {
     // We only update the values if the user provides a token
     else if (address) {
       // Getting some token data is async, so we need to wait for the data to return, hence the promise
-      getBalanceAndSymbol(account, address, provider, signer).then((data) => {
+      getBalanceAndSymbol(account, address, provider, signer, weth.address, coins).then((data) => {
         setCoin2({
           address: address,
           symbol: data.symbol,
@@ -282,7 +284,7 @@ function LiquidityRemover(props) {
       }
 
       if (coin1 && account) {
-        getBalanceAndSymbol(account, coin1.address, provider, signer).then(
+        getBalanceAndSymbol(account, coin1.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin1({
               ...coin1,
@@ -292,7 +294,7 @@ function LiquidityRemover(props) {
         );
       }
       if (coin2 && account) {
-        getBalanceAndSymbol(account, coin2.address, provider, signer).then(
+        getBalanceAndSymbol(account, coin2.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin2({
               ...coin2,
@@ -323,9 +325,13 @@ function LiquidityRemover(props) {
         console.log('chainID: ', chainId);
         const router = await getRouter (chains.routerAddress.get(chainId), signer)
         setRouter(router);
-        setWeth(getWeth (router.WETH(), signer));
-        setFactory(getFactory (router.factory(), signer));
-        
+        await router.WETH().then((wethAddress) => {
+          setWeth(getWeth (wethAddress, signer));
+        });
+        await router.factory().then((factory_address) => {
+          setFactory(getFactory (factory_address, signer));
+        });
+        setCoins(COINS.get(chainId));
       } else {
         console.log('Wrong network mate.');
         setwrongNetworkOpen(true);
@@ -345,13 +351,13 @@ function LiquidityRemover(props) {
       <CoinDialog
         open={dialog1Open}
         onClose={onToken1Selected}
-        coins={COINS.ALL}
+        coins={coins}
         signer={signer}
       />
       <CoinDialog
         open={dialog2Open}
         onClose={onToken2Selected}
-        coins={COINS.ALL}
+        coins={coins}
         signer={signer}
       />
       <WrongNetwork
