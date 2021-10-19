@@ -1,4 +1,5 @@
 import { Contract, ethers } from "ethers";
+import * as chains from "./constants/chains";
 import * as COINS from "./constants/coins";
 
 const ROUTER = require("./build/UniswapV2Router02.json");
@@ -23,10 +24,12 @@ export function getRouter(address, signer) {
   return new Contract(address, ROUTER.abi, signer);
 }
 
-export async function getAddresses(router) {
-  const wethAddress = await router.WETH();
-  const factoryAddress = await router.factory();
-  return [wethAddress, factoryAddress];
+export async function checkNetwork(provider) {
+  const chainId = getNetwork(provider);
+  if (chains.networks.includes(chainId)){
+    return true
+  }
+  return false;
 }
 
 export function getWeth(address, signer) {

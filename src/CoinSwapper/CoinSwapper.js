@@ -20,13 +20,13 @@ import {
   getAmountOut,
   getBalanceAndSymbol,
   getWeth,
-  getAddresses,
   swapTokens,
   getReserves,
 } from "../ethereumFunctions";
 import CoinField from "./CoinField";
 import CoinDialog from "./CoinDialog";
 import LoadingButton from "../Components/LoadingButton";
+import WrongNetwork from "../Components/wrongNetwork";
 import * as COINS from "../constants/coins";
 import * as chains from "../constants/chains";
 
@@ -83,6 +83,7 @@ function CoinSwapper(props) {
   // Stores a record of whether their respective dialog window is open
   const [dialog1Open, setDialog1Open] = React.useState(false);
   const [dialog2Open, setDialog2Open] = React.useState(false);
+  const [wrongNetworkOpen, setwrongNetworkOpen] = React.useState(false);
 
   // Stores data about their respective coin
   const [coin1, setCoin1] = React.useState({
@@ -301,6 +302,7 @@ function CoinSwapper(props) {
 
   // This hook will run when the component first mounts, it can be useful to put logic to populate variables here
   useEffect(() => {
+    
     getAccount().then((account) => {
       setAccount(account);
     });
@@ -310,14 +312,19 @@ function CoinSwapper(props) {
         setChainId(chainId);
         return chainId;
       });
-      console.log('chainID: ', chainId);
-      const router = await getRouter (chains.routerAddress.get(chainId), signer)
-      console.log('router address: ' ,router.address)
-      setRouter(router);
-      console.log('Weth address: ', router.WETH())
-      setWeth(getWeth (router.WETH(), signer));
-      console.log('factory address: ', router.factory())
-      setFactory(getFactory (router.factory(), signer));
+
+      if (chains.networks.includes(chainId)){
+        setwrongNetworkOpen(false);
+        console.log('chainID: ', chainId);
+        const router = await getRouter (chains.routerAddress.get(chainId), signer)
+        setRouter(router);
+        setWeth(getWeth (router.WETH(), signer));
+        setFactory(getFactory (router.factory(), signer));
+        
+      } else {
+        console.log('Wrong network mate.');
+        setwrongNetworkOpen(true);
+      }
     }
 
     Network()
@@ -339,6 +346,9 @@ function CoinSwapper(props) {
         coins={COINS.ALL}
         signer={signer}
       />
+      <WrongNetwork
+        open={wrongNetworkOpen}
+        />
 
       {/* Coin Swapper */}
       <Container maxWidth="xs">
