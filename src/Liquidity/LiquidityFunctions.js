@@ -1,6 +1,4 @@
 import { Contract, ethers } from "ethers";
-import * as COINS from "../constants/coins";
-
 import { fetchReserves } from "../ethereumFunctions";
 
 const ERC20 = require("../build/ERC20.json");

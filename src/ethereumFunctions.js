@@ -23,6 +23,12 @@ export function getRouter(address, signer) {
   return new Contract(address, ROUTER.abi, signer);
 }
 
+export async function getAddresses(router) {
+  const wethAddress = await router.WETH();
+  const factoryAddress = await router.factory();
+  return [wethAddress, factoryAddress];
+}
+
 export function getWeth(address, signer) {
   return new Contract(address, ERC20.abi, signer);
 }
@@ -162,6 +168,7 @@ export async function getAmountOut(
       [address1, address2]
     );
     const amount_out = ethers.utils.formatEther(values_out[1]);
+    console.log('amount out: ', amount_out)
     return Number(amount_out);
   } catch {
     return false;

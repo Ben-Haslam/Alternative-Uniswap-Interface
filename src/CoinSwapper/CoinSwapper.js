@@ -20,6 +20,7 @@ import {
   getAmountOut,
   getBalanceAndSymbol,
   getWeth,
+  getAddresses,
   swapTokens,
   getReserves,
 } from "../ethereumFunctions";
@@ -304,13 +305,23 @@ function CoinSwapper(props) {
       setAccount(account);
     });
 
-    getNetwork(provider).then((chainId) => {
-      setChainId(chainId);
-      console.log('chainID: ', chainId);
-      setRouter(getRouter (chains.routerAddress.get(chainId), signer));
-      setWeth(getWeth (chains.wethAddress.get(chainId), signer));
-      setFactory(getFactory (chains.factoryAddress.get(chainId), signer));
+    async function Network() {
+      const chainId = await getNetwork(provider).then((chainId) => {
+        setChainId(chainId);
+        return chainId;
       });
+      console.log('chainID: ', chainId);
+      const router = await getRouter (chains.routerAddress.get(chainId), signer)
+      console.log('router address: ' ,router.address)
+      setRouter(router);
+      console.log('Weth address: ', router.WETH())
+      setWeth(getWeth (router.WETH(), signer));
+      console.log('factory address: ', router.factory())
+      setFactory(getFactory (router.factory(), signer));
+    }
+
+    Network()
+
   }, []);
 
   return (
