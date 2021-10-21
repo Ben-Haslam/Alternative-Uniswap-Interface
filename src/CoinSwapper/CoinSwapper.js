@@ -26,7 +26,8 @@ import {
 import CoinField from "./CoinField";
 import CoinDialog from "./CoinDialog";
 import LoadingButton from "../Components/LoadingButton";
-import * as COINS from "../constants/coins";
+import WrongNetwork from "../Components/wrongNetwork";
+import COINS from "../constants/coins";
 import * as chains from "../constants/chains";
 
 const styles = (theme) => ({
@@ -82,6 +83,7 @@ function CoinSwapper(props) {
   // Stores a record of whether their respective dialog window is open
   const [dialog1Open, setDialog1Open] = React.useState(false);
   const [dialog2Open, setDialog2Open] = React.useState(false);
+  const [wrongNetworkOpen, setwrongNetworkOpen] = React.useState(false);
 
   // Stores data about their respective coin
   const [coin1, setCoin1] = React.useState({
@@ -94,6 +96,8 @@ function CoinSwapper(props) {
     symbol: undefined,
     balance: undefined,
   });
+
+  const [coins, setCoins] = React.useState([]);
 
   // Stores the current reserves in the liquidity pool between coin1 and coin2
   const [reserves, setReserves] = React.useState(["0.0", "0.0"]);
@@ -159,7 +163,7 @@ function CoinSwapper(props) {
     // We only update the values if the user provides a token
     else if (address) {
       // Getting some token data is async, so we need to wait for the data to return, hence the promise
-      getBalanceAndSymbol(account, address, provider, signer).then((data) => {
+      getBalanceAndSymbol(account, address, provider, signer, weth.address, coins).then((data) => {
         setCoin1({
           address: address,
           symbol: data.symbol,
@@ -181,7 +185,7 @@ function CoinSwapper(props) {
     // We only update the values if the user provides a token
     else if (address) {
       // Getting some token data is async, so we need to wait for the data to return, hence the promise
-      getBalanceAndSymbol(account, address, provider, signer).then((data) => {
+      getBalanceAndSymbol(account, address, provider, signer, weth.address, coins).then((data) => {
         setCoin2({
           address: address,
           symbol: data.symbol,
@@ -249,7 +253,7 @@ function CoinSwapper(props) {
     if (isNaN(parseFloat(field1Value))) {
       setField2Value("");
     } else if (field1Value && coin1.address && coin2.address) {
-      getAmountOut(coin1.address, coin2.address, field1Value, router).then(
+      getAmountOut(coin1.address, coin2.address, field1Value, router, signer).then(
         (amount) => setField2Value(amount.toFixed(7))
       );
     } else {
@@ -273,8 +277,8 @@ function CoinSwapper(props) {
         ).then((data) => setReserves(data));
       }
 
-      if (coin1 && account) {
-        getBalanceAndSymbol(account, coin1.address, provider, signer).then(
+      if (coin1 && account &&!wrongNetworkOpen) {
+        getBalanceAndSymbol(account, coin1.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin1({
               ...coin1,
@@ -283,8 +287,8 @@ function CoinSwapper(props) {
           }
         );
       }
-      if (coin2 && account) {
-        getBalanceAndSymbol(account, coin2.address, provider, signer).then(
+      if (coin2 && account &&!wrongNetworkOpen) {
+        getBalanceAndSymbol(account, coin2.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin2({
               ...coin2,
@@ -300,17 +304,43 @@ function CoinSwapper(props) {
 
   // This hook will run when the component first mounts, it can be useful to put logic to populate variables here
   useEffect(() => {
+    
     getAccount().then((account) => {
       setAccount(account);
     });
 
-    getNetwork(provider).then((chainId) => {
-      setChainId(chainId);
-      console.log('chainID: ', chainId);
-      setRouter(getRouter (chains.routerAddress.get(chainId), signer));
-      setWeth(getWeth (chains.wethAddress.get(chainId), signer));
-      setFactory(getFactory (chains.factoryAddress.get(chainId), signer));
+    async function Network() {
+      const chainId = await getNetwork(provider).then((chainId) => {
+        setChainId(chainId);
+        return chainId;
       });
+
+      if (chains.networks.includes(chainId)){
+        setwrongNetworkOpen(false);
+        console.log('chainID: ', chainId);
+        // Get the router using the chainID
+        const router = await getRouter (chains.routerAddress.get(chainId), signer)
+        setRouter(router);
+        // Get Weth address from router
+        await router.WETH().then((wethAddress) => {
+          setWeth(getWeth (wethAddress, signer));
+          // Set the value of the weth address in the default coins array
+          const coins = COINS.get(chainId);
+          coins[0].address = wethAddress;
+          setCoins(coins);
+        });
+        // Get the factory address from the router
+        await router.factory().then((factory_address) => {
+          setFactory(getFactory (factory_address, signer));
+        })
+      } else {
+        console.log('Wrong network mate.');
+        setwrongNetworkOpen(true);
+      }
+    }
+
+    Network()
+
   }, []);
 
   return (
@@ -319,15 +349,18 @@ function CoinSwapper(props) {
       <CoinDialog
         open={dialog1Open}
         onClose={onToken1Selected}
-        coins={COINS.ALL}
+        coins={coins}
         signer={signer}
       />
       <CoinDialog
         open={dialog2Open}
         onClose={onToken2Selected}
-        coins={COINS.ALL}
+        coins={coins}
         signer={signer}
       />
+      <WrongNetwork
+        open={wrongNetworkOpen}
+        />
 
       {/* Coin Swapper */}
       <Container maxWidth="xs">

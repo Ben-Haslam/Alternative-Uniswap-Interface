@@ -11,6 +11,7 @@ import {
   getBalanceAndSymbol,
   getWeth,
   getReserves,
+  getNetwork
 } from "../ethereumFunctions";
 import { removeLiquidity, quoteRemoveLiquidity } from "./LiquidityFunctions";
 import {
@@ -19,7 +20,9 @@ import {
 } from "../CoinSwapper/CoinField";
 import CoinDialog from "../CoinSwapper/CoinDialog";
 import LoadingButton from "../Components/LoadingButton";
-import * as COINS from "../constants/coins";
+import WrongNetwork from "../Components/wrongNetwork";
+import COINS from "../constants/coins";
+import * as chains from "../constants/chains";
 
 const styles = (theme) => ({
   paperContainer: {
@@ -62,9 +65,22 @@ function LiquidityRemover(props) {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
 
+  // Stores information for the Autonity Network
+  const [provider, setProvider] = React.useState(getProvider());
+  const [signer, setSigner] = React.useState(getSigner(provider));
+
+  // The following are populated in a react hook
+  const [account, setAccount] = React.useState(undefined);
+  const [chainId, setChainId] = React.useState(undefined);
+  const [router, setRouter] = React.useState(undefined);
+  const [weth, setWeth] = React.useState(undefined);
+  const [factory, setFactory] = React.useState(undefined);
+
   // Stores a record of whether their respective dialog window is open
   const [dialog1Open, setDialog1Open] = React.useState(false);
   const [dialog2Open, setDialog2Open] = React.useState(false);
+  const [wrongNetworkOpen, setwrongNetworkOpen] = React.useState(false);
+
 
   // Stores data about their respective coin
   const [coin1, setCoin1] = React.useState({
@@ -78,25 +94,13 @@ function LiquidityRemover(props) {
     balance: undefined,
   });
 
+  const [coins, setCoins] = React.useState([]);
+
   // Stores the current reserves in the liquidity pool between coin1 and coin2
   const [reserves, setReserves] = React.useState(["0.0", "0.0"]);
 
   // Stores the current value of their respective text box
   const [field1Value, setField1Value] = React.useState("");
-
-  // Stores information for the Autonity Network
-  const [provider, setProvider] = React.useState(getProvider());
-  const [signer, setSigner] = React.useState(getSigner(provider));
-  const [account, setAccount] = React.useState(undefined); // This is populated in a react hook
-  const [router, setRouter] = React.useState(
-    getRouter("0x4489D87C8440B19f11d63FA2246f943F492F3F5F", signer)
-  );
-  const [weth, setWeth] = React.useState(
-    getWeth("0x3f0D1FAA13cbE43D662a37690f0e8027f9D89eBF", signer)
-  );
-  const [factory, setFactory] = React.useState(
-    getFactory("0x4EDFE8706Cefab9DCd52630adFFd00E9b93FF116", signer)
-  );
 
   // Controls the loading button
   const [loading, setLoading] = React.useState(false);
@@ -191,7 +195,7 @@ function LiquidityRemover(props) {
     // We only update the values if the user provides a token
     else if (address) {
       // Getting some token data is async, so we need to wait for the data to return, hence the promise
-      getBalanceAndSymbol(account, address, provider, signer).then((data) => {
+      getBalanceAndSymbol(account, address, provider, signer, weth.address, coins).then((data) => {
         setCoin1({
           address: address,
           symbol: data.symbol,
@@ -213,7 +217,7 @@ function LiquidityRemover(props) {
     // We only update the values if the user provides a token
     else if (address) {
       // Getting some token data is async, so we need to wait for the data to return, hence the promise
-      getBalanceAndSymbol(account, address, provider, signer).then((data) => {
+      getBalanceAndSymbol(account, address, provider, signer, weth.address, coins).then((data) => {
         setCoin2({
           address: address,
           symbol: data.symbol,
@@ -253,7 +257,6 @@ function LiquidityRemover(props) {
         factory,
         signer
       ).then((data) => {
-        console.log(data);
         setTokensOut(data);
       });
     }
@@ -279,8 +282,8 @@ function LiquidityRemover(props) {
         });
       }
 
-      if (coin1 && account) {
-        getBalanceAndSymbol(account, coin1.address, provider, signer).then(
+      if (coin1 && account &&!wrongNetworkOpen) {
+        getBalanceAndSymbol(account, coin1.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin1({
               ...coin1,
@@ -289,8 +292,8 @@ function LiquidityRemover(props) {
           }
         );
       }
-      if (coin2 && account) {
-        getBalanceAndSymbol(account, coin2.address, provider, signer).then(
+      if (coin2 && account &&!wrongNetworkOpen) {
+        getBalanceAndSymbol(account, coin2.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin2({
               ...coin2,
@@ -305,12 +308,44 @@ function LiquidityRemover(props) {
   });
 
   useEffect(() => {
-    // This hook will run when the component first mounts, it can be useful to put logic to populate variables here
-
+    
     getAccount().then((account) => {
       setAccount(account);
     });
-  });
+
+    async function Network() {
+      const chainId = await getNetwork(provider).then((chainId) => {
+        setChainId(chainId);
+        return chainId;
+      });
+
+      if (chains.networks.includes(chainId)){
+        setwrongNetworkOpen(false);
+        console.log('chainID: ', chainId);
+        // Get the router using the chainID
+        const router = await getRouter (chains.routerAddress.get(chainId), signer)
+        setRouter(router);
+        // Get Weth address from router
+        await router.WETH().then((wethAddress) => {
+          setWeth(getWeth (wethAddress, signer));
+          // Set the value of the weth address in the default coins array
+          const coins = COINS.get(chainId);
+          coins[0].address = wethAddress;
+          setCoins(coins);
+        });
+        // Get the factory address from the router
+        await router.factory().then((factory_address) => {
+          setFactory(getFactory (factory_address, signer));
+        })
+      } else {
+        console.log('Wrong network mate.');
+        setwrongNetworkOpen(true);
+      }
+    }
+
+    Network()
+
+  }, []);
 
   return (
     <div>
@@ -321,14 +356,17 @@ function LiquidityRemover(props) {
       <CoinDialog
         open={dialog1Open}
         onClose={onToken1Selected}
-        coins={COINS.ALL}
+        coins={coins}
         signer={signer}
       />
       <CoinDialog
         open={dialog2Open}
         onClose={onToken2Selected}
-        coins={COINS.ALL}
+        coins={coins}
         signer={signer}
+      />
+      <WrongNetwork
+        open={wrongNetworkOpen}
       />
 
       <Grid container direction="column" alignItems="center" spacing={2}>
