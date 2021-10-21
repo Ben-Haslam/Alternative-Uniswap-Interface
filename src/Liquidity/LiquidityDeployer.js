@@ -297,7 +297,7 @@ function LiquidityDeployer(props) {
         });
       }
 
-      if (coin1 && account) {
+      if (coin1 && account &&!wrongNetworkOpen) {
         getBalanceAndSymbol(account, coin1.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin1({
@@ -307,7 +307,7 @@ function LiquidityDeployer(props) {
           }
         );
       }
-      if (coin2 && account) {
+      if (coin2 && account &&!wrongNetworkOpen) {
         getBalanceAndSymbol(account, coin2.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin2({
@@ -338,15 +338,21 @@ function LiquidityDeployer(props) {
       if (chains.networks.includes(chainId)){
         setwrongNetworkOpen(false);
         console.log('chainID: ', chainId);
+        // Get the router using the chainID
         const router = await getRouter (chains.routerAddress.get(chainId), signer)
         setRouter(router);
+        // Get Weth address from router
         await router.WETH().then((wethAddress) => {
           setWeth(getWeth (wethAddress, signer));
+          // Set the value of the weth address in the default coins array
+          const coins = COINS.get(chainId);
+          coins[0].address = wethAddress;
+          setCoins(coins);
         });
+        // Get the factory address from the router
         await router.factory().then((factory_address) => {
           setFactory(getFactory (factory_address, signer));
-        });
-        setCoins(COINS.get(chainId));
+        })
       } else {
         console.log('Wrong network mate.');
         setwrongNetworkOpen(true);

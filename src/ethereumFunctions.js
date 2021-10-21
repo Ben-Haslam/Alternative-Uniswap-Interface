@@ -189,17 +189,22 @@ export async function getAmountOut(
 export async function fetchReserves(address1, address2, pair) {
   try {
     const reservesRaw = await pair.getReserves();
-    let results = [
-      Number(ethers.utils.formatEther(reservesRaw[0])),
-      Number(ethers.utils.formatEther(reservesRaw[1])),
+
+
+    // Put the results in the right order
+    const results =  [
+      (await pair.token0()) === address1 ? reservesRaw[0] : reservesRaw[1],
+      (await pair.token1()) === address2 ? reservesRaw[1] : reservesRaw[0],
     ];
 
+    // Scale each to the right decimal place
     return [
-      (await pair.token0()) === address1 ? results[0] : results[1],
-      (await pair.token1()) === address2 ? results[1] : results[0],
-    ];
+      (results[0]*10**(-18)),
+      (results[1]*10**(-18))
+    ]
   } catch (err) {
     console.log("no reserves yet");
+    console.log(err);
     return [0, 0];
   }
 }
@@ -220,15 +225,22 @@ export async function getReserves(
   const pairAddress = await factory.getPair(address1, address2);
   const pair = new Contract(pairAddress, PAIR.abi, signer);
 
-  const reservesRaw = await fetchReserves(address1, address2, pair);
-  const liquidityTokens_BN = await pair.balanceOf(accountAddress);
-  const liquidityTokens = Number(
-    ethers.utils.formatEther(liquidityTokens_BN)
-  ).toFixed(2);
+  if (pairAddress !== '0x0000000000000000000000000000000000000000'){
+    const reservesRaw = await fetchReserves(address1, address2, pair);
+    const liquidityTokens_BN = await pair.balanceOf(accountAddress);
+    const liquidityTokens = Number(
+      ethers.utils.formatEther(liquidityTokens_BN)
+    ).toFixed(2);
+  
+    return [
+      reservesRaw[0].toFixed(2),
+      reservesRaw[1].toFixed(2),
+      liquidityTokens,
+    ];
+  } else {
+    console.log("no reserves yet");
+    return [0,0];
+  }
 
-  return [
-    reservesRaw[0].toFixed(2),
-    reservesRaw[1].toFixed(2),
-    liquidityTokens,
-  ];
+
 }
