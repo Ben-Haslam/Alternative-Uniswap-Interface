@@ -83,11 +83,12 @@ export async function getBalanceAndSymbol(
       };
     } else {
       const token = new Contract(address, ERC20.abi, signer);
+      const tokenDecimals = await token.decimals();
       const balanceRaw = await token.balanceOf(accountAddress);
       const symbol = await token.symbol();
 
       return {
-        balance: ethers.utils.formatEther(balanceRaw),
+        balance: balanceRaw*10**(-tokenDecimals),
         symbol: symbol,
       };
     }
@@ -117,13 +118,15 @@ export async function swapTokens(
   const time = Math.floor(Date.now() / 1000) + 200000;
   const deadline = ethers.BigNumber.from(time);
 
-  const amountIn = ethers.utils.parseEther(amount.toString());
+  const token1 = new Contract(address1, ERC20.abi, signer);
+  const tokenDecimals = await token1.decimals();
+  
+  const amountIn = ethers.utils.parseUnits(String(amount), tokenDecimals);
   const amountOut = await routerContract.callStatic.getAmountsOut(
     amountIn,
     tokens
   );
 
-  const token1 = new Contract(address1, ERC20.abi, signer);
   await token1.approve(routerContract.address, amountIn);
   const wethAddress = await routerContract.WETH();
 
@@ -165,14 +168,21 @@ export async function getAmountOut(
   address1,
   address2,
   amountIn,
-  routerContract
+  routerContract,
+  signer
 ) {
   try {
+    const token1 = new Contract(address1, ERC20.abi, signer);
+    const token1Decimals = await token1.decimals();
+
+    const token2 = new Contract(address2, ERC20.abi, signer);
+    const token2Decimals = await token2.decimals();
+
     const values_out = await routerContract.getAmountsOut(
-      ethers.utils.parseEther(amountIn),
+      ethers.utils.parseUnits(String(amountIn), token1Decimals),
       [address1, address2]
     );
-    const amount_out = ethers.utils.formatEther(values_out[1]);
+    const amount_out = values_out[1]*10**(-token2Decimals);
     console.log('amount out: ', amount_out)
     return Number(amount_out);
   } catch {
@@ -186,10 +196,18 @@ export async function getAmountOut(
 //    `address1` - An Ethereum address of the token to trade from (either a ERC20 token or AUT)
 //    `address2` - An Ethereum address of the token to trade to (either a ERC20 token or AUT)
 //    `pair` - The pair contract for the two tokens
-export async function fetchReserves(address1, address2, pair) {
+export async function fetchReserves(address1, address2, pair, signer) {
   try {
-    const reservesRaw = await pair.getReserves();
 
+    // Get decimals for each coin
+    const coin1 = new Contract(address1, ERC20.abi, signer);
+    const coin2 = new Contract(address2, ERC20.abi, signer);
+
+    const coin1Decimals = await coin1.decimals();
+    const coin2Decimals = await coin2.decimals();
+
+    // Get reserves
+    const reservesRaw = await pair.getReserves();
 
     // Put the results in the right order
     const results =  [
@@ -199,11 +217,11 @@ export async function fetchReserves(address1, address2, pair) {
 
     // Scale each to the right decimal place
     return [
-      (results[0]*10**(-18)),
-      (results[1]*10**(-18))
+      (results[0]*10**(-coin1Decimals)),
+      (results[1]*10**(-coin2Decimals))
     ]
   } catch (err) {
-    console.log("no reserves yet");
+    console.log("error!");
     console.log(err);
     return [0, 0];
   }
@@ -226,7 +244,7 @@ export async function getReserves(
   const pair = new Contract(pairAddress, PAIR.abi, signer);
 
   if (pairAddress !== '0x0000000000000000000000000000000000000000'){
-    const reservesRaw = await fetchReserves(address1, address2, pair);
+    const reservesRaw = await fetchReserves(address1, address2, pair, signer);
     const liquidityTokens_BN = await pair.balanceOf(accountAddress);
     const liquidityTokens = Number(
       ethers.utils.formatEther(liquidityTokens_BN)

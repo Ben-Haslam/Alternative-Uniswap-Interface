@@ -253,7 +253,7 @@ function CoinSwapper(props) {
     if (isNaN(parseFloat(field1Value))) {
       setField2Value("");
     } else if (field1Value && coin1.address && coin2.address) {
-      getAmountOut(coin1.address, coin2.address, field1Value, router).then(
+      getAmountOut(coin1.address, coin2.address, field1Value, router, signer).then(
         (amount) => setField2Value(amount.toFixed(7))
       );
     } else {

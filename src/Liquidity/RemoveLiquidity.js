@@ -257,7 +257,6 @@ function LiquidityRemover(props) {
         factory,
         signer
       ).then((data) => {
-        console.log(data);
         setTokensOut(data);
       });
     }

@@ -27,17 +27,20 @@ export async function addLiquidity(
   account,
   signer
 ) {
-  const amountIn1 = ethers.utils.parseEther(amount1.toString());
-  const amountIn2 = ethers.utils.parseEther(amount2.toString());
+  const token1 = new Contract(address1, ERC20.abi, signer);
+  const token2 = new Contract(address2, ERC20.abi, signer);
 
-  const amount1Min = ethers.utils.parseEther(amount1min.toString());
-  const amount2Min = ethers.utils.parseEther(amount2min.toString());
+  const token1Decimals = await token1.decimals();
+  const token2Decimals = await token2.decimals();
+
+  const amountIn1 = ethers.utils.parseUnits(String(amount1), token1Decimals);
+  const amountIn2 = ethers.utils.parseUnits(String(amount2), token2Decimals);
+
+  const amount1Min = ethers.utils.parseUnits(String(amount1min), token1Decimals);
+  const amount2Min = ethers.utils.parseUnits(String(amount2min), token2Decimals);
 
   const time = Math.floor(Date.now() / 1000) + 200000;
   const deadline = ethers.BigNumber.from(time);
-
-  const token1 = new Contract(address1, ERC20.abi, signer);
-  const token2 = new Contract(address2, ERC20.abi, signer);
 
   await token1.approve(routerContract.address, amountIn1);
   await token2.approve(routerContract.address, amountIn2);
@@ -114,10 +117,16 @@ export async function removeLiquidity(
   signer,
   factory
 ) {
-  const liquidity = ethers.utils.parseEther(liquidity_tokens.toString());
+  const token1 = new Contract(address1, ERC20.abi, signer);
+  const token2 = new Contract(address2, ERC20.abi, signer);
 
-  const amount1Min = ethers.utils.parseEther(amount1min.toString());
-  const amount2Min = ethers.utils.parseEther(amount2min.toString());
+  const token1Decimals = await token1.decimals();
+  const token2Decimals = await token2.decimals();
+
+  const liquidity = ethers.utils.parseUnits(String(liquidity_tokens), 18);
+
+  const amount1Min = ethers.utils.parseUnits(String(amount1min), token1Decimals);
+  const amount2Min = ethers.utils.parseUnits(String(amount2min), token2Decimals);
 
   const time = Math.floor(Date.now() / 1000) + 200000;
   const deadline = ethers.BigNumber.from(time);
@@ -197,7 +206,7 @@ export async function quoteAddLiquidity(
   const pairAddress = await factory.getPair(address1, address2);
   const pair = new Contract(pairAddress, PAIR.abi, signer);
 
-  const reservesRaw = await fetchReserves(address1, address2, pair); // Returns the reserves already formated as ethers
+  const reservesRaw = await fetchReserves(address1, address2, pair, signer); // Returns the reserves already formated as ethers
   const reserveA = reservesRaw[0];
   const reserveB = reservesRaw[1];
 
@@ -250,7 +259,7 @@ export async function quoteRemoveLiquidity(
   console.log("pair address", pairAddress);
   const pair = new Contract(pairAddress, PAIR.abi, signer);
 
-  const reservesRaw = await fetchReserves(address1, address2, pair); // Returns the reserves already formated as ethers
+  const reservesRaw = await fetchReserves(address1, address2, pair, signer); // Returns the reserves already formated as ethers
   const reserveA = reservesRaw[0];
   const reserveB = reservesRaw[1];
 
