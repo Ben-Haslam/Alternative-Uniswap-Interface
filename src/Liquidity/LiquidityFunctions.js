@@ -1,5 +1,5 @@
 import { Contract, ethers } from "ethers";
-import { fetchReserves } from "../ethereumFunctions";
+import { fetchReserves, getDecimals } from "../ethereumFunctions";
 
 const ERC20 = require("../build/ERC20.json");
 const PAIR = require("../build/IUniswapV2Pair.json");
@@ -30,8 +30,8 @@ export async function addLiquidity(
   const token1 = new Contract(address1, ERC20.abi, signer);
   const token2 = new Contract(address2, ERC20.abi, signer);
 
-  const token1Decimals = await token1.decimals();
-  const token2Decimals = await token2.decimals();
+  const token1Decimals = await getDecimals(token1);
+  const token2Decimals = await getDecimals(token2);
 
   const amountIn1 = ethers.utils.parseUnits(String(amount1), token1Decimals);
   const amountIn2 = ethers.utils.parseUnits(String(amount2), token2Decimals);
@@ -120,10 +120,12 @@ export async function removeLiquidity(
   const token1 = new Contract(address1, ERC20.abi, signer);
   const token2 = new Contract(address2, ERC20.abi, signer);
 
-  const token1Decimals = await token1.decimals();
-  const token2Decimals = await token2.decimals();
+  const token1Decimals = await getDecimals(token1);
+  const token2Decimals = await getDecimals(token2);
 
-  const liquidity = ethers.utils.parseUnits(String(liquidity_tokens), 18);
+  console.log('balls 1');
+  const liquidity = ethers.utils.parseUnits(String(liquidity_tokens), (token1Decimals + token2Decimals));
+  console.log('liquidity: ', liquidity);
 
   const amount1Min = ethers.utils.parseUnits(String(amount1min), token1Decimals);
   const amount2Min = ethers.utils.parseUnits(String(amount2min), token2Decimals);

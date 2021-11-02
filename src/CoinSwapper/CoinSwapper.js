@@ -277,7 +277,7 @@ function CoinSwapper(props) {
         ).then((data) => setReserves(data));
       }
 
-      if (coin1 && account &&!wrongNetworkOpen) {
+      if (coin1.address && account &&!wrongNetworkOpen) {
         getBalanceAndSymbol(account, coin1.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin1({
@@ -287,7 +287,7 @@ function CoinSwapper(props) {
           }
         );
       }
-      if (coin2 && account &&!wrongNetworkOpen) {
+      if (coin2.address && account &&!wrongNetworkOpen) {
         getBalanceAndSymbol(account, coin2.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin2({
