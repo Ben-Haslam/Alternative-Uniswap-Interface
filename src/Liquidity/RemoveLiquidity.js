@@ -139,16 +139,25 @@ function LiquidityRemover(props) {
     else return "0.0";
   };
 
+  const validFloatTest = (input) => {
+    const parsedInput = parseFloat(input);
+    return (
+      parsedInput !== NaN &&
+      0 < parsedInput
+    );
+  };
+
   // Determines whether the button should be enabled or not
   const isButtonEnabled = () => {
-    let validFloat = new RegExp("^[0-9]*[.,]?[0-9]*$");
 
     // If both coins have been selected, and a valid float has been entered for both, which are less than the user's balances, then return true
+    const parsedInput = parseFloat(field1Value);
     return (
       coin1.address &&
       coin2.address &&
-      validFloat.test(field1Value) &&
-      parseFloat(field1Value) <= liquidityTokens
+      parsedInput !== NaN &&
+      0 < parsedInput &&
+      parsedInput <= liquidityTokens
     );
   };
 

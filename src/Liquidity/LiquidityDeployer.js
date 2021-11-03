@@ -148,18 +148,23 @@ function LiquidityDeployer(props) {
 
   // Determines whether the button should be enabled or not
   const isButtonEnabled = () => {
-    let validFloat = new RegExp("^[0-9]*[.,]?[0-9]*$");
 
     // If both coins have been selected, and a valid float has been entered for both, which are less than the user's balances, then return true
+    const parsedInput1 = parseFloat(field1Value);
+    const parsedInput2 = parseFloat(field2Value);
     return (
       coin1.address &&
       coin2.address &&
-      validFloat.test(field1Value) &&
-      validFloat.test(field2Value) &&
-      parseFloat(field1Value) <= coin1.balance &&
-      parseFloat(field2Value) <= coin2.balance
+      parsedInput1 !== NaN &&
+      0 < parsedInput1 &&
+      parsedInput2 !== NaN &&
+      0 < parsedInput2 &&
+      parsedInput1 <= coin1.balance &&
+      parsedInput2 <= coin2.balance
     );
   };
+
+
 
   const deploy = () => {
     console.log("Attempting to deploy liquidity...");

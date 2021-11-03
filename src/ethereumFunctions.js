@@ -239,29 +239,6 @@ export async function fetchReserves(address1, address2, pair, signer) {
   }
 }
 
-async function fetchLiquidity(address1, address2, pair, signer, accountAddress){
-
-  try{
-
-    // Get decimals for each coin
-    const coin1 = new Contract(address1, ERC20.abi, signer);
-    const coin2 = new Contract(address2, ERC20.abi, signer);
-
-    const coin1Decimals = await getDecimals(coin1);
-    const coin2Decimals = await getDecimals(coin2);
-
-    // Get the liquidity token and scale it with the decimals from each coin
-    const liquidityTokens_BN = await pair.balanceOf(accountAddress);
-    return ethers.utils.formatEther(liquidityTokens_BN);
-    // return liquidityTokens_BN*10**(-(coin1Decimals + coin2Decimals)/2);
-  } catch (err) {
-    console.log("The fetchLiquidity function had an error:");
-    console.log(err);
-    return 0;
-  }
-   
-}
-
 // This function returns the reserves stored in a the liquidity pool between the token of address1 and the token
 // of address2, as well as the liquidity tokens owned by accountAddress for that pair.
 //    `address1` - An Ethereum address of the token to trade from (either a token or AUT)
@@ -284,11 +261,11 @@ export async function getReserves(
     const liquidityTokens_BN = await pair.balanceOf(accountAddress);
     const liquidityTokens = Number(
       ethers.utils.formatEther(liquidityTokens_BN)
-    ).toFixed(2);
+    );
   
     return [
-      reservesRaw[0].toFixed(2),
-      reservesRaw[1].toFixed(2),
+      reservesRaw[0].toPrecision(6),
+      reservesRaw[1].toPrecision(6),
       liquidityTokens,
     ];
   } else {
