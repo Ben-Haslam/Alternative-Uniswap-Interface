@@ -30,6 +30,29 @@ const AUTONITYCoins = [
   }
 ]
 
+const DEVNETCoins = [
+  {
+    name: "Auton",
+    abbr: "AUT",
+    address: "", // Weth address is fetched from the router
+  },
+  {
+    name: "Newton",
+    abbr: "NEW",
+    address: "0xBd770416a3345F91E4B34576cb804a576fa48EB1",
+  },
+  {
+    name: "Token A",
+    abbr: "TA",
+    address: "0x45C2Ce65a558b1631641aA121ED482b3d7F51102",
+  },
+  {
+    name: "Token B",
+    abbr: "TB",
+    address: "0x64143f5db7A854A0511319153FF90894a128f7b2",
+  }
+]
+
 const MAINNETCoins = [
   {
     name: "Ether",
@@ -127,4 +150,5 @@ COINS.set(chains.ChainId.RINKEBY, RINKEBYCoins);
 COINS.set(chains.ChainId.GÖRLI, GÖRLICoins);
 COINS.set(chains.ChainId.KOVAN, KOVANCoins);
 COINS.set(chains.ChainId.AUTONITY, AUTONITYCoins);
+COINS.set(chains.ChainId.DEVNET, DEVNETCoins);
 export default COINS

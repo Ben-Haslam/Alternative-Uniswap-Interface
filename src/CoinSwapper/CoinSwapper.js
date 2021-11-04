@@ -140,14 +140,15 @@ function CoinSwapper(props) {
 
   // Determines whether the button should be enabled or not
   const isButtonEnabled = () => {
-    let validFloat = new RegExp("^[0-9]*[.,]?[0-9]*$");
 
     // If both coins have been selected, and a valid float has been entered which is less than the user's balance, then return true
+    const parsedInput = parseFloat(field1Value);
     return (
       coin1.address &&
       coin2.address &&
-      validFloat.test(field1Value) &&
-      parseFloat(field1Value) <= coin1.balance
+      !isNaN(parsedInput) &&
+      0 < parsedInput &&
+      parsedInput <= coin1.balance
     );
   };
 
@@ -203,7 +204,7 @@ function CoinSwapper(props) {
     swapTokens(
       coin1.address,
       coin2.address,
-      parseFloat(field1Value),
+      field1Value,
       router,
       account,
       signer
@@ -252,7 +253,7 @@ function CoinSwapper(props) {
   useEffect(() => {
     if (isNaN(parseFloat(field1Value))) {
       setField2Value("");
-    } else if (field1Value && coin1.address && coin2.address) {
+    } else if (parseFloat(field1Value) && coin1.address && coin2.address) {
       getAmountOut(coin1.address, coin2.address, field1Value, router, signer).then(
         (amount) => setField2Value(amount.toFixed(7))
       );
@@ -277,7 +278,7 @@ function CoinSwapper(props) {
         ).then((data) => setReserves(data));
       }
 
-      if (coin1 && account &&!wrongNetworkOpen) {
+      if (coin1.address && account &&!wrongNetworkOpen) {
         getBalanceAndSymbol(account, coin1.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin1({
@@ -287,7 +288,7 @@ function CoinSwapper(props) {
           }
         );
       }
-      if (coin2 && account &&!wrongNetworkOpen) {
+      if (coin2.address && account &&!wrongNetworkOpen) {
         getBalanceAndSymbol(account, coin2.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin2({

@@ -141,14 +141,15 @@ function LiquidityRemover(props) {
 
   // Determines whether the button should be enabled or not
   const isButtonEnabled = () => {
-    let validFloat = new RegExp("^[0-9]*[.,]?[0-9]*$");
 
     // If both coins have been selected, and a valid float has been entered for both, which are less than the user's balances, then return true
+    const parsedInput = parseFloat(field1Value);
     return (
       coin1.address &&
       coin2.address &&
-      validFloat.test(field1Value) &&
-      parseFloat(field1Value) <= liquidityTokens
+      parsedInput !== NaN &&
+      0 < parsedInput &&
+      parsedInput <= liquidityTokens
     );
   };
 
@@ -159,7 +160,7 @@ function LiquidityRemover(props) {
     removeLiquidity(
       coin1.address,
       coin2.address,
-      parseFloat(field1Value),
+      field1Value,
       0,
       0,
       router,
@@ -282,7 +283,7 @@ function LiquidityRemover(props) {
         });
       }
 
-      if (coin1 && account &&!wrongNetworkOpen) {
+      if (coin1.address && account &&!wrongNetworkOpen) {
         getBalanceAndSymbol(account, coin1.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin1({
@@ -292,7 +293,7 @@ function LiquidityRemover(props) {
           }
         );
       }
-      if (coin2 && account &&!wrongNetworkOpen) {
+      if (coin2.address && account &&!wrongNetworkOpen) {
         getBalanceAndSymbol(account, coin2.address, provider, signer, weth.address, coins).then(
           (data) => {
             setCoin2({

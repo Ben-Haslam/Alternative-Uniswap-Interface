@@ -1,26 +1,26 @@
 {
   "files": {
-    "main.css": "/autonity-uniswap-interface/static/css/main.797d0e06.chunk.css",
-    "main.js": "/autonity-uniswap-interface/static/js/main.2b21a86b.chunk.js",
-    "main.js.map": "/autonity-uniswap-interface/static/js/main.2b21a86b.chunk.js.map",
+    "main.css": "/autonity-uniswap-interface/static/css/main.b90bdd4b.chunk.css",
+    "main.js": "/autonity-uniswap-interface/static/js/main.c8c04555.chunk.js",
+    "main.js.map": "/autonity-uniswap-interface/static/js/main.c8c04555.chunk.js.map",
     "runtime-main.js": "/autonity-uniswap-interface/static/js/runtime-main.ec89cad2.js",
     "runtime-main.js.map": "/autonity-uniswap-interface/static/js/runtime-main.ec89cad2.js.map",
     "static/css/2.3ab4f688.chunk.css": "/autonity-uniswap-interface/static/css/2.3ab4f688.chunk.css",
-    "static/js/2.c5e2be10.chunk.js": "/autonity-uniswap-interface/static/js/2.c5e2be10.chunk.js",
-    "static/js/2.c5e2be10.chunk.js.map": "/autonity-uniswap-interface/static/js/2.c5e2be10.chunk.js.map",
+    "static/js/2.e5fb9d82.chunk.js": "/autonity-uniswap-interface/static/js/2.e5fb9d82.chunk.js",
+    "static/js/2.e5fb9d82.chunk.js.map": "/autonity-uniswap-interface/static/js/2.e5fb9d82.chunk.js.map",
     "static/js/3.c38e175b.chunk.js": "/autonity-uniswap-interface/static/js/3.c38e175b.chunk.js",
     "static/js/3.c38e175b.chunk.js.map": "/autonity-uniswap-interface/static/js/3.c38e175b.chunk.js.map",
     "index.html": "/autonity-uniswap-interface/index.html",
     "static/css/2.3ab4f688.chunk.css.map": "/autonity-uniswap-interface/static/css/2.3ab4f688.chunk.css.map",
-    "static/css/main.797d0e06.chunk.css.map": "/autonity-uniswap-interface/static/css/main.797d0e06.chunk.css.map",
-    "static/js/2.c5e2be10.chunk.js.LICENSE.txt": "/autonity-uniswap-interface/static/js/2.c5e2be10.chunk.js.LICENSE.txt",
+    "static/css/main.b90bdd4b.chunk.css.map": "/autonity-uniswap-interface/static/css/main.b90bdd4b.chunk.css.map",
+    "static/js/2.e5fb9d82.chunk.js.LICENSE.txt": "/autonity-uniswap-interface/static/js/2.e5fb9d82.chunk.js.LICENSE.txt",
     "static/media/logo.28418735.svg": "/autonity-uniswap-interface/static/media/logo.28418735.svg"
   },
   "entrypoints": [
     "static/js/runtime-main.ec89cad2.js",
     "static/css/2.3ab4f688.chunk.css",
-    "static/js/2.c5e2be10.chunk.js",
-    "static/css/main.797d0e06.chunk.css",
-    "static/js/main.2b21a86b.chunk.js"
+    "static/js/2.e5fb9d82.chunk.js",
+    "static/css/main.b90bdd4b.chunk.css",
+    "static/js/main.c8c04555.chunk.js"
   ]
 }
