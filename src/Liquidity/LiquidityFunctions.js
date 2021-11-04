@@ -33,11 +33,11 @@ export async function addLiquidity(
   const token1Decimals = await getDecimals(token1);
   const token2Decimals = await getDecimals(token2);
 
-  const amountIn1 = ethers.utils.parseUnits(String(amount1), token1Decimals);
-  const amountIn2 = ethers.utils.parseUnits(String(amount2), token2Decimals);
+  const amountIn1 = ethers.utils.parseUnits(amount1, token1Decimals);
+  const amountIn2 = ethers.utils.parseUnits(amount2, token2Decimals);
 
-  const amount1Min = ethers.utils.parseUnits(String(amount1min), token1Decimals);
-  const amount2Min = ethers.utils.parseUnits(String(amount2min), token2Decimals);
+  const amount1Min = ethers.utils.parseUnits(amount1min, token1Decimals);
+  const amount2Min = ethers.utils.parseUnits(amount2min, token2Decimals);
 
   const time = Math.floor(Date.now() / 1000) + 200000;
   const deadline = ethers.BigNumber.from(time);
@@ -50,10 +50,10 @@ export async function addLiquidity(
   console.log([
     address1,
     address2,
-    Number(amountIn1),
-    Number(amountIn2),
-    Number(amount1Min),
-    Number(amount2Min),
+    amountIn1,
+    amountIn2,
+    amount1Min,
+    amount2Min,
     account,
     deadline,
   ]);
@@ -220,6 +220,8 @@ export async function quoteAddLiquidity(
   const token1Decimals = await getDecimals(token1);
   const token2Decimals = await getDecimals(token2);
 
+  console.log('decimals: ', token1Decimals, token2Decimals);
+
   const decimalFactor = 10**((token1Decimals + token2Decimals)/2 - 18); // Needed to sort out decimals if they are not both 18
 
   const reservesRaw = await fetchReserves(address1, address2, pair, signer); // Returns the reserves already formated as ethers
@@ -229,16 +231,16 @@ export async function quoteAddLiquidity(
   if (reserveA === 0 && reserveB === 0) {
     let amountOut = Math.sqrt(reserveA * reserveB);
     return [
-      amountADesired.toString(),
-      amountBDesired.toString(),
+      amountADesired,
+      amountBDesired,
       amountOut*decimalFactor.toString(),
     ];
   } else {
     let [amountBOptimal, amountOut] = quote(amountADesired, reserveA, reserveB);
     if (amountBOptimal <= amountBDesired) {
       return [
-        amountADesired.toString(),
-        amountBOptimal.toString(),
+        amountADesired,
+        amountBOptimal,
         amountOut*decimalFactor.toString(),
       ];
     } else {
@@ -249,9 +251,9 @@ export async function quoteAddLiquidity(
       );
       console.log(amountAOptimal, amountOut);
       return [
-        amountAOptimal.toString(),
-        amountBDesired.toString(),
-        amountOut*decimalFactor.toString(),
+        amountAOptimal,
+        amountBDesired,
+        amountOut*decimalFactor,
       ];
     }
   }

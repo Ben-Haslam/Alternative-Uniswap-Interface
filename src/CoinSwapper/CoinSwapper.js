@@ -140,7 +140,7 @@ function CoinSwapper(props) {
 
   // Determines whether the button should be enabled or not
   const isButtonEnabled = () => {
-    
+
     // If both coins have been selected, and a valid float has been entered which is less than the user's balance, then return true
     const parsedInput = parseFloat(field1Value);
     return (
@@ -204,7 +204,7 @@ function CoinSwapper(props) {
     swapTokens(
       coin1.address,
       coin2.address,
-      parseFloat(field1Value),
+      field1Value,
       router,
       account,
       signer

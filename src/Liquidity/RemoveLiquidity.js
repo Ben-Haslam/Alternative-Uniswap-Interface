@@ -139,14 +139,6 @@ function LiquidityRemover(props) {
     else return "0.0";
   };
 
-  const validFloatTest = (input) => {
-    const parsedInput = parseFloat(input);
-    return (
-      parsedInput !== NaN &&
-      0 < parsedInput
-    );
-  };
-
   // Determines whether the button should be enabled or not
   const isButtonEnabled = () => {
 
@@ -168,7 +160,7 @@ function LiquidityRemover(props) {
     removeLiquidity(
       coin1.address,
       coin2.address,
-      parseFloat(field1Value),
+      field1Value,
       0,
       0,
       router,

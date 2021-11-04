@@ -173,10 +173,10 @@ function LiquidityDeployer(props) {
     addLiquidity(
       coin1.address,
       coin2.address,
-      parseFloat(field1Value),
-      parseFloat(field2Value),
-      0,
-      0,
+      field1Value,
+      field2Value,
+      '0',
+      '0',
       router,
       account,
       signer
@@ -269,8 +269,8 @@ function LiquidityDeployer(props) {
       quoteAddLiquidity(
         coin1.address,
         coin2.address,
-        parseFloat(field1Value),
-        parseFloat(field2Value),
+        field1Value,
+        field2Value,
         factory,
         signer
       ).then((data) => {

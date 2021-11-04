@@ -133,7 +133,7 @@ export async function swapTokens(
   const token1 = new Contract(address1, ERC20.abi, signer);
   const tokenDecimals = await await getDecimals(token1);
   
-  const amountIn = ethers.utils.parseUnits(String(amount), tokenDecimals);
+  const amountIn = ethers.utils.parseUnits(amount, tokenDecimals);
   const amountOut = await routerContract.callStatic.getAmountsOut(
     amountIn,
     tokens
