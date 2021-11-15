@@ -44,12 +44,12 @@ const DEVNETCoins = [
   {
     name: "Token A",
     abbr: "TA",
-    address: "0x45C2Ce65a558b1631641aA121ED482b3d7F51102",
+    address: "0xD5073808CbA7d24500aa8f659B339b87945958a6",
   },
   {
     name: "Token B",
     abbr: "TB",
-    address: "0x64143f5db7A854A0511319153FF90894a128f7b2",
+    address: "0x908B8e60d149529d757F4aEd9320F246724f2b99",
   }
 ]
 
