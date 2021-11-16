@@ -131,7 +131,7 @@ export async function swapTokens(
   const deadline = ethers.BigNumber.from(time);
 
   const token1 = new Contract(address1, ERC20.abi, signer);
-  const tokenDecimals = await await getDecimals(token1);
+  const tokenDecimals = await getDecimals(token1);
   
   const amountIn = ethers.utils.parseUnits(amount, tokenDecimals);
   const amountOut = await routerContract.callStatic.getAmountsOut(

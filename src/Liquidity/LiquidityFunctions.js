@@ -191,8 +191,7 @@ export async function removeLiquidity(
 
 const quote = (amount1, reserve1, reserve2) => {
   const amount2 = amount1 * (reserve2 / reserve1);
-  const amountOut = Math.sqrt(amount2 * amount1);
-  return [amount2, amountOut];
+  return [amount2];
 };
 
 // Function used to get a quote of the liquidity addition
@@ -203,6 +202,57 @@ const quote = (amount1, reserve1, reserve2) => {
 //    `factory` - The current factory
 //    `signer` - The current signer
 
+async function quoteMintLiquidity(
+  address1,
+  address2,
+  amountA,
+  amountB,
+  factory,
+  signer
+){
+  const MINIMUM_LIQUIDITY = 1000;
+  let _reserveA = 0;
+  let _reserveB = 0;
+  let totalSupply = 0;
+  [_reserveA, _reserveB, totalSupply] = await factory.getPair(address1, address2).then(async (pairAddress) => {
+    if (pairAddress !== '0x0000000000000000000000000000000000000000'){
+      const pair = new Contract(pairAddress, PAIR.abi, signer);
+
+      const reservesRaw = await fetchReserves(address1, address2, pair, signer); // Returns the reserves already formated as ethers
+      const reserveA = reservesRaw[0];
+      const reserveB = reservesRaw[1];
+    
+      const _totalSupply = await pair.totalSupply();
+      const totalSupply = Number(ethers.utils.formatEther(_totalSupply));
+      return [reserveA, reserveB, totalSupply]
+    } else {
+      return [0,0,0]
+    }
+  });
+
+  const token1 = new Contract(address1, ERC20.abi, signer);
+  const token2 = new Contract(address2, ERC20.abi, signer);
+
+  // Need to do all this decimals work to account for 0 decimal numbers
+
+  const token1Decimals = await getDecimals(token1);
+  const token2Decimals = await getDecimals(token2);
+
+  const valueA = amountA*(10**token1Decimals);
+  const valueB = amountB*(10**token2Decimals);
+
+  const reserveA = _reserveA*(10**token1Decimals);
+  const reserveB = _reserveB*(10**token2Decimals);
+
+  if (totalSupply == 0){
+    return Math.sqrt(((valueA * valueB)-MINIMUM_LIQUIDITY))*10**(-18);
+  };
+  
+  return (
+    Math.min(valueA*totalSupply/reserveA, valueB*totalSupply/reserveB)
+  );
+};
+
 export async function quoteAddLiquidity(
   address1,
   address2,
@@ -211,49 +261,59 @@ export async function quoteAddLiquidity(
   factory,
   signer
 ) {
+
   const pairAddress = await factory.getPair(address1, address2);
   const pair = new Contract(pairAddress, PAIR.abi, signer);
-
-  const token1 = new Contract(address1, ERC20.abi, signer);
-  const token2 = new Contract(address2, ERC20.abi, signer);
-
-  const token1Decimals = await getDecimals(token1);
-  const token2Decimals = await getDecimals(token2);
-
-  console.log('decimals: ', token1Decimals, token2Decimals);
-
-  const decimalFactor = 10**((token1Decimals + token2Decimals)/2 - 18); // Needed to sort out decimals if they are not both 18
 
   const reservesRaw = await fetchReserves(address1, address2, pair, signer); // Returns the reserves already formated as ethers
   const reserveA = reservesRaw[0];
   const reserveB = reservesRaw[1];
 
   if (reserveA === 0 && reserveB === 0) {
-    let amountOut = Math.sqrt(reserveA * reserveB);
+    const amountOut = await quoteMintLiquidity(
+      address1,
+      address2,
+      amountADesired,
+      amountBDesired,
+      factory,
+      signer);
     return [
       amountADesired,
       amountBDesired,
-      amountOut*decimalFactor.toString(),
+      amountOut.toPrecision(8),
     ];
   } else {
-    let [amountBOptimal, amountOut] = quote(amountADesired, reserveA, reserveB);
+    const amountBOptimal = quote(amountADesired, reserveA, reserveB);
     if (amountBOptimal <= amountBDesired) {
+      const amountOut = await quoteMintLiquidity(
+        address1,
+        address2,
+        amountADesired,
+        amountBOptimal,
+        factory,
+        signer);
       return [
         amountADesired,
         amountBOptimal,
-        amountOut*decimalFactor.toString(),
+        amountOut.toPrecision(8),
       ];
     } else {
-      let [amountAOptimal, amountOut] = quote(
+      const amountAOptimal = quote(
         amountBDesired,
         reserveB,
         reserveA
       );
-      console.log(amountAOptimal, amountOut);
+      const amountOut = await quoteMintLiquidity(
+        address1,
+        address2,
+        amountAOptimal,
+        amountBDesired,
+        factory,
+        signer);
       return [
         amountAOptimal,
         amountBDesired,
-        amountOut*decimalFactor,
+        amountOut.toPrecision(8),
       ];
     }
   }
