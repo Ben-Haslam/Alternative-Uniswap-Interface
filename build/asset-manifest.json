@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/autonity-uniswap-interface/static/css/main.b90bdd4b.chunk.css",
-    "main.js": "/autonity-uniswap-interface/static/js/main.84432eae.chunk.js",
-    "main.js.map": "/autonity-uniswap-interface/static/js/main.84432eae.chunk.js.map",
+    "main.js": "/autonity-uniswap-interface/static/js/main.18c5b640.chunk.js",
+    "main.js.map": "/autonity-uniswap-interface/static/js/main.18c5b640.chunk.js.map",
     "runtime-main.js": "/autonity-uniswap-interface/static/js/runtime-main.ec89cad2.js",
     "runtime-main.js.map": "/autonity-uniswap-interface/static/js/runtime-main.ec89cad2.js.map",
     "static/css/2.3ab4f688.chunk.css": "/autonity-uniswap-interface/static/css/2.3ab4f688.chunk.css",
@@ -21,6 +21,6 @@
     "static/css/2.3ab4f688.chunk.css",
     "static/js/2.b462f68e.chunk.js",
     "static/css/main.b90bdd4b.chunk.css",
-    "static/js/main.84432eae.chunk.js"
+    "static/js/main.18c5b640.chunk.js"
   ]
 }
