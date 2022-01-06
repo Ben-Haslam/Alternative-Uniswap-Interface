@@ -252,26 +252,30 @@ export async function getReserves(
   signer,
   accountAddress
 ) {
-  const pairAddress = await factory.getPair(address1, address2);
-  const pair = new Contract(pairAddress, PAIR.abi, signer);
-
-  if (pairAddress !== '0x0000000000000000000000000000000000000000'){
-
-    const reservesRaw = await fetchReserves(address1, address2, pair, signer);
-    const liquidityTokens_BN = await pair.balanceOf(accountAddress);
-    const liquidityTokens = Number(
-      ethers.utils.formatEther(liquidityTokens_BN)
-    );
+  try {
+    const pairAddress = await factory.getPair(address1, address2);
+    const pair = new Contract(pairAddress, PAIR.abi, signer);
   
-    return [
-      reservesRaw[0].toPrecision(6),
-      reservesRaw[1].toPrecision(6),
-      liquidityTokens,
-    ];
-  } else {
-    console.log("no reserves yet");
-    return [0,0,0];
+    if (pairAddress !== '0x0000000000000000000000000000000000000000'){
+  
+      const reservesRaw = await fetchReserves(address1, address2, pair, signer);
+      const liquidityTokens_BN = await pair.balanceOf(accountAddress);
+      const liquidityTokens = Number(
+        ethers.utils.formatEther(liquidityTokens_BN)
+      );
+    
+      return [
+        reservesRaw[0].toPrecision(6),
+        reservesRaw[1].toPrecision(6),
+        liquidityTokens,
+      ];
+    } else {
+      console.log("no reserves yet");
+      return [0,0,0];
+    }
+  }catch (err) {
+    console.log("error!");
+    console.log(err);
+    return [0, 0, 0];
   }
-
-
 }

@@ -1,6 +1,6 @@
 Publishes to [https://clearmatics.github.io/autonity-uniswap-interface/]()
 
-Check out the blog [here](https://github.com/clearmatics/autonity-uniswap-interface/blob/master/blog.md)
+Check out the blog [here](https://medium.com/clearmatics/how-i-made-a-uniswap-interface-from-scratch-b51e1027ca87)
 
 # Getting Started with Create React App
 

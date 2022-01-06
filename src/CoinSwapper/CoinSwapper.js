@@ -324,6 +324,7 @@ function CoinSwapper(props) {
         setRouter(router);
         // Get Weth address from router
         await router.WETH().then((wethAddress) => {
+          console.log('Weth: ', wethAddress);
           setWeth(getWeth (wethAddress, signer));
           // Set the value of the weth address in the default coins array
           const coins = COINS.get(chainId);
