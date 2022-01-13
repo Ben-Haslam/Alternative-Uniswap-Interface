@@ -142,13 +142,15 @@ function CoinSwapper(props) {
   const isButtonEnabled = () => {
 
     // If both coins have been selected, and a valid float has been entered which is less than the user's balance, then return true
-    const parsedInput = parseFloat(field1Value);
+    const parsedInput1 = parseFloat(field1Value);
+    const parsedInput2 = parseFloat(field2Value);
     return (
       coin1.address &&
       coin2.address &&
-      !isNaN(parsedInput) &&
-      0 < parsedInput &&
-      parsedInput <= coin1.balance
+      !isNaN(parsedInput1) &&
+      !isNaN(parsedInput2) &&
+      0 < parsedInput1 &&
+      parsedInput1 <= coin1.balance
     );
   };
 
@@ -256,7 +258,10 @@ function CoinSwapper(props) {
     } else if (parseFloat(field1Value) && coin1.address && coin2.address) {
       getAmountOut(coin1.address, coin2.address, field1Value, router, signer).then(
         (amount) => setField2Value(amount.toFixed(7))
-      );
+      ).catch(e => {
+        console.log(e);
+        setField2Value("NA");
+      })
     } else {
       setField2Value("");
     }
