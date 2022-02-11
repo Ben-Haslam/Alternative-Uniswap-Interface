@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { MenuItems } from "./MenuItems";
-import logo from "../assets/img/logo.svg";
 import "./NavBar.css";
 
 class NavBar extends Component {
@@ -12,7 +11,7 @@ class NavBar extends Component {
       <nav>
         <div className="Title">
           <h1 className="navbar-logo">
-            <img src={logo} className="logo"></img> Autonity Uniswap
+            Alternative Uniswap Interface
           </h1>
         </div>
 

@@ -1,6 +1,6 @@
 # NOTE: This is a proof-of-concept. Use it at your own risk, and it's not intended for any sort of production use.
 
-Publishes to [https://clearmatics.github.io/autonity-uniswap-interface/]()
+Publishes to [https://ben-haslam.github.io/Alternative-Uniswap-Interface/]()
 
 Check out the blog [here](https://medium.com/clearmatics/how-i-made-a-uniswap-interface-from-scratch-b51e1027ca87)
 
