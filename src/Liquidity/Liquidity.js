@@ -31,16 +31,16 @@ const styles = (theme) => ({
 
 const useStyles = makeStyles(styles);
 
-function Liquidity() {
+function Liquidity(props) {
   const classes = useStyles();
 
   const [deploy, setDeploy] = React.useState(true);
 
   const deploy_or_remove = (deploy) => {
     if (deploy === true) {
-      return <LiquidityDeployer />;
+      return <LiquidityDeployer network={props.network}/>;
     }
-    return <LiquidityRemover />;
+    return <LiquidityRemover network={props.network}/>;
   };
 
   return (
