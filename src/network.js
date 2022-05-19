@@ -87,7 +87,7 @@ const Web3Provider = (props) => {
 
   async function createListener() {
     return setInterval(async () => {
-      console.log("Heartbeat");
+      // console.log("Heartbeat");
       try {
         // Check the account has not changed
         const account = await getAccount();
@@ -103,7 +103,7 @@ const Web3Provider = (props) => {
         setConnected(false);
         await setupConnection();
       }
-    }, 2000);
+    }, 1000);
   }
 
   useEffect(async () => {
