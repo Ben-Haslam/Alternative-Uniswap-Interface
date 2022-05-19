@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "/Alternative-Uniswap-Interface/static/css/main.b90bdd4b.chunk.css",
-    "main.js": "/Alternative-Uniswap-Interface/static/js/main.04efb30f.chunk.js",
-    "main.js.map": "/Alternative-Uniswap-Interface/static/js/main.04efb30f.chunk.js.map",
+    "main.css": "/Alternative-Uniswap-Interface/static/css/main.797d0e06.chunk.css",
+    "main.js": "/Alternative-Uniswap-Interface/static/js/main.d2543427.chunk.js",
+    "main.js.map": "/Alternative-Uniswap-Interface/static/js/main.d2543427.chunk.js.map",
     "runtime-main.js": "/Alternative-Uniswap-Interface/static/js/runtime-main.99be9be0.js",
     "runtime-main.js.map": "/Alternative-Uniswap-Interface/static/js/runtime-main.99be9be0.js.map",
     "static/css/2.3ab4f688.chunk.css": "/Alternative-Uniswap-Interface/static/css/2.3ab4f688.chunk.css",
-    "static/js/2.acf6369a.chunk.js": "/Alternative-Uniswap-Interface/static/js/2.acf6369a.chunk.js",
-    "static/js/2.acf6369a.chunk.js.map": "/Alternative-Uniswap-Interface/static/js/2.acf6369a.chunk.js.map",
+    "static/js/2.de1e7dab.chunk.js": "/Alternative-Uniswap-Interface/static/js/2.de1e7dab.chunk.js",
+    "static/js/2.de1e7dab.chunk.js.map": "/Alternative-Uniswap-Interface/static/js/2.de1e7dab.chunk.js.map",
     "static/js/3.c38e175b.chunk.js": "/Alternative-Uniswap-Interface/static/js/3.c38e175b.chunk.js",
     "static/js/3.c38e175b.chunk.js.map": "/Alternative-Uniswap-Interface/static/js/3.c38e175b.chunk.js.map",
     "index.html": "/Alternative-Uniswap-Interface/index.html",
     "static/css/2.3ab4f688.chunk.css.map": "/Alternative-Uniswap-Interface/static/css/2.3ab4f688.chunk.css.map",
-    "static/css/main.b90bdd4b.chunk.css.map": "/Alternative-Uniswap-Interface/static/css/main.b90bdd4b.chunk.css.map",
-    "static/js/2.acf6369a.chunk.js.LICENSE.txt": "/Alternative-Uniswap-Interface/static/js/2.acf6369a.chunk.js.LICENSE.txt"
+    "static/css/main.797d0e06.chunk.css.map": "/Alternative-Uniswap-Interface/static/css/main.797d0e06.chunk.css.map",
+    "static/js/2.de1e7dab.chunk.js.LICENSE.txt": "/Alternative-Uniswap-Interface/static/js/2.de1e7dab.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.99be9be0.js",
     "static/css/2.3ab4f688.chunk.css",
-    "static/js/2.acf6369a.chunk.js",
-    "static/css/main.b90bdd4b.chunk.css",
-    "static/js/main.04efb30f.chunk.js"
+    "static/js/2.de1e7dab.chunk.js",
+    "static/css/main.797d0e06.chunk.css",
+    "static/js/main.d2543427.chunk.js"
   ]
 }

@@ -1,4 +1,4 @@
-export const networks = [3,4,5,42,123, 1337, 444800, 444900]
+export const networks = [3,4,5,42,123, 1337, 65110000, 444900]
 
 export const ChainId = {
   // MAINNET: 1,
@@ -6,7 +6,7 @@ export const ChainId = {
   RINKEBY: 4,
   GÖRLI: 5,
   KOVAN: 42,
-  DEVNET: 444800,
+  DEVNET: 65110000,
   AUTONITY: 444900,
   PARASTATE: 123,
   GANCHE: 1337
