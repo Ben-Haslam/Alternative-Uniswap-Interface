@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/Alternative-Uniswap-Interface/static/css/main.797d0e06.chunk.css",
-    "main.js": "/Alternative-Uniswap-Interface/static/js/main.d2543427.chunk.js",
-    "main.js.map": "/Alternative-Uniswap-Interface/static/js/main.d2543427.chunk.js.map",
+    "main.js": "/Alternative-Uniswap-Interface/static/js/main.164052c7.chunk.js",
+    "main.js.map": "/Alternative-Uniswap-Interface/static/js/main.164052c7.chunk.js.map",
     "runtime-main.js": "/Alternative-Uniswap-Interface/static/js/runtime-main.99be9be0.js",
     "runtime-main.js.map": "/Alternative-Uniswap-Interface/static/js/runtime-main.99be9be0.js.map",
     "static/css/2.3ab4f688.chunk.css": "/Alternative-Uniswap-Interface/static/css/2.3ab4f688.chunk.css",
@@ -20,6 +20,6 @@
     "static/css/2.3ab4f688.chunk.css",
     "static/js/2.de1e7dab.chunk.js",
     "static/css/main.797d0e06.chunk.css",
-    "static/js/main.d2543427.chunk.js"
+    "static/js/main.164052c7.chunk.js"
   ]
 }
