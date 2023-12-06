@@ -11,7 +11,7 @@ class NavBar extends Component {
       <nav>
         <div className="Title">
           <h1 className="navbar-logo">
-            Alternative Uniswap Interface
+            [WE]swap Interface
           </h1>
         </div>
 
